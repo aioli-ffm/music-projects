@@ -10,7 +10,7 @@ Catch2 is a modern, C++-native, header-only, test framework for unit-tests. The 
 2. In your `<UTEST_FILE.CPP>`, include the header with `#include <CATCH>/catch.hpp`
 3. Compile with `g++ -std=c++11 -Wall -Wextra  <UTEST_FILE.CPP> -o bin/utest && ./bin/utest`
 
-See the [](tests/utest_example.cpp) file for an example, and the tutorial: `https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md`
+See the (tests/utest_example.cpp) file for an example, and the tutorial: `https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md`
 
 
 ### C++ PLOTTING WITH MATPLOTLIB-CPP`https://github.com/lava/matplotlib-cpp`:
@@ -21,7 +21,7 @@ Like Catch2, matplotlib-cpp is a single-header plotting library built on the top
 2. In your `<PLOT_FILE.CPP>`, include the header with `#include <PLOT>/matplotlibcpp.h`
 3. Compile with `g++ -std=c++11 -Wall -Wextra <PLOT_FILE.CPP> -I/usr/include/python2.7 -lpython2.7 -o ./bin/testplot && ./bin/testplot`
 
-See the [](tests/plot_example.cpp) file for an example. I didn't find any documentation whatsoever but the header file is somehow self-explanatory, and doesn't provide complex functionality.
+See the (tests/plot_example.cpp) file for an example. I didn't find any documentation whatsoever but the header file is somehow self-explanatory, and doesn't provide complex functionality.
 
 
 ### C++ BENCHMARKING WITH GOOGLE BENCHMARK LIBRARY `https://github.com/google/benchmark`:
@@ -38,5 +38,5 @@ To use them for performing benchmarking in local files, two things are required:
 1. In `<BENCHMARK_FILE.CPP>`, include the header: `#include "<LOCAL_LIB>/benchmark.h"`
 2. compile and run `my_test.cpp` with `g++ -std=c++11 -Wall -Wextra -L<LOCAL_LIB> <BENCHMARK_FILE.CPP> -lbenchmark -lpthread -o bin/benchmark && ./bin/benchmark`
 
-See the [](tests/benchmark_example.cpp) file for an example. The repo's README offers a good introduction: `https://github.com/google/benchmark/blob/master/README.md`
+See the (tests/benchmark_example.cpp) file for an example. The repo's README offers a good introduction: `https://github.com/google/benchmark/blob/master/README.md`
 
