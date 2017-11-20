@@ -23,9 +23,9 @@
 // - Add unit testing with catch
 // - Add and use proper benchmarking lib
 // - Google styleguide https://google.github.io/styleguide/cppguide.html
-// g++ -O3 -std=c++11 -Wall -Wextra overlap_add_convolver.cpp -fopenmp -lfftw3f -o test && valgrind --leak-check=full -v ./test
 // - prevent plot method from blocking the main thread
-
+// g++ -O3 -std=c++11 -Wall -Wextra overlap_add_convolver.cpp -fopenmp -lfftw3f -o bin/test && valgrind --leak-check=full -v ./bin/test
+// g++ -O3 -std=c++11 -Wall -Wextra overlap_add_convolver.cpp -fopenmp -lfftw3f -I/usr/include/python2.7 -lpython2.7 -o bin/test && ./bin/test
 
 #define REAL 0
 #define IMAG 1
@@ -669,13 +669,13 @@ int main(){//(int argc,  char** argv){
   // MakeAndExportFftwWisdom(kWisdomPatient, 0, 29, FFTW_PATIENT);
 
   // create a test signal
-  const size_t kSizeS = 44100*60/1;
+  const size_t kSizeS = 44100*60*100/1;
   float* s_arr = new float[kSizeS]; for(size_t i=0; i<kSizeS; ++i){s_arr[i] = i+1;}
   FloatSignal s(s_arr, kSizeS);
   // s.plot("signal");
 
   // create several test patches:
-  const size_t kSizeP1 =  44100*1/1;
+  const size_t kSizeP1 =  44100*1/10;
   float* p1_arr = new float[kSizeP1]; for(size_t i=0; i<kSizeP1; ++i){p1_arr[i]=i+1;}
   FloatSignal p1(p1_arr, kSizeP1);
   // const size_t kSizeP2 = 3; // 44100*3/1;
@@ -692,10 +692,10 @@ int main(){//(int argc,  char** argv){
   // OverlapSaveConvolver x2(s, p2);
   // OverlapSaveConvolver x3(s, p3);
 
-  for(int i=0; i<10000; ++i){
-    cout << "iter " << i << endl;
-    x1.executeXcorr();
-  }
+  // for(int i=0; i<10000; ++i){
+  //   cout << "iter " << i << endl;
+  //   x1.executeXcorr();
+  // }
   // x.printChunks("xcorr");
   // x1.extractResult().print("xcorr");
 
