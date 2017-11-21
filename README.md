@@ -97,8 +97,12 @@ downloads: `http://calab1.ucsd.edu/~datasets/`
 
 * NumPy is the omnipresent python library for numerical computation. It features tensors of arbitrary rank and a broad set of efficiently implemented operations on them, as well as vectorized notation. Most python-based machine learning frameworks (like TensorFlow or PyTorch) interact closely with it.
 
-* Importing and exporting wave files: `import scipy.io.wavfile as pywav`
-* Loading .au files: `https://help.scilab.org/doc/6.0.0/en_US/auread.html`
+* Importing and exporting wave files: `import scipy.io.wavfile as pywav`, `pywav.read("<FILE_PATH>.wav")`, `pywav.write(nparr, samplerate, path)`
+* Batch converting mp3 to wav in a directory: `for i in *.mp3; do ffmpeg -i "$i" -acodec pcm_u8 -ac 1 -ar 22050 "${i%.mp3}.wav"; done`
+* Converting a single file: `ffmpeg -i <FILENAME>.mp3 -acodec pcm_u8 -ac 1 -ar 22050 <FILENAME>.wav`
+* For .au to .wav: `for i in *.au; do sox "$i" "${i%.au}.wav"; done`
+* Delete all files ending with .au: `find . -type f -name "*.au" -delete`
+
 
 * LibRosa is a library for extracting audio features (especially time/frequency representations): `https://github.com/librosa/librosa` 
 
@@ -112,7 +116,7 @@ See the related files in this repo for more details.
 
 ## 3. TENSORFLOW, PYTORCH, TENSORBOARD: INSTALLATION (VENV) AND USAGE
 
-Not sure if this is the place to refer to this since it is not specific to music. Check the related files in the repo for the details!
+* Tensorboard: `pip install git+https://github.com/lanpa/tensorboard-pytorch`, and then `from tensorboardX import FileWriter`
 
 
 
