@@ -1,193 +1,35 @@
-// Copyright (C) 2017 Andres Fernandez (https://github.com/andres-fr)
+#ifndef CONVOLVER_H
+#define CONVOLVER_H
 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
-
-
-// TODO:
-// - Signal arrays are aligned, but SIMDization wasn't explicitly benchmarked:
-//   explicitly SIMDize SpectralConvolution and SpectralCorrelation: https://github.com/VcDevel/Vc
-// - Add unit testing with catch
-// - Add and use proper benchmarking lib
-// - Google styleguide https://google.github.io/styleguide/cppguide.html
-// - prevent plot method from blocking the main thread
-// g++ -O3 -std=c++11 -Wall -Wextra overlap_add_convolver.cpp -fopenmp -lfftw3f -o bin/test && valgrind --leak-check=full -v ./bin/test
-// g++ -O3 -std=c++11 -Wall -Wextra overlap_add_convolver.cpp -fopenmp -lfftw3f -I/usr/include/python2.7 -lpython2.7 -o bin/test && ./bin/test
-
-#define REAL 0
-#define IMAG 1
-
+// OPEN MP:
 // comment this line to deactivate OpenMP for loop parallelizations, or if you want to debug
 // memory management (valgrind reports OMP normal activity as error).
 // the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
 #define WITH_OPENMP_ABOVE 1
 
-//
-// #include <string.h>
-// #include <math.h>
-// #include <iostream>
-// #include <sstream>
-// #include <stdexcept>
-// #include <vector>
-// #include <initializer_list>
-
-// #include <iterator>
-// #include <algorithm>
-//
+// STL INCLUDES
+#include <string.h>
+#include <math.h>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <vector>
+#include <initializer_list>
+#include <iterator>
+#include <algorithm>
+#include <thread>
+// SYSTEM-INSTALLED LIBRARIES
 #include <fftw3.h>
 #ifdef WITH_OPENMP_ABOVE
 # include <omp.h>
 #endif
-//
-#include "third_party/matplotlibcpp.h"
-#include <thread>
-//
-#include "helpers.h"
-
-// using namespace std;
-namespace plt = matplotlibcpp;
+// LOCAL INCLUDES
+#include "../include/helpers.hpp"
+#include "../include/signal.hpp"
 
 
 
 
-
-// This is an abstract base class that provides some basic, type-independent functionality for
-// any container that should behave as a signal. It is not intended to be instantiated directly.
-template <class T>
-class Signal {
-protected:
-  T* data_;
-  size_t size_;
-public:
-  // Given a size and a reference to an array, it fills the array with <SIZE> zeros.
-  // Therefore, **IT DELETES THE CONTENTS OF THE ARRAY**. It is intended to be passed a newly
-  // allocated array by the classes that inherit from Signal, because it isn't an expensive
-  // operation and avoids memory errors due to non-initialized values.
-  explicit Signal(T* data, size_t size) : data_(data), size_(size){
-    memset(data_, 0, sizeof(T)*size);
-  }
-  // The destructor is empty because this class didn't allocate the contained array
-  virtual ~Signal(){}
-  // getters
-  size_t &getSize(){return size_;}
-  const size_t &getSize() const{return size_;}
-  T* getData(){return data_;}
-  const T* getData() const{return data_;}
-  // overloaded operators
-  T &operator[](size_t idx){return data_[idx];}
-  T &operator[](size_t idx) const {return data_[idx];}
-  // basic print function. It may be overriden if, for example, the type <T> is a struct.
-  void print(const std::string name="signal"){
-    std::cout << std::endl;
-    for(size_t i=0; i<size_; ++i){
-      std::cout << name << "[" << i << "]\t=\t" << data_[i] << std::endl;
-    }
-  }
-};
-
-// This class is a Signal that works on aligned float arrays allocated by FFTW.
-// It also overloads some further operators to do basic arithmetic
-class FloatSignal : public Signal<float>{
-private:
-  std::thread* plt_thread_ = NULL;
-public:
-  // the basic constructor allocates an aligned, float array, which is zeroed by the superclass
-  explicit FloatSignal(size_t size)
-    : Signal(fftwf_alloc_real(size), size){}
-  explicit FloatSignal(float* data, size_t size) : FloatSignal(size){
-    memcpy(data_, data, sizeof(float)*size);
-  }
-  explicit FloatSignal(float* data, size_t size, size_t pad_bef, size_t pad_aft)
-    : FloatSignal(size+pad_bef+pad_aft){
-    memcpy(data_+pad_bef, data, sizeof(float)*size);
-  }
-  // the destructor frees the only resource allocated
-  ~FloatSignal() {fftwf_free(data_);}
-  void operator+=(const float x){for(size_t i=0; i<size_; ++i){data_[i] += x;}}
-  void operator*=(const float x){for(size_t i=0; i<size_; ++i){data_[i] *= x;}}
-  void operator/=(const float x){for(size_t i=0; i<size_; ++i){data_[i] /= x;}}
-};
-
-
-
-
-// This class is a Signal that works on aligned complex (float[2]) arrays allocated by FFTW.
-// It also overloads some further operators to do basic arithmetic
-class ComplexSignal : public Signal<fftwf_complex>{
-public:
-  // the basic constructor allocates an aligned, float[2] array, which is zeroed by the superclass
-  explicit ComplexSignal(size_t size)
-    : Signal(fftwf_alloc_complex(size), size){}
-  ~ComplexSignal(){fftwf_free(data_);}
-  void operator*=(const float x){
-    for(size_t i=0; i<size_; ++i){
-      data_[i][REAL] *= x;
-      data_[i][IMAG] *= x;
-    }
-  }
-  void operator+=(const float x){for(size_t i=0; i<size_; ++i){data_[i][REAL] += x;}}
-  void operator+=(const fftwf_complex x){
-    for(size_t i=0; i<size_; ++i){
-      data_[i][REAL] += x[REAL];
-      data_[i][IMAG] += x[IMAG];
-    }
-  }
-  // override print method to show both fields of the complex number
-  void print(const std::string name="signal"){
-    for(size_t i=0; i<size_; ++i){
-      printf("%s[%zu]\t=\t(%f, i%f)\n",name.c_str(),i,data_[i][REAL],data_[i][IMAG]);
-    }
-  }
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// This free function takes three complex signals a,b,c of the same size and computes the complex
-// element-wise multiplication:   a+ib * c+id = ac+iad+ibc-bd = ac-bd + i(ad+bc)   The computation
-// loop isn't sent to OMP because this function itself is already expected to be called by multiple
-// threads, and it would actually slow down the process.
-// It throuws an exception if
-void SpectralConvolution(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
-  const size_t kSize_a = a.getSize();
-  const size_t kSize_b = b.getSize();
-  const size_t kSize_result = result.getSize();
-  CheckAllEqual({kSize_a, kSize_b, kSize_result},
-                std::string("SpectralConvolution: all sizes must be equal and are"));
-  for(size_t i=0; i<kSize_a; ++i){
-    // a+ib * c+id = ac+iad+ibc-bd = ac-bd + i(ad+bc)
-     result[i][REAL] = a[i][REAL]*b[i][REAL] - a[i][IMAG]*b[i][IMAG];
-     result[i][IMAG] = a[i][IMAG]*b[i][REAL] + a[i][REAL]*b[i][IMAG];
-  }
-}
-
-// This function behaves identically to SpectralConvolution, but computes c=a*conj(b) instead
-// of c=a*b:         a * conj(b) = a+ib * c-id = ac-iad+ibc+bd = ac+bd + i(bc-ad)
-void SpectralCorrelation(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
-  const size_t kSize_a = a.getSize();
-  const size_t kSize_b = b.getSize();
-  const size_t kSize_result = result.getSize();
-  // CheckAllEqual({kSize_a, kSize_b, kSize_result},
-  //                 "SpectralCorrelation: all sizes must be equal and are");
-  for(size_t i=0; i<kSize_a; ++i){
-    // a * conj(b) = a+ib * c-id = ac-iad+ibc+bd = ac+bd + i(bc-ad)
-    result[i][REAL] = a[i][REAL]*b[i][REAL] + a[i][IMAG]*b[i][IMAG];
-    result[i][IMAG] = a[i][IMAG]*b[i][REAL] - a[i][REAL]*b[i][IMAG];
-
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This class is a simple wrapper for the memory management of the fftw plans, plus a
 // parameterless execute() method which is also a wrapper for FFTW's execute.
@@ -248,7 +90,12 @@ void MakeAndExportFftwWisdom(const std::string path_out, const size_t min_2pow=0
     FftForwardPlan fwd(fs, cs);
     FftBackwardPlan bwd(cs, fs);
   }
-  fftwf_export_wisdom_to_filename(path_out.c_str());
+  std::cout << "MakeAndExportFftwWisdom: exporting wisdom to -->" << path_out;
+  if(fftwf_export_wisdom_to_filename(path_out.c_str())){
+    std::cout << "<-- was successful!" << std::endl;
+  } else {
+    std::cout << "<-- failed! ignoring..." << std::endl;
+  }
 }
 
 // Given a path to a wisdom file generated with "MakeAndExportFftwWisdom", reads and loads it
@@ -264,53 +111,6 @@ void ImportFftwWisdom(const std::string path_in, const bool throw_exception_if_f
     else{std::cout << "WARNING: " << message;}
   }
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// template<class Iter>
-// void PlotSignals(Iter beg, Iter end, const std::string name,
-//                  const int starting_idx=0,
-//                  const std::string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
-//                  const std::string save_path=""){
-//   // check that indexes make sense and calculate plot range
-//   const size_t kIterDistance = distance(beg, end);
-//   for(;beg!=end; ++beg){
-//     auto signal = beg->
-//   };
-
-//   void plot(const std::string name,
-//             const size_t min_idx,const size_t max_idx,
-//             const std::string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
-//             const std::string save_path="float_signal.png"){
-//     // check that indexes make sense and calculate plot range
-//     CheckWithinRange(min_idx, 0, max_idx, "plot()");
-//     CheckWithinRange(max_idx, min_idx, size_-1, "plot()");
-//     const size_t plot_range = 1+max_idx-min_idx;
-//     // make x and y axes. This is inefficient but plot is anyway much slower.
-//     // Better to have it here than to pollute the constructor with plot data.
-//     std::vector<float> domain(plot_range);
-//     std::vector<float> codomain(plot_range);
-//     for(size_t i=min_idx;i<=max_idx; ++i){
-//       domain[i]   = i;
-//       codomain[i] = data_[i];
-//     }
-//     // TODO: figure out how to prevent plt from blocking main thread
-//     plt::named_plot(name, domain, codomain, style);
-//     plt::xlim(min_idx, max_idx);
-//     plt::legend();
-//     if(!save_path.empty()){
-//       plt::save(save_path);
-//     }
-//     plt::show();
-//   }
-//   void plot(const std::string name="FloatSignal",
-//             const std::string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
-//             const std::string save_path="float_signal.png"){
-//     plot(name, 0, size_-1, style, save_path);
-//   }
-// };
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// PERFORM CONVOLUTION/CORRELATION
@@ -530,52 +330,4 @@ public:
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// MAIN ROUTINE
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int main(){//(int argc,  char** argv){
-
-  // // do this just once to configure your system for an optimal FFT
-  const std::string kWisdomPatient = "wisdom_real_dft_pow2_patient";
-  // MakeAndExportFftwWisdom(kWisdomPatient, 0, 29, FFTW_PATIENT);
-
-  // create a test signal
-  const size_t kSizeS = 44100*60/10;
-  float* s_arr = new float[kSizeS]; for(size_t i=0; i<kSizeS; ++i){s_arr[i] = i+1;}
-  FloatSignal s(s_arr, kSizeS);
-  // s.plot("signal");
-
-  // create several test patches:
-  const size_t kSizeP1 =  44100*1/10;
-  float* p1_arr = new float[kSizeP1]; for(size_t i=0; i<kSizeP1; ++i){p1_arr[i]=i+1;}
-  FloatSignal p1(p1_arr, kSizeP1);
-  // const size_t kSizeP2 = 3; // 44100*3/1;
-  // float* p2_arr = new float[kSizeP2]; for(size_t i=0; i<kSizeP2; ++i){p2_arr[i]=i+1;}
-  // FloatSignal p2(p2_arr, kSizeP2);
-  // const size_t kSizeP3 = 4; // 44100*3/1;
-  // float* p3_arr = new float[kSizeP3]; for(size_t i=0; i<kSizeP3; ++i){p3_arr[i]=i+1;}
-  // FloatSignal p3(p3_arr, kSizeP3);
-
-  // p.plot("patch");
-
-  // Try some simple convolution
-  OverlapSaveConvolver x1(s, p1, kWisdomPatient);
-  // OverlapSaveConvolver x2(s, p2);
-  // OverlapSaveConvolver x3(s, p3);
-
-  for(int i=0; i<100; ++i){
-    std::cout << "iter " << i << std::endl;
-    x1.executeXcorr();
-  }
-  // x1.printChunks("xcorr");
-  // x1.extractResult().print("xcorr");
-
-
-  // clean memory and exit
-  delete[] s_arr;
-  delete[] p1_arr;
-  // delete[] p2_arr;
-  // delete[] p3_arr;
-  return 0;
-}
+#endif
