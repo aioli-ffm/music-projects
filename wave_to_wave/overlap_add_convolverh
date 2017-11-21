@@ -1,18 +1,20 @@
-// Copyright (C) 2017 Andres Fernandez (https://github.com/andres-fr)
+  // OverlapSaveConvolver: A small C++11 single-file program that performs
+  // efficient 1D convolution and cross-correlation of two float arrays.
+  // Copyright (C) 2017 Andres Fernandez (https://github.com/andres-fr)
 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
+  // This program is free software; you can redistribute it and/or modify
+  // it under the terms of the GNU General Public License as published by
+  // the Free Software Foundation; either version 3 of the License, or
+  // (at your option) any later version.
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+  // This program is distributed in the hope that it will be useful,
+  // but WITHOUT ANY WARRANTY; without even the implied warranty of
+  // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  // GNU General Public License for more details.
 
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+  // You should have received a copy of the GNU General Public License
+  // along with this program; if not, write to the Free Software Foundation,
+  // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 
 // TODO:
@@ -34,16 +36,16 @@
 #define WITH_OPENMP_ABOVE 1
 
 //
-// #include <string.h>
-// #include <math.h>
-// #include <iostream>
-// #include <sstream>
-// #include <stdexcept>
-// #include <vector>
-// #include <initializer_list>
+#include <string.h>
+#include <cmath>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <vector>
+#include <initializer_list>
 
-// #include <iterator>
-// #include <algorithm>
+#include <iterator>
+#include <algorithm>
 //
 #include <fftw3.h>
 #ifdef WITH_OPENMP_ABOVE
@@ -52,15 +54,141 @@
 //
 #include "third_party/matplotlibcpp.h"
 #include <thread>
-//
-#include "helpers.h"
 
-// using namespace std;
+using namespace std;
 namespace plt = matplotlibcpp;
 
 
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// TYPECHECK/ANTIBUGGING
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Given a container or its beginning and end iterables, converts the container to a string
+// of the form {a, b, c} (like a basic version of Python's __str__). Usage example:
+// vector<string> c1({"foo", "bar"});
+// vector<size_t> c2({1});
+// list<double> c3({1,2,3,4,5});
+// vector<bool> c4({false, true, false});
+// list<int> c5;
+// cout << IterableToString({1.23, 4.56, -789.0}) << endl;
+// cout << IterableToString(c1) << endl;
+// cout << IterableToString({"hello", "hello"}) << endl;
+// cout << IterableToString(c2) << endl;
+// cout << IterableToString(c3) << endl;
+// cout << IterableToString(c4) << endl;
+// cout << IterableToString(c5.begin(), c5.end()) << endl;
+template<typename T>
+string IterableToString(T it, T end){
+  stringstream ss;
+  ss << "{";
+  bool first = true;
+  for (; it!=end; ++it){
+    if (first){
+      ss << *it;
+      first = false;
+    } else {
+      ss << ", " << *it;
+    }
+  } ss << "}";
+  return ss.str();
+}
+template <class C> // Overload IterableToString to directly accept any Collection like vector<int>
+string IterableToString(const C &c){
+  return IterableToString(c.begin(), c.end());
+}
+template <class T> // Overload IterableToString to directly accept initializer_lists
+string IterableToString(const initializer_list<T> c){
+  return IterableToString(c.begin(), c.end());
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Given a container or its beginning and end iterables, checks wether all values contained in the
+// iterable are equal and raises an exception if not. Usage example:
+// vector<size_t> v1({});
+// vector<double> v2({123.4, 123.4, 123.4});
+// vector<bool> v3({false, false, false});
+// vector<size_t> v4({1});
+// vector<string> v5({"hello", "hello", "bye"});
+// CheckAllEqual({3,3,3,3,3,3,3,3});
+// CheckAllEqual(v1);
+// CheckAllEqual(v2.begin(), v2.end());
+// CheckAllEqual(v3);
+// CheckAllEqual(v4);
+// CheckAllEqual(v5.begin(), prev(v5.end()));
+// CheckAllEqual(v5);
+template<class I>
+void CheckAllEqual(const I beg, const I end, const string &message="CheckAllEqual"){
+  I it = beg;
+  bool all_eq = true;
+  auto last = (it==end)? end : prev(end);
+  for(;it!=last; ++it){
+    all_eq &= (*(it)==*(next(it)));
+    if (!all_eq) {
+      throw runtime_error(string("[ERROR] ") + message+" "+IterableToString(beg, end));
+    }
+  }
+}
+template <class C>
+void CheckAllEqual(const C &c, const string message="CheckAllEqual"){
+  CheckAllEqual(c.begin(), c.end(), message);
+}
+template <class T>
+void CheckAllEqual(const initializer_list<T> c, const string message="CheckAllEqual"){
+  CheckAllEqual(c.begin(), c.end(), message);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Raises an exception if complex_size!=(real_size/2+1), being "/" an integer division.
+void CheckRealComplexRatio(const size_t real_size, const size_t complex_size,
+                              const string func_name="CheckRealComplexRatio"){
+  if(complex_size!=(real_size/2+1)){
+    throw runtime_error(string("[ERROR] ") + func_name +
+                        ": size of ComplexSignal must equal size(FloatSignal)/2+1. " +
+                        " Sizes were (float, complex): " +
+                        IterableToString({real_size, complex_size}));
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Abstract function that performs a comparation between any 2 elements, and if the comparation
+// returns a truthy value raises an exception with the given message.
+template <class T, class Functor>
+void CheckTwoElements(const T a, const T b, const Functor &binary_predicate,
+                        const string message){
+  if(binary_predicate(a,b)){
+    throw runtime_error(string("[ERROR] ") + message + " " + IterableToString({a, b}));
+  }
+}
+
+// Raises an exception with the given message if a>b.
+void CheckLessEqual(const size_t a, const size_t b,
+                          const string message="a was greater than b!"){
+  CheckTwoElements(a, b, [](const size_t a, const size_t b){return a>b;},  message);
+}
+
+void CheckWithinRange(const size_t idx, const size_t min_allowed, const size_t max_allowed,
+                      const string func_name="CheckWithinRange"){
+  CheckTwoElements(idx, min_allowed, [](const size_t a, const size_t b){return a<b;},
+                   func_name+" index cannot be smaller than minimum allowed!");
+  CheckTwoElements(idx, max_allowed, [](const size_t a, const size_t b){return a>b;},
+                   func_name+" index cannot be bigger than maximum allowed!");
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+size_t Pow2Ceil(size_t x){return pow(2, ceil(log2(x)));}
 
 // This is an abstract base class that provides some basic, type-independent functionality for
 // any container that should behave as a signal. It is not intended to be instantiated directly.
@@ -88,10 +216,10 @@ public:
   T &operator[](size_t idx){return data_[idx];}
   T &operator[](size_t idx) const {return data_[idx];}
   // basic print function. It may be overriden if, for example, the type <T> is a struct.
-  void print(const std::string name="signal"){
-    std::cout << std::endl;
+  void print(const string name="signal"){
+    cout << endl;
     for(size_t i=0; i<size_; ++i){
-      std::cout << name << "[" << i << "]\t=\t" << data_[i] << std::endl;
+      cout << name << "[" << i << "]\t=\t" << data_[i] << endl;
     }
   }
 };
@@ -100,7 +228,7 @@ public:
 // It also overloads some further operators to do basic arithmetic
 class FloatSignal : public Signal<float>{
 private:
-  std::thread* plt_thread_ = NULL;
+  thread* plt_thread_ = NULL;
 public:
   // the basic constructor allocates an aligned, float array, which is zeroed by the superclass
   explicit FloatSignal(size_t size)
@@ -144,7 +272,7 @@ public:
     }
   }
   // override print method to show both fields of the complex number
-  void print(const std::string name="signal"){
+  void print(const string name="signal"){
     for(size_t i=0; i<size_; ++i){
       printf("%s[%zu]\t=\t(%f, i%f)\n",name.c_str(),i,data_[i][REAL],data_[i][IMAG]);
     }
@@ -163,7 +291,7 @@ void SpectralConvolution(const ComplexSignal &a, const ComplexSignal &b, Complex
   const size_t kSize_b = b.getSize();
   const size_t kSize_result = result.getSize();
   CheckAllEqual({kSize_a, kSize_b, kSize_result},
-                std::string("SpectralConvolution: all sizes must be equal and are"));
+                  "SpectralConvolution: all sizes must be equal and are");
   for(size_t i=0; i<kSize_a; ++i){
     // a+ib * c+id = ac+iad+ibc-bd = ac-bd + i(ad+bc)
      result[i][REAL] = a[i][REAL]*b[i][REAL] - a[i][IMAG]*b[i][IMAG];
@@ -177,8 +305,8 @@ void SpectralCorrelation(const ComplexSignal &a, const ComplexSignal &b, Complex
   const size_t kSize_a = a.getSize();
   const size_t kSize_b = b.getSize();
   const size_t kSize_result = result.getSize();
-  // CheckAllEqual({kSize_a, kSize_b, kSize_result},
-  //                 "SpectralCorrelation: all sizes must be equal and are");
+  CheckAllEqual({kSize_a, kSize_b, kSize_result},
+                  "SpectralCorrelation: all sizes must be equal and are");
   for(size_t i=0; i<kSize_a; ++i){
     // a * conj(b) = a+ib * c-id = ac-iad+ibc+bd = ac+bd + i(bc-ad)
     result[i][REAL] = a[i][REAL]*b[i][REAL] + a[i][IMAG]*b[i][IMAG];
@@ -238,7 +366,7 @@ public:
 // while to compute, but has to be done only once (per computer), and then it can be quickly loaded
 // for faster FFT computation, as explained in the docs (http://www.fftw.org/#documentation).
 // See also the docs for different flags. Note that using a wisdom file is optional.
-void MakeAndExportFftwWisdom(const std::string path_out, const size_t min_2pow=0,
+void MakeAndExportFftwWisdom(const string path_out, const size_t min_2pow=0,
                         const size_t max_2pow=25, const unsigned flag=FFTW_PATIENT){
   for(size_t i=min_2pow; i<=max_2pow; ++i){
     size_t size = pow(2, i);
@@ -253,35 +381,35 @@ void MakeAndExportFftwWisdom(const std::string path_out, const size_t min_2pow=0
 
 // Given a path to a wisdom file generated with "MakeAndExportFftwWisdom", reads and loads it
 // into FFTW to perform faster FFT computations. Using a wisdom file is optional.
-void ImportFftwWisdom(const std::string path_in, const bool throw_exception_if_fail=true){
+void ImportFftwWisdom(const string path_in, const bool throw_exception_if_fail=true){
   int result = fftwf_import_wisdom_from_filename(path_in.c_str());
   if(result!=0){
-    std::cout << "[ImportFftwWisdom] succesfully imported " << path_in << std::endl;
+    cout << "[ImportFftwWisdom] succesfully imported " << path_in << endl;
   } else{
-    std::string message = "[ImportFftwWisdom] ";
+    string message = "[ImportFftwWisdom] ";
     message += "couldn't import wisdom! is this a path to a valid wisdom file? -->"+path_in+"<--\n";
-    if(throw_exception_if_fail){throw std::runtime_error(std::string("ERROR: ") + message);}
-    else{std::cout << "WARNING: " << message;}
+    if(throw_exception_if_fail){throw runtime_error(string("ERROR: ") + message);}
+    else{cout << "WARNING: " << message;}
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // template<class Iter>
-// void PlotSignals(Iter beg, Iter end, const std::string name,
+// void PlotSignals(Iter beg, Iter end, const string name,
 //                  const int starting_idx=0,
-//                  const std::string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
-//                  const std::string save_path=""){
+//                  const string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
+//                  const string save_path=""){
 //   // check that indexes make sense and calculate plot range
 //   const size_t kIterDistance = distance(beg, end);
 //   for(;beg!=end; ++beg){
 //     auto signal = beg->
 //   };
 
-//   void plot(const std::string name,
+//   void plot(const string name,
 //             const size_t min_idx,const size_t max_idx,
-//             const std::string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
-//             const std::string save_path="float_signal.png"){
+//             const string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
+//             const string save_path="float_signal.png"){
 //     // check that indexes make sense and calculate plot range
 //     CheckWithinRange(min_idx, 0, max_idx, "plot()");
 //     CheckWithinRange(max_idx, min_idx, size_-1, "plot()");
@@ -303,9 +431,9 @@ void ImportFftwWisdom(const std::string path_in, const bool throw_exception_if_f
 //     }
 //     plt::show();
 //   }
-//   void plot(const std::string name="FloatSignal",
-//             const std::string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
-//             const std::string save_path="float_signal.png"){
+//   void plot(const string name="FloatSignal",
+//             const string style="g-", //"b, g, r, c,m,y, k, w"   "-, --, :, o, v, *, D"
+//             const string save_path="float_signal.png"){
 //     plot(name, 0, size_-1, style, save_path);
 //   }
 // };
@@ -349,14 +477,14 @@ private:
   // padded copy of the signal
   FloatSignal padded_signal_;
   // the deconstructed signal
-  std::vector<FloatSignal*> s_chunks_;
-  std::vector<ComplexSignal*> s_chunks_complex_;
+  vector<FloatSignal*> s_chunks_;
+  vector<ComplexSignal*> s_chunks_complex_;
   // the corresponding chunks holding convs/xcorrs
-  std::vector<FloatSignal*> result_chunks_;
-  std::vector<ComplexSignal*> result_chunks_complex_;
+  vector<FloatSignal*> result_chunks_;
+  vector<ComplexSignal*> result_chunks_complex_;
   // the corresponding plans (plus the plan of the patch)
-  std::vector<FftForwardPlan*> forward_plans_;
-  std::vector<FftBackwardPlan*> backward_plans_;
+  vector<FftForwardPlan*> forward_plans_;
+  vector<FftBackwardPlan*> backward_plans_;
 
   // Basic state management to prevent getters from being called prematurely.
   // Also to adapt the extractResult getter, since Conv and Xcorr padding behaves differently
@@ -364,11 +492,11 @@ private:
   State _state_; // kUninitialized after instantiation, kConv/kXcorr after respective op.
   // This private method throws an exception if _state_ is kUninitialized, because that
   // means that some "getter" has ben called before any computation has been performed.
-  void __check_last_executed_not_null(const std::string method_name){
+  void __check_last_executed_not_null(const string method_name){
     if(_state_ == State::kUninitialized){
-      throw std::runtime_error(std::string("[ERROR] OverlapSaveConvolver.") + method_name +
-                               "() can't be called before executeXcorr() or executeConv()!" +
-                               " No meaningful data has been computed yet.");
+      throw runtime_error(string("[ERROR] OverlapSaveConvolver.") + method_name +
+                          "() can't be called before executeXcorr() or executeConv()!" +
+                          " No meaningful data has been computed yet.");
     }
   }
 
@@ -407,13 +535,13 @@ public:
   // of them, so no care has to be taken regarding memory management.
   // The wisdomPath may be empty, or a path to a valid wisdom file.
   // Note that len(signal) can never be smaller than len(patch), or an exception is thrown.
-  OverlapSaveConvolver(FloatSignal &signal, FloatSignal &patch, const std::string wisdomPath="")
+  OverlapSaveConvolver(FloatSignal &signal, FloatSignal &patch, const string wisdomPath="")
     : signal_size_(signal.getSize()),
       patch_size_(patch.getSize()),
       result_size_(signal_size_+patch_size_-1),
       //
       padded_patch_(patch.getData(), patch_size_, 0,
-                    std::max(kMinChunksize, 2*Pow2Ceil(patch_size_)-patch_size_)),
+                    max(kMinChunksize, 2*Pow2Ceil(patch_size_)-patch_size_)),
       result_chunksize_(padded_patch_.getSize()),
       result_chunksize_complex_(result_chunksize_/2+1),
       result_stride_(result_chunksize_-patch_size_+1),
@@ -454,10 +582,10 @@ public:
     _state_ = State::kXcorr;
   }
   // getting info from the convolfer
-  void printChunks(const std::string name="convolver"){
+  void printChunks(const string name="convolver"){
     __check_last_executed_not_null("printChunks");
     for (size_t i =0; i<result_chunks_.size();i++){
-      result_chunks_.at(i)->print(name+"_chunk_"+std::to_string(i));
+      result_chunks_.at(i)->print(name+"_chunk_"+to_string(i));
     }
   }
 
@@ -537,11 +665,11 @@ public:
 int main(){//(int argc,  char** argv){
 
   // // do this just once to configure your system for an optimal FFT
-  const std::string kWisdomPatient = "wisdom_real_dft_pow2_patient";
+  const string kWisdomPatient = "wisdom_real_dft_pow2_patient";
   // MakeAndExportFftwWisdom(kWisdomPatient, 0, 29, FFTW_PATIENT);
 
   // create a test signal
-  const size_t kSizeS = 44100*60/10;
+  const size_t kSizeS = 44100*60*100/1;
   float* s_arr = new float[kSizeS]; for(size_t i=0; i<kSizeS; ++i){s_arr[i] = i+1;}
   FloatSignal s(s_arr, kSizeS);
   // s.plot("signal");
@@ -564,11 +692,11 @@ int main(){//(int argc,  char** argv){
   // OverlapSaveConvolver x2(s, p2);
   // OverlapSaveConvolver x3(s, p3);
 
-  for(int i=0; i<100; ++i){
-    std::cout << "iter " << i << std::endl;
-    x1.executeXcorr();
-  }
-  // x1.printChunks("xcorr");
+  // for(int i=0; i<10000; ++i){
+  //   cout << "iter " << i << endl;
+  //   x1.executeXcorr();
+  // }
+  // x.printChunks("xcorr");
   // x1.extractResult().print("xcorr");
 
 
