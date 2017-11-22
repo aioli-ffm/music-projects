@@ -14,7 +14,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
-// g++ -O3 -std=c++11 -Wall -Wextra wave_to_wave.cpp -fopenmp -lfftw3f -I/usr/include/python2.7 -I./include -lpython2.7 -o ./bin/test && ./bin/test -z -y wisdom -i 10
+// g++ -O3 -std=c++11 -Wall -Wextra wave_to_wave.cpp -fopenmp -lfftw3f -lpython2.7 -o ./bin/test && ./bin/test -z -y wisdom -i 10
+
+
 
 // TODO:
 // - cmakefile with "test" (run tests), "benchmark" (run benchmarks), "clean" (clean binaries and build-related files) and "build" (compile sources), and "all", which would do all in that order. Just "make" would do nothing except showing this possible options. Ideally "build" would take the results of "benchmark" into account.

@@ -5,7 +5,7 @@
 #include<list>
 
 #include "../third_party/catch.hpp"
-#include "../include/helpers.h"
+#include "../include/helpers.hpp"
 
 // compile with:
 // g++ -std=c++11 -Wall -Wextra  utest_main.cpp -o bin/utest && ./bin/utest

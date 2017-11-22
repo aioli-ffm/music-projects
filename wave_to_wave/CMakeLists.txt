@@ -11,10 +11,10 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-file(GLOB ${PROJECT_NAME}sources "include/*.h")
 
+add_definitions(-std=c++11)
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}sources} "wave_to_wave.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
-target_link_libraries(${PROJECT_NAME} fftw3f ${OpenMP_CXX_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} fftw3f ${OpenMP_CXX_LIBRARIES} python2.7)
