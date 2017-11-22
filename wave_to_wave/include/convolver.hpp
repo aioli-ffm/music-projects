@@ -135,7 +135,7 @@ void ImportFftwWisdom(const std::string path_in, const bool throw_exception_if_f
 // In this class: X = result_chunksize, L = result_stride
 class OverlapSaveConvolver {
 private:
-  const static size_t kMinChunksize = 2048; // seems to be the fastest
+  const size_t kMinChunksize = 2048; // seems to be the fastest
   // grab input lengths
   size_t signal_size_;
   size_t patch_size_;
