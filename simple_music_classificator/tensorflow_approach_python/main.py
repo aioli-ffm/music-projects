@@ -1,24 +1,32 @@
+from __future__ import print_function, division
 import scipy.io.wavfile as pywav
 import numpy as np
 import tensorflow as tf
-from tensorboardX import FileWriter
+from tensorboardX import SummaryWriter
+from tabulate import tabulate
 
 import os
 import random
 from six.moves import xrange
 
+
+
+
+
 ################################################################################
 # PREPROCESSING GLOBALS
 ################################################################################
+
 DATASET_PATH = "../../datasets/gtzan/"
-SAMPLE_RATE = 22050 # Nyquist = 11025Hz
+SAMPLE_RATE = 22050
 TRAIN_CV_TEST_RATIO = [0.6, 0.1, 0.3]
 
 
 
 
+
 ################################################################################
-# LOAD DATA: files are 22050Hz, 16-bit wavs
+# LOAD DATA: files are samplerate=22050, 16-bit wavs
 # 10 classes, 100 unique 30s wavs per class
 # reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
 ################################################################################
@@ -44,33 +52,37 @@ def downsample_nparray(arr, in_samplerate, out_samplerate):
     """
     NotImplemented
 
+# DATA = get_dataset(DATASET_PATH)
+# DATASET_CLASSES = DATA.keys()
+# # note that wav sizes differ slightly: range [660000, 675808]~=(29.93s, 30.65)
+# wav_sizes = set([len(w) for wavlist in DATA.values() for w in wavlist])
+# MIN_CHUNKSIZE = min(wav_sizes)
+# MAX_CHUNKSIZE = max(wav_sizes)
+# print("wav sizes range (min, max): [%d, %d]\n"%(MIN_CHUNKSIZE, MAX_CHUNKSIZE))
 
 
-DATA = get_dataset(DATASET_PATH)
-DATASET_CLASSES = data.keys()
-# note that wav sizes differ slightly: range [660000, 675808] ~= (29.93s, 30.65)
-wav_sizes = set([len(w) for wavlist in DATA.values() for w in wavlist])
-MIN_CHUNKSIZE = min(wav_sizes)
-MAX_CHUNKSIZE = max(wav_sizes)
-print "wav sizes range (min, max): [%d, %d]\n" % (MIN_CHUNKSIZE, MAX_CHUNKSIZE)
+
 
 
 ################################################################################
 # SPLIT DATA:
 ################################################################################
 
-def split_dataset(dataset, train_cv_test_ratio):
+def split_dataset(dataset, train_cv_test_ratio, classes=None):
     """Given a dictionary of key=class, value=wav_list, shuffles every wav_list
-       and splits it by the proportions given by the [train, cv, test] ratio
-       list (which must add up to 1), and returns the 3 subsets as 3 dicts in
-       that order.
+       for each class and splits it by the proportions given by the
+       [train, cv, test] ratio list (which must add up to 1), and returns the 3
+       subsets as 3 dicts in that order. If a class list is given, only the
+       subsets for that classes will be returned.
     """
     if sum(train_cv_test_ratio)!=1:
         raise RuntimeError("[ERROR] split_dataset: ratios don't add up to 1! ")
     train_subset = {}
     cv_subset = {}
     test_subset = {}
-    for classname, wavlist in dataset.iteritems():
+    classes = classes if classes else dataset.keys()
+    for classname in classes:
+        wavlist = dataset[classname]
         random.shuffle(wavlist)
         # get min and max indexes as given by the ratios
         l = len(wavlist) # always 100 for GTZAN
@@ -82,14 +94,15 @@ def split_dataset(dataset, train_cv_test_ratio):
         test_subset[classname] = wavlist[test_0:]
     return train_subset, cv_subset, test_subset
 
+# TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO, ["reggae", "classical"])
+# del DATA # release unused reference just in case
 
-TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO)
-del DATA # release unused reference just in case
+# # check that the proportions are correct
+# for c in TRAIN_SUBSET.iterkeys(): # c is classname
+#     print("  %s(train, cv, test): (%d, %d, %d)" %
+#           (c, len(TRAIN_SUBSET[c]), len(CV_SUBSET[c]), len(TEST_SUBSET[c])))
 
-# check that the proportions are correct
-for c in TRAIN_SUBSET.iterkeys(): # c is classname
-    print "  %s(train, cv, test): (%d, %d, %d)" % \
-    (c, len(TRAIN_SUBSET[c]), len(CV_SUBSET[c]), len(TEST_SUBSET[c]))
+
 
 
 
@@ -122,7 +135,6 @@ def get_random_batch(dataset, chunk_size, batch_size):
                      for x in xrange(batch_size)])
     return data, labels # cast data to float32?
 
-
 def get_class_batch(dataset,clss, chunk_size):
     """Given adictionary of key=class, value=wav_list, returns a rank 2 tensor
        with the most possible non-overlapping distinct chunks of chunk_size
@@ -150,10 +162,70 @@ def get_class_batch(dataset,clss, chunk_size):
 
 
 
+
+################################################################################
+# ERROR METRICS
+################################################################################
+
+class ConfusionMatrix(object):
+    """
+    """
+    def __init__(self, class_domain, name=""):
+        self.matrix = {c:{c:0 for c in class_domain} for c in class_domain}
+        self.name = name
+    def add(self, predictions, labels):
+        """Given a list of predictions and their respective labels, adds every
+           corresponding entry to the confusion matrix.
+        """
+        pred_lbl = zip(predictions, labels)
+        for pred, lbl in pred_lbl:
+            self.matrix[lbl][pred] += 1
+    def __str__(self):
+        acc, acc_by_class = self.accuracy()
+        classes = sorted(self.matrix.keys())
+        short_classes = {c: c[0:8]+"..." if len(c)>8 else c for c in classes}
+        prettymatrix = tabulate([[short_classes[c1]]+[self.matrix[c1][c2]
+                                                      for c2 in classes]+
+                                 [acc_by_class[c1]]
+                                 for c1 in classes],
+                                headers=["real(row)|predicted(col)"]+
+                                [short_classes[c] for c in classes]+
+                                ["acc. by class"])
+        return ("\n"+self.name+" CONFUSION MATRIX\n"+prettymatrix+
+                "\n"+self.name+" ACCURACY="+str(acc)+"\n")
+    def accuracy(self):
+        """Returns the total accuracy, and a dict with the accuracy per class
+        """
+        total = 0
+        right = 0
+        by_class = {c: [0,0] for c in self.matrix}
+        acc = float("nan")
+        by_class_acc = {c:float("nan") for c in self.matrix}
+        for clss, preds in self.matrix.iteritems():
+            for pred, n in preds.iteritems():
+                total += n
+                by_class[clss][1] += n
+                if clss==pred:
+                    right += n
+                    by_class[clss][0] += n
+        try:
+            acc = float(right)/total
+        except ZeroDivisionError:
+            pass
+        for c,x in by_class.iteritems():
+            try:
+                by_class_acc[c] = float(x[0])/x[1]
+            except ZeroDivisionError:
+                pass
+        return acc, by_class_acc
+
+
+
+
+
 ################################################################################
 # DEFINE TENSORFLOW MODELS
 ################################################################################
-
 
 # aliases
 matmul = tf.matmul
@@ -166,29 +238,35 @@ softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
 # max_pool = tf.nn.max_pool
 # batch_norm = tf.layers.batch_normalization
 
-weight_variable = lambda shape, stddev=0.1: tf.Variable(
-    tf.truncated_normal(shape, stddev=stddev))
-bias_variable = lambda shape: tf.Variable(tf.constant(0.1, shape=[shape]))
+def weight_variable(shape, stddev=0.1, dtype=tf.float32):
+    return tf.Variable(tf.truncated_normal(shape, stddev=stddev, dtype=dtype))
 
-def basic_model(batch, num_classes, hidden_size=512):
+def bias_variable(shape, dtype=tf.float32):
+    return tf.Variable(tf.constant(0.1, shape=[shape], dtype=dtype))
+
+def basic_model(batch, num_classes, hidden_size=64):
     """A simple MLP. For every element of the input batch, performs:
        ========= LAYER 0 (input)==================================
                                         batch_size x chunk_size
+       expand_dims                  1 x batch_size x chunk_size
        ========= LAYER 1 (hidden)=================================
        fully(chunk_sizexhidden_size)    batch_size x hidden_size
        ========= LAYER 2 (logits) ================================
        fully(hidden_size x num_classes) batch_size x num_classes
     """
+    # add one extra dim at the end (needed by matmul)
     batch_size, chunk_size = batch.get_shape().as_list()
     #
-    W1 = weight_variable([batch_size, hidden_size])
-    b1 = bias_variable(hidden_size)
+    W1 = weight_variable([chunk_size, hidden_size], dtype=tf.float16)
+    b1 = bias_variable(hidden_size, dtype=tf.float16)
     out1 = relu(matmul(batch, W1)+b1)
     #
-    W2 = weight_variable([hidden_size, num_classes])
-    b2 = bias_variable(num_classes)
+    W2 = weight_variable([hidden_size, num_classes], dtype=tf.float16)
+    b2 = bias_variable(num_classes, dtype=tf.float16)
     logits = matmul(out1, W2) + b2
     return logits, l2loss(W1)+l2loss(W2)
+
+
 
 
 
@@ -196,24 +274,21 @@ def basic_model(batch, num_classes, hidden_size=512):
 # DEFINE TENSORFLOW GRAPH
 ################################################################################
 
-
-def make_graph(model, chunk_shape, classes, l2reg=0):
-    with tf.Graph().as_default():
+def make_graph(model, chunk_shape, num_classes, l2reg=0,
+               optimizer_fn=lambda:tf.train.AdamOptimizer()):
+    with tf.Graph().as_default() as g:
         data_ph = tf.placeholder(tf.float16, shape=((None,)+chunk_shape),
                                  name="data_placeholder")
-        labels_ph = tf.placeholder(tf.float16, shape=(None),
+        labels_ph = tf.placeholder(tf.int32, shape=(None),
                                    name="labels_placeholder")
-        logits, l2nodes = model(data_ph, len(classes), 512)
-        loss = tf.reduce_mean(softmax(logits=data_ph, labels=labels_ph))
+        logits, l2nodes = model(data_ph, num_classes, 512)
+        loss = tf.reduce_mean(softmax(logits=logits, labels=labels_ph))
         if l2reg>0:
             loss += l2reg*l2nodes
         global_step = tf.Variable(0, name="global_step", trainable=False)
-        minimizer = optimizer.minimize(loss, global_step=global_step)
+        minimizer = optimizer_fn().minimize(loss, global_step=global_step)
         predictions = tf.argmax(logits, 1, output_type=tf.int32)
-        #
-        correct_predictions = tf.equal(predictions, labels_ph)
-        accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
-
+        return g, [data_ph, labels_ph], [loss,global_step,minimizer,predictions]
 
 
 
@@ -222,157 +297,94 @@ def make_graph(model, chunk_shape, classes, l2reg=0):
 ################################################################################
 # DEFINE TF SESSION
 ################################################################################
-CHUNK_SIZE = MIN_CHUNKSIZE
-# reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
-CLASSES = DATASET_CLASSES
 
-
-
-if CHUNK_SIZE>MIN_CHUNKSIZE:
-    raise RuntimeError("[ERROR] CHUNK_SIZE can't be bigger than MIN_CHUNKSIZE")
-
-
-### MNIST
-LOG_PATH = "../tensorboard_logs/"
-TRAIN_MNIST_DDICT, CV_MNIST_DDICT, TEST_MNIST_DDICT = load_mnist_as_ddicts()
-BATCHSIZE = 200
-CHUNKSIZE = 28
-# OPTMANAGER = OptimizerManager(tf.train.MomentumOptimizer, learning_rate=lambda x: 1e-4, momentum=lambda x:0.5)
-OPTMANAGER = OptimizerManager(tf.train.AdamOptimizer, learning_rate=lambda x: 1e-4)
-SELECTED_MODEL = mnist_model_conv
-L2REG_FN = lambda x:  3e-07
-DROPOUT_FN = lambda x: 1
-
-with tf.Session()
-
-
-
-def run_training(train_ddict, cv_ddict, test_ddict,
-                 model, optimizer_manager,
-                 batch_size, chunk_size, l2rate_fn, dropout_fn,
-                 log_path,
-                 batch_frequency=100, cv_frequency=500, snapshot_frequency=5000,
-                 cv_voting_size=1, test_voting_size=1,
-                 max_steps=float("inf"),
-                 extra_info="",
-                 normalize_chunks=True,
-                 max_gpu_memory_fraction=1):
-     # DATA HOUSEKEEPING: get num of classes, data shape, and create a bijection from its labels to
-    # ascending ints starting by zero
-    num_classes = len(train_ddict)
-    data_shape = train_ddict.values()[0].values()[0].shape
-    chunk_shape = (data_shape[0], chunk_size) if len(data_shape)==2 else (chunk_size,)
-    class2int = {c:i for i, c in enumerate(train_ddict)}
-    int2class = {v:k for k,v in class2int.iteritems()}
-    # make graph
-    g, graph_placeholders, graph_outputs = make_custom_graph(model, chunk_shape,
-                                                             num_classes, optimizer_manager,
-                                                             normalize_data=normalize_chunks)
-    # run graph
-    sess_config = tf.ConfigProto()
-    sess_config.gpu_options.allow_growth = True
-    sess_config.gpu_options.per_process_gpu_memory_fraction = max_gpu_memory_fraction
-    with tf.Session(graph=g, config=sess_config) as sess:
-        # session initialization
-        sess.run(tf.global_variables_initializer())
-        print("\nTF session initialized.\nMODEL:", model.__name__,
-              "\nOPTIMIZER:", optimizer_manager,
-              "\nBATCH SIZE:", batch_size,
-              "\nCHUNK SHAPE:", chunk_shape,
-              "\nL2 REGULARIZATION FACTOR:", l2rate_fn(0),
-              "\nDROPOUT:", dropout_fn(0),
-              "\nCV VOTING SIZE:", cv_voting_size,
-              "\nTEST VOTING SIZE:", test_voting_size,
-              "\nNORMALIZE CHUNKS", normalize_chunks)
-        # tensorboard logging
-        sess_datastring = make_session_datastring(model, optimizer_manager, batch_size, chunk_size,
-                                                  l2rate_fn(0), dropout_fn(0), cv_voting_size,
-                                                  test_voting_size, normalize_chunks, extra_info)
-        log_dir = log_path + sess_datastring
-        logger = TensorBoardLogger(log_path, sess_datastring, g)
-        # start optimization
-        step = 0
-        while step<max_steps:
-            step += 1
-            # TRAINING
-            train_data_batch, train_lbl_batch = get_random_batch(train_ddict, chunk_size, batch_size)
-            train_lbl_batch = [class2int[lbl] for lbl in train_lbl_batch]
-            train_feed = {graph_placeholders["data_placeholder"]:train_data_batch,
-                          graph_placeholders["labels_placeholder"]:train_lbl_batch,
-                          graph_placeholders["l2_rate"]: l2rate_fn(step),
-                          graph_placeholders["dropout_rate"]:dropout_fn(step),
-                          graph_placeholders["is_training"]:True}
-            train_feed.update(optimizer_manager.feed_dict(step))
-            _, lrate = sess.run([graph_outputs["minimizer"],
-                                 graph_outputs["opt_lrate"]], feed_dict=train_feed)
-            # plot training
-            if step%batch_frequency == 0:
-                plot_feed = {graph_placeholders["data_placeholder"]:train_data_batch,
-                             graph_placeholders["labels_placeholder"]:train_lbl_batch,
-                             graph_placeholders["l2_rate"]: l2rate_fn(step),
-                             graph_placeholders["dropout_rate"]:1.0,
-                             graph_placeholders["is_training"]:False}
-                acc, lss = sess.run([graph_outputs["accuracy"],graph_outputs["loss"]], feed_dict=plot_feed)
-                print("[TRAINING]","\tstep = "+str(step)+"/"+str(max_steps), "\tbatch_acc =", acc, "\tbatch_loss =", lss)
-                logger.add_train_scalars(acc, lss, lrate, step)
-            # CROSS VALIDATION
-            if step%cv_frequency == 0:
-                confmatrix = ConfusionMatrix(cv_ddict.keys(), "CV", voting_size=cv_voting_size)
+def run_training(train_subset, cv_subset, test_subset, model,
+                 batch_size, chunk_size, max_steps=float("inf"),
+                 l2reg=0, optimizer_fn=lambda: tf.train.AdamOptimizer(),
+                 train_freq=10, cv_freq=100):
+    # get current classes and map them to 0,1,2,3... integers
+    classes = {c:i for i, c in enumerate(train_subset.keys())}
+    classes_inv = {v:k for k,v in classes.iteritems()}
+    # MATRIX OBJECTS (for the metrics) AND LOGGER (to plot them to TENSORBOARD)
+    logger = SummaryWriter()
+    # CREATE TF GRAPH
+    graph, [data_ph, labels_ph], [loss, global_step, minimizer, predictions] = (
+        make_graph(model, (chunk_size,), len(CLASSES), l2reg, optimizer_fn))
+    # START SESSION
+    with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
+        sess.run(tf.global_variables_initializer()) # compiler will warn you
+        # START TRAINING
+        for step in xrange(max_steps):
+            data_batch, label_batch = get_random_batch(train_subset, chunk_size,
+                                                       batch_size)
+            lbl = [classes[l] for l in label_batch] # convert from str to int
+            sess.run(minimizer, feed_dict={data_ph:data_batch, labels_ph:lbl})
+            # LOG TRAINING
+            if(step%train_freq==0):
+                p, l, i = sess.run([predictions, loss, global_step],
+                                feed_dict={data_ph:data_batch, labels_ph:lbl})
+                cm_train = ConfusionMatrix(classes.keys(), "BATCH")
+                cm_train.add([classes_inv[x] for x in p], label_batch)
+                acc, by_class_acc = cm_train.accuracy()
+                print(cm_train)
+                logger.add_scalars("TRAINING", {"acc":acc, "loss":l}, i)
+            # LOG CROSS-VALIDATION
+            if(step%cv_freq==0):
                 cv_total_loss = 0
-                # split each CV sample into chunks and make a single batch with them:
-                for ccc in cv_ddict:
-                    for _, data in cv_ddict[ccc].iteritems():
-                        cv_sample_data = cut_sample_to_chunks(data, chunk_size, shuffle=True)
-                        cv_sample_len = len(cv_sample_data)
-                        # pass the sample chunks to TF
-                        for ii in xrange(0, cv_sample_len, cv_voting_size):
-                            max_ii = min(ii+cv_voting_size, cv_sample_len) # avoids crash in last chunk
-                            if(max_ii-ii<cv_voting_size):
-                                print("CV warning: voting among", max_ii-ii, "elements, whereas",
-                                      "voting size was", cv_voting_size,
-                                      "(data_length, chunksize) =", (data.shape[1], chunk_size))
-                            cv_data_batch = cv_sample_data[ii:max_ii]
-                            cv_labels_batch = [class2int[ccc] for _ in xrange(len(cv_data_batch))]
-                            cv_feed = {graph_placeholders["data_placeholder"]:cv_data_batch,
-                                       graph_placeholders["labels_placeholder"]:cv_labels_batch,
-                                       graph_placeholders["l2_rate"]: l2rate_fn(step),
-                                       graph_placeholders["dropout_rate"]:1.0,
-                                       graph_placeholders["is_training"]:False}
-                            cv_preds, cv_lss = sess.run([graph_outputs["predictions"],
-                                                         graph_outputs["loss"]], feed_dict=cv_feed)
-                            cv_total_loss += cv_lss
-                            confmatrix.add([int2class[vote(cv_preds)]], [ccc])
-                print(confmatrix, "CV LOSS = ", cv_total_loss, sep="")
-                logger.add_cv_scalars(confmatrix.accuracy()[0], cv_total_loss, step)
-                logger.add_cv_confmatrix(confmatrix, step)
-        # TESTING
+                cm_cv = ConfusionMatrix(classes.keys(), "CV")
+                for c_cv in classes:
+                    print("validating class %s: this may take a while..."%c_cv)
+                    # extract ALL chunks of selected class and corresponding lbl
+                    cv_data = get_class_batch(cv_subset, c_cv, chunk_size)
+                    cv_labels = [c_cv for _ in xrange(len(cv_data))]
+                    lbl = [classes[c_cv] for _ in xrange(len(cv_data))]
+                    p,l,i = sess.run([predictions, loss, global_step],
+                                     feed_dict={data_ph:cv_data, labels_ph:lbl})
+                    cv_total_loss += l
+                    cm_cv.add([classes_inv[x] for x in p], cv_labels)
+                # once loss and matrix has been calculated for every class...
+                acc, by_class_acc = cm_cv.accuracy()
+                logger.add_scalars("CV", {"acc":acc, "loss":cv_total_loss}, i)
+        # AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
+        # here for brevity, code is identical to the one for cross-validation)
+        print("here could be your amazing test with 99.9% accuracy!!")
+        return
 
-        confmatrix = ConfusionMatrix(test_ddict.keys(), "TEST", voting_size=test_voting_size)
-        test_total_loss = 0
-        # split each TEST sample into chunks and make a single batch with them:
-        for ccc in test_ddict:
-            for _, data in test_ddict[ccc].iteritems():
-                test_sample_data = cut_sample_to_chunks(data, chunk_size, shuffle=True)
-                test_sample_len = len(test_sample_data)
-                # pass the sample chunks to TF
-                for ii in xrange(0, test_sample_len, test_voting_size):
-                    max_ii = min(ii+test_voting_size, test_sample_len) # avoids crash in last chunk
-                    if(max_ii-ii<test_voting_size):
-                        print("TEST warning: voting among", max_ii-ii, "elements, whereas",
-                              "voting size was", test_voting_size,
-                              "(data_length, chunksize) =", (data.shape[1], chunk_size))
-                    test_data_batch = test_sample_data[ii:max_ii]
-                    test_labels_batch = [class2int[ccc] for _ in xrange(len(test_data_batch))]
-                    test_feed = {graph_placeholders["data_placeholder"]:test_data_batch,
-                               graph_placeholders["labels_placeholder"]:test_labels_batch,
-                               graph_placeholders["l2_rate"]: l2rate_fn(step),
-                               graph_placeholders["dropout_rate"]:1.0,
-                               graph_placeholders["is_training"]:False}
-                    test_preds, test_lss = sess.run([graph_outputs["predictions"],
-                                                 graph_outputs["loss"]], feed_dict=test_feed)
-                    test_total_loss += test_lss
-                    confmatrix.add([int2class[vote(test_preds)]], [ccc])
-        print(confmatrix, "TEST LOSS = ", test_total_loss, sep="")
-        logger.add_test_scalars(confmatrix.accuracy()[0], test_total_loss, step)
-        logger.add_test_confmatrix(confmatrix, step)
-        logger.close()
+
+
+
+
+################################################################################
+# RUN TF SESSION
+################################################################################
+
+
+# SET HYPERPARAMETERS ##########################################################
+# reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
+CLASSES = ["reggae", "classical"]
+MODEL=basic_model
+BATCH_SIZE = 2
+CHUNK_SIZE = 10 # for GTZAN(22050) this has to be smaller than 660000
+MAX_STEPS=20
+L2_REG = 1e-5
+OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
+TRAIN_FREQ=2
+CV_FREQ=5
+################################################################################
+DATA = get_dataset(DATASET_PATH)
+TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO,
+                                                     CLASSES)
+
+CV_SUBSET = {k:v[0:2] for k,v in CV_SUBSET.iteritems()}
+del DATA # data won't be needed anymore and may free some useful RAM
+
+# check that the proportions are correct
+for c in TRAIN_SUBSET.iterkeys(): # c is classname
+    print("  %s(train, cv, test): (%d, %d, %d)" %
+          (c, len(TRAIN_SUBSET[c]), len(CV_SUBSET[c]), len(TEST_SUBSET[c])))
+
+
+run_training(TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET, MODEL,
+             BATCH_SIZE, CHUNK_SIZE, MAX_STEPS,
+             L2_REG, OPTIMIZER_FN,
+             TRAIN_FREQ, CV_FREQ)
