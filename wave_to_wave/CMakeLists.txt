@@ -39,4 +39,5 @@ add_executable(${PROJECT_NAME} wave_to_wave.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 target_link_libraries(${PROJECT_NAME} fftw3f ${OpenMP_CXX_LIBRARIES} ${PYTHON_LIBRARIES} CXXopts )
 
+add_subdirectory(benchmark)
 add_subdirectory(test)

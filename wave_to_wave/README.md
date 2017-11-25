@@ -28,6 +28,7 @@ cd build
 cmake ..
 make
 make test
+make run-benchmarks
 ```
 
 # TODO:
