@@ -1,8 +1,8 @@
 # LICENSING:
 
-* All the third-party libraries used are held in the [third_party] directory. Each third-party library is released under its own individual license, which should be mentioned in the respective source files.
+* All the third-party libraries used are held in the [third_party](third_party) directory. Each third-party library is released under its own individual license, which should be mentioned in the respective source files.
 
-* The remaining files are part of this project and are licensed under the GPLv3 or higher, as stated in the [LICENSE] file. Again, **this license file does NOT apply to the libraries located in the third-party directory**.
+* The remaining files are part of this project and are licensed under the GPLv3 or higher, as stated in the [LICENSE](LICENSE) file. Again, **the [LICENSE](LICENSE) file of does NOT apply to the libraries located in the third-party directory**.
 
 
 # C++ RELATED TOOLS:
@@ -25,7 +25,7 @@ Catch2 is a modern, C++-native, header-only, test framework for unit-tests. The 
 2. In your `<UTEST_FILE.CPP>`, include the header with `#include <CATCH>/catch.hpp`
 3. Compile with `g++ -std=c++11 -Wall -Wextra  <UTEST_FILE.CPP> -o bin/utest && ./bin/utest`
 
-See the [test] directory for examples, and the tutorial: `https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md`
+See the [test](test) directory for examples, and the tutorial: `https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md`
 
 
 ### PLOTTING WITH MATPLOTLIB-CPP`https://github.com/lava/matplotlib-cpp`:
@@ -64,5 +64,5 @@ To use them for performing benchmarking in local files, two things are required:
 1. In `<BENCHMARK_FILE.CPP>`, include the header: `#include "<LOCAL_LIB>/benchmark.h"`
 2. compile and run `my_test.cpp` with `g++ -std=c++11 -Wall -Wextra -L<LOCAL_LIB> <BENCHMARK_FILE.CPP> -lbenchmark -lpthread -o bin/benchmark && ./bin/benchmark`
 
-See the [benchmark] directory for examples. The repo's README offers a good introduction: `https://github.com/google/benchmark/blob/master/README.md`
+See the [benchmark](benchmark) directory for examples. The repo's README offers a good introduction: `https://github.com/google/benchmark/blob/master/README.md`
 
