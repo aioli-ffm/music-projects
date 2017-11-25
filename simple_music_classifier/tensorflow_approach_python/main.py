@@ -411,21 +411,21 @@ def test_with_mnist():
 
 
 # SET HYPERPARAMETERS ##########################################################
-# reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
-CLASSES = ["reggae", "classical"]
+#  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
+CLASSES = ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
 MODEL= lambda batch, num_classes: simple_mlp(batch, num_classes, 128)
 BATCH_SIZE = 1000
 CHUNK_SIZE = 22050*2 # for GTZAN(22050) this has to be smaller than 660000
 MAX_STEPS=10000
 L2_REG = 0
-OPTIMIZER_FN = lambda: tf.train.GradientDescentOptimizer(1e-2)
+OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=10
 CV_FREQ=1000009000
 # DOWNSAMPLE=2
 ################################################################################
 
 
-DATA = get_dataset(DATASET_PATH, normalize=False)#, downsample=DOWNSAMPLE)
+DATA = get_dataset(DATASET_PATH, normalize=True)#, downsample=DOWNSAMPLE)
 TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO,
                                                      CLASSES)
 # CV_SUBSET = {k:v[0:2] for k,v in CV_SUBSET.iteritems()}
