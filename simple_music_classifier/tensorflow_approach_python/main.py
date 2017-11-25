@@ -50,8 +50,8 @@ def get_dataset(dataset_path, downsample=0, normalize=True):
             wav_path = os.path.join(class_path, classname+"."+str(i).zfill(5))
             arr = pywav.read(wav_path+".wav")[1].astype(np.float32)
             if normalize: arr /= max(abs(arr.max()), abs(arr.min()))
-            # if downsample > 0:
-            #     arr = signal.decimate(arr, downsample)
+            if downsample > 0:
+                arr = signal.decimate(arr, downsample).astype(np.float32)
             wavlist.append(arr)
     return data
 
@@ -420,12 +420,12 @@ MAX_STEPS=10000
 L2_REG = 0
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=10
-CV_FREQ=1000009000
-# DOWNSAMPLE=2
+CV_FREQ=100
+DOWNSAMPLE=3
 ################################################################################
 
 
-DATA = get_dataset(DATASET_PATH, normalize=True)#, downsample=DOWNSAMPLE)
+DATA = get_dataset(DATASET_PATH, downsample=DOWNSAMPLE, normalize=True)
 TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO,
                                                      CLASSES)
 # CV_SUBSET = {k:v[0:2] for k,v in CV_SUBSET.iteritems()}
