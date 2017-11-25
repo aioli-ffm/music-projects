@@ -8,7 +8,7 @@ from tabulate import tabulate
 import os
 import random
 from six.moves import xrange
-
+from scipy import signal
 
 
 
@@ -31,10 +31,12 @@ TRAIN_CV_TEST_RATIO = [0.7, 0.1, 0.2]
 # reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
 ################################################################################
 
-def get_dataset(dataset_path):
+def get_dataset(dataset_path, downsample=0):
     """Returns GTZAN dataset as a dictionary of key='classname',
        value='wavlist', where wavlist[XX] corresponds to
        'dataset_path/classname/classname.000XX.wav' as numpy array
+       :param downsample: int By which factor the audio files are downsampled.
+        if this is 0, the data won't be downsampled.
     """
     data = {c:[] for c in os.listdir(dataset_path)}
     # fill the data dictionary: "DATASET_PATH/classname/classname.000XX.wav"
@@ -42,15 +44,11 @@ def get_dataset(dataset_path):
         class_path = os.path.join(dataset_path, classname)
         for i in xrange(100):
             wav_path = os.path.join(class_path, classname+"."+str(i).zfill(5))
-            wavlist.append(pywav.read(wav_path+".wav")[1])
+            int_arr = pywav.read(wav_path+".wav")[1]
+            if downsample > 0:
+                int_arr = signal.decimate(int_arr, downsample)
+            wavlist.append(int_arr)
     return data
-
-def downsample_nparray(arr, in_samplerate, out_samplerate):
-    """Most of the style-defining features happen way below 10kHz frequency, so
-       it could be interesting to train the classificator on downsampled the
-       music.
-    """
-    NotImplemented
 
 # DATA = get_dataset(DATASET_PATH)
 # DATASET_CLASSES = DATA.keys()
@@ -363,13 +361,14 @@ CLASSES = ["reggae", "classical"]
 MODEL=basic_model
 BATCH_SIZE = 2
 CHUNK_SIZE = 10 # for GTZAN(22050) this has to be smaller than 660000
-MAX_STEPS=20
+MAX_STEPS=10000
 L2_REG = 1e-5
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=2
 CV_FREQ=5
+DOWNSAMPLE=0
 ################################################################################
-DATA = get_dataset(DATASET_PATH)
+DATA = get_dataset(DATASET_PATH, downsample=DOWNSAMPLE)
 TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO,
                                                      CLASSES)
 
