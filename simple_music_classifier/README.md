@@ -28,7 +28,7 @@
                             | ... (other genres)
 
 ```
-3. Convert the audio files from .au to .wav
+3. Convert the audio files from .au to .wav. In each of the genre folders (rock, reggae...): `for i in *.au; do sox "$i" "${i%.au}.wav"; done && find . -type f -name "*.au" -delete`
 4. The Python work will be performed on Python2.7. Make sure you have it installed, together with the `pip` package manager (ensure last pip is activated: `easy_install -U pip`)
 5. Also install virtualenv. 1 and 2 in ubuntu: `sudo apt-get install python-pip python-dev python-virtualenv`.
 6. Create a virtual environment for the whole Python dependecies that we will need: `virtualenv --system-site-packages ~/aioli_ve`
