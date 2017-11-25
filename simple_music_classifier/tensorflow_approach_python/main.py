@@ -19,7 +19,7 @@ from six.moves import xrange
 
 DATASET_PATH = "../../datasets/gtzan/"
 SAMPLE_RATE = 22050
-TRAIN_CV_TEST_RATIO = [0.6, 0.1, 0.3]
+TRAIN_CV_TEST_RATIO = [0.7, 0.1, 0.2]
 
 
 
@@ -247,12 +247,11 @@ def bias_variable(shape, dtype=tf.float32):
 def basic_model(batch, num_classes, hidden_size=64):
     """A simple MLP. For every element of the input batch, performs:
        ========= LAYER 0 (input)==================================
-                                        batch_size x chunk_size
-       expand_dims                  1 x batch_size x chunk_size
+                                         batch_size x chunk_size
        ========= LAYER 1 (hidden)=================================
-       fully(chunk_sizexhidden_size)    batch_size x hidden_size
+       fully(chunk_sizexhidden_size)     batch_size x hidden_size
        ========= LAYER 2 (logits) ================================
-       fully(hidden_size x num_classes) batch_size x num_classes
+       fully(hidden_size x num_classes ) batch_size x num_classes
     """
     # add one extra dim at the end (needed by matmul)
     batch_size, chunk_size = batch.get_shape().as_list()
@@ -269,10 +268,10 @@ def basic_model(batch, num_classes, hidden_size=64):
 
 
 
-
 ################################################################################
 # DEFINE TENSORFLOW GRAPH
 ################################################################################
+
 
 def make_graph(model, chunk_shape, num_classes, l2reg=0,
                optimizer_fn=lambda:tf.train.AdamOptimizer()):
@@ -293,7 +292,6 @@ def make_graph(model, chunk_shape, num_classes, l2reg=0,
 
 
 
-
 ################################################################################
 # DEFINE TF SESSION
 ################################################################################
@@ -310,7 +308,7 @@ def run_training(train_subset, cv_subset, test_subset, model,
     # CREATE TF GRAPH
     graph, [data_ph, labels_ph], [loss, global_step, minimizer, predictions] = (
         make_graph(model, (chunk_size,), len(CLASSES), l2reg, optimizer_fn))
-    # START SESSION
+    # START SESSION (log_device_placement=True)
     with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
         sess.run(tf.global_variables_initializer()) # compiler will warn you
         # START TRAINING
