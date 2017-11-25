@@ -31,7 +31,11 @@ TRAIN_CV_TEST_RATIO = [0.7, 0.1, 0.2]
 # reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
 ################################################################################
 
-def get_dataset(dataset_path, downsample=0):
+def normalize_array(nparr):
+    peak = max(abs(nparr.max()), abs(nparr.min()))
+    return nparr.astype(np.float32)/peak
+
+def get_dataset(dataset_path, downsample=0, normalize=True):
     """Returns GTZAN dataset as a dictionary of key='classname',
        value='wavlist', where wavlist[XX] corresponds to
        'dataset_path/classname/classname.000XX.wav' as numpy array
@@ -44,10 +48,15 @@ def get_dataset(dataset_path, downsample=0):
         class_path = os.path.join(dataset_path, classname)
         for i in xrange(100):
             wav_path = os.path.join(class_path, classname+"."+str(i).zfill(5))
-            int_arr = pywav.read(wav_path+".wav")[1]
+            # arr = pywav.read(wav_path+".wav")[1].astype(np.float32)
+            # if normalize: arr /= max(abs(arr.max()), abs(arr.min()))
+            arr = np.array([-1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0], dtype=np.float32)
+            print(">>>>>>>>>> BEFORE:", arr[0:20], arr.dtype)
             if downsample > 0:
-                int_arr = signal.decimate(int_arr, downsample)
-            wavlist.append(int_arr)
+                arr = signal.decimate(arr, downsample)
+                print(">>>>>>>>>> AFTER:", arr[0:20], arr.dtype)
+                raw_input("yo mama is so fat")
+            wavlist.append(arr)
     return data
 
 # DATA = get_dataset(DATASET_PATH)
@@ -236,13 +245,13 @@ softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
 # max_pool = tf.nn.max_pool
 # batch_norm = tf.layers.batch_normalization
 
-def weight_variable(shape, stddev=0.1, dtype=tf.float32):
+def weight_variable(shape, stddev=0.000, dtype=tf.float32):
     return tf.Variable(tf.truncated_normal(shape, stddev=stddev, dtype=dtype))
 
 def bias_variable(shape, dtype=tf.float32):
-    return tf.Variable(tf.constant(0.1, shape=[shape], dtype=dtype))
+    return tf.Variable(tf.constant(0, shape=[shape], dtype=dtype))
 
-def basic_model(batch, num_classes, hidden_size=64):
+def simple_mlp(batch, num_classes, hidden_size=64):
     """A simple MLP. For every element of the input batch, performs:
        ========= LAYER 0 (input)==================================
                                          batch_size x chunk_size
@@ -278,14 +287,15 @@ def make_graph(model, chunk_shape, num_classes, l2reg=0,
                                  name="data_placeholder")
         labels_ph = tf.placeholder(tf.int32, shape=(None),
                                    name="labels_placeholder")
-        logits, l2nodes = model(data_ph, num_classes, 512)
+        logits, l2nodes = model(data_ph, num_classes)
         loss = tf.reduce_mean(softmax(logits=logits, labels=labels_ph))
         if l2reg>0:
             loss += l2reg*l2nodes
         global_step = tf.Variable(0, name="global_step", trainable=False)
         minimizer = optimizer_fn().minimize(loss, global_step=global_step)
         predictions = tf.argmax(logits, 1, output_type=tf.int32)
-        return g, [data_ph, labels_ph], [loss,global_step,minimizer,predictions]
+        return g, [data_ph, labels_ph], [logits, loss,global_step,minimizer,
+                                         predictions]
 
 
 
@@ -304,7 +314,7 @@ def run_training(train_subset, cv_subset, test_subset, model,
     # MATRIX OBJECTS (for the metrics) AND LOGGER (to plot them to TENSORBOARD)
     logger = SummaryWriter()
     # CREATE TF GRAPH
-    graph, [data_ph, labels_ph], [loss, global_step, minimizer, predictions] = (
+    graph,[data_ph,labels_ph],[logits,loss,global_step,minimizer,predictions]=(
         make_graph(model, (chunk_size,), len(CLASSES), l2reg, optimizer_fn))
     # START SESSION (log_device_placement=True)
     with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
@@ -317,12 +327,13 @@ def run_training(train_subset, cv_subset, test_subset, model,
             sess.run(minimizer, feed_dict={data_ph:data_batch, labels_ph:lbl})
             # LOG TRAINING
             if(step%train_freq==0):
-                p, l, i = sess.run([predictions, loss, global_step],
+                p, l, i, logts = sess.run([predictions,loss,global_step,logits],
                                 feed_dict={data_ph:data_batch, labels_ph:lbl})
                 cm_train = ConfusionMatrix(classes.keys(), "BATCH")
                 cm_train.add([classes_inv[x] for x in p], label_batch)
                 acc, by_class_acc = cm_train.accuracy()
                 print(cm_train)
+                print(">>>>>>", logts)
                 logger.add_scalars("TRAINING", {"acc":acc, "loss":l}, i)
             # LOG CROSS-VALIDATION
             if(step%cv_freq==0):
@@ -358,21 +369,23 @@ def run_training(train_subset, cv_subset, test_subset, model,
 # SET HYPERPARAMETERS ##########################################################
 # reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
 CLASSES = ["reggae", "classical"]
-MODEL=basic_model
-BATCH_SIZE = 2
-CHUNK_SIZE = 10 # for GTZAN(22050) this has to be smaller than 660000
+MODEL= lambda batch, num_classes: simple_mlp(batch, num_classes, 1024)
+BATCH_SIZE = 50
+CHUNK_SIZE = 22050 # for GTZAN(22050) this has to be smaller than 660000
 MAX_STEPS=10000
-L2_REG = 1e-5
-OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
-TRAIN_FREQ=2
-CV_FREQ=5
-DOWNSAMPLE=0
+L2_REG = 0
+OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-5)
+TRAIN_FREQ=5
+CV_FREQ=50
+DOWNSAMPLE=2
 ################################################################################
 DATA = get_dataset(DATASET_PATH, downsample=DOWNSAMPLE)
+print(">>>>>>>>>>", DATA.values()[0][0].dtype)
+raw_input("stop")
 TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO,
                                                      CLASSES)
 
-CV_SUBSET = {k:v[0:2] for k,v in CV_SUBSET.iteritems()}
+# CV_SUBSET = {k:v[0:2] for k,v in CV_SUBSET.iteritems()}
 del DATA # data won't be needed anymore and may free some useful RAM
 
 # check that the proportions are correct
