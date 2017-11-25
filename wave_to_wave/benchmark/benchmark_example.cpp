@@ -1,4 +1,4 @@
-#include "../third_party/google_benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 
 // mkdir -p bin g++ -std=c++11 -Wall -Wextra -L../third_party/google_benchmark  benchmark_example.cpp -lbenchmark -lpthread -o bin/benchmark && ./bin/benchmark
