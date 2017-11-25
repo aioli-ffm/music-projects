@@ -23,7 +23,7 @@
 #include <iostream>
 // LOCAL THIRD-PARTY
 // #include "third_party/matplotlibcpp.h"
-#include "third_party/cxxopts.hpp"
+#include <cxxopts.hpp>
 // LOCAL INCLUDES
 #include "include/signal.hpp"
 #include "include/convolver.hpp"
