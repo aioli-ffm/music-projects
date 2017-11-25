@@ -10,12 +10,12 @@
 
 ### COMPILING WITH CMAKE:
 
-'''bash
+```bash
 mkdir build
 cd build
 cmake ..
 make
-'''
+```
 
 ### UNIT TESTING WITH CATCH2 `https://github.com/catchorg/Catch2`:
 
