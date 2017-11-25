@@ -1,3 +1,0 @@
-/home/afr/Desktop/music-projects/wave_to_wave/CMakeFiles/edit_cache.dir
-/home/afr/Desktop/music-projects/wave_to_wave/CMakeFiles/rebuild_cache.dir
-/home/afr/Desktop/music-projects/wave_to_wave/CMakeFiles/wave_to_wave.dir

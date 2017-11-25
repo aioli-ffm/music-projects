@@ -24,8 +24,8 @@
 # include <omp.h>
 #endif
 // LOCAL INCLUDES
-#include "../include/helpers.hpp"
-#include "../include/signal.hpp"
+#include "helpers.hpp"
+#include "signal.hpp"
 
 
 

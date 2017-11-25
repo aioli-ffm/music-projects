@@ -1,1 +1,0 @@
-/usr/bin/c++    -fopenmp   CMakeFiles/wave_to_wave.dir/wave_to_wave.cpp.o  -o wave_to_wave -rdynamic -lfftw3f -lpython2.7 
