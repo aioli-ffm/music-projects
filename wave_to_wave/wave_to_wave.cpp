@@ -18,13 +18,6 @@
 
 
 
-// TODO:
-// - cmakefile with "test" (run tests), "benchmark" (run benchmarks), "clean" (clean binaries and build-related files) and "build" (compile sources), and "all", which would do all in that order. Just "make" would do nothing except showing this possible options. Ideally "build" would take the results of "benchmark" into account.
-// - explicitly SIMDize SpectralConvolution and SpectralCorrelation funcs: https://github.com/VcDevel/Vc
-// - prevent plotting from blocking the main thread
-// - make "synths.hpp" header and add a basic blob generator, morlet+chi2
-// - make the optimizer
-
 // STL INCLUDES
 #include <string.h>
 #include <iostream>

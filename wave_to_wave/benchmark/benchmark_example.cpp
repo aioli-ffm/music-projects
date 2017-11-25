@@ -1,8 +1,10 @@
 #include "../third_party/google_benchmark/benchmark.h"
 
-// g++ -std=c++11 -Wall -Wextra -L../third_party/google_benchmark  benchmark_example.cpp -lbenchmark -lpthread -o bin/benchmark && ./bin/benchmark
+
+// mkdir -p bin g++ -std=c++11 -Wall -Wextra -L../third_party/google_benchmark  benchmark_example.cpp -lbenchmark -lpthread -o bin/benchmark && ./bin/benchmark
 
 #define BASIC_BENCHMARK_TEST(x) BENCHMARK(x)->Arg(8)->Arg(512)->Arg(8192)
+
 
 void BM_empty(benchmark::State& state) {
   for (auto _ : state) {

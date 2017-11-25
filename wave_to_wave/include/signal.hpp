@@ -23,6 +23,7 @@ class AudioSignal {
 protected:
   T* data_;
   size_t size_;
+  long int delay_;
 public:
   // Given a size and a reference to an array, it fills the array with <SIZE> zeros.
   // Therefore, **IT DELETES THE CONTENTS OF THE ARRAY**. It is intended to be passed a newly

@@ -17,44 +17,34 @@
   // Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 
-// TODO:
-// g++ -O3 -std=c++11 -Wall -Wextra wavelet_synth.cpp -fopenmp -lfftw3f -o test && valgrind --leak-check=full -v ./test
 
+// #define REAL 0
+// #define IMAG 1
 
-#define REAL 0
-#define IMAG 1
+// // comment this line to deactivate OpenMP for loop parallelizations, or if you want to debug
+// // memory management (valgrind reports OMP normal activity as error).
+// // the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
+// #define WITH_OPENMP_ABOVE 1
 
-// comment this line to deactivate OpenMP for loop parallelizations, or if you want to debug
-// memory management (valgrind reports OMP normal activity as error).
-// the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
-#define WITH_OPENMP_ABOVE 1
+// //
+// #include <string.h>
+// #include <math.h>
+// #include <iostream>
+// #include <sstream>
+// #include <stdexcept>
+// #include <vector>
+// #include <initializer_list>
 
-//
-#include <string.h>
-#include <math.h>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-#include <vector>
-#include <initializer_list>
+// #include <iterator>
+// #include <algorithm>
+// //
+// #include <fftw3.h>
+// #ifdef WITH_OPENMP_ABOVE
+// # include <omp.h>
+// #endif
+// //
 
-#include <iterator>
-#include <algorithm>
-//
-#include <fftw3.h>
-#ifdef WITH_OPENMP_ABOVE
-# include <omp.h>
-#endif
-//
-
-using namespace std;
-
-
-// TODO:
-// 1. adapt the convolver to accept many patches
-// 1. Modularize project: one file for general typechecking and helpers, one for the fft+conv.
-//   separate headers/sources
-// 2. 
+// using namespace std;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
