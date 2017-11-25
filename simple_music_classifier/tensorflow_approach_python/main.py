@@ -48,14 +48,10 @@ def get_dataset(dataset_path, downsample=0, normalize=True):
         class_path = os.path.join(dataset_path, classname)
         for i in xrange(100):
             wav_path = os.path.join(class_path, classname+"."+str(i).zfill(5))
-            # arr = pywav.read(wav_path+".wav")[1].astype(np.float32)
-            # if normalize: arr /= max(abs(arr.max()), abs(arr.min()))
-            arr = np.array([-1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1, 0, 1, 0], dtype=np.float32)
-            print(">>>>>>>>>> BEFORE:", arr[0:20], arr.dtype)
-            if downsample > 0:
-                arr = signal.decimate(arr, downsample)
-                print(">>>>>>>>>> AFTER:", arr[0:20], arr.dtype)
-                raw_input("yo mama is so fat")
+            arr = pywav.read(wav_path+".wav")[1].astype(np.float32)
+            if normalize: arr /= max(abs(arr.max()), abs(arr.min()))
+            # if downsample > 0:
+            #     arr = signal.decimate(arr, downsample)
             wavlist.append(arr)
     return data
 
@@ -140,7 +136,7 @@ def get_random_batch(dataset, chunk_size, batch_size):
     data = np.stack([dataset[labels[x]][wav_ids[x]][start_idxs[x]:
                                                     start_idxs[x]+chunk_size]
                      for x in xrange(batch_size)])
-    return data, labels # cast data to float32?
+    return data, labels
 
 def get_class_batch(dataset,clss, chunk_size):
     """Given adictionary of key=class, value=wav_list, returns a rank 2 tensor
@@ -245,11 +241,11 @@ softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
 # max_pool = tf.nn.max_pool
 # batch_norm = tf.layers.batch_normalization
 
-def weight_variable(shape, stddev=0.000, dtype=tf.float32):
+def weight_variable(shape, stddev=0.001, dtype=tf.float32):
     return tf.Variable(tf.truncated_normal(shape, stddev=stddev, dtype=dtype))
 
 def bias_variable(shape, dtype=tf.float32):
-    return tf.Variable(tf.constant(0, shape=[shape], dtype=dtype))
+    return tf.Variable(tf.constant(0.1, shape=[shape], dtype=dtype))
 
 def simple_mlp(batch, num_classes, hidden_size=64):
     """A simple MLP. For every element of the input batch, performs:
@@ -263,14 +259,15 @@ def simple_mlp(batch, num_classes, hidden_size=64):
     # add one extra dim at the end (needed by matmul)
     batch_size, chunk_size = batch.get_shape().as_list()
     #
-    W1 = weight_variable([chunk_size, hidden_size], dtype=tf.float16)
-    b1 = bias_variable(hidden_size, dtype=tf.float16)
+    W1 = weight_variable([chunk_size, hidden_size], dtype=tf.float32)
+    b1 = bias_variable(hidden_size, dtype=tf.float32)
     out1 = relu(matmul(batch, W1)+b1)
     #
-    W2 = weight_variable([hidden_size, num_classes], dtype=tf.float16)
-    b2 = bias_variable(num_classes, dtype=tf.float16)
+    W2 = weight_variable([hidden_size, num_classes], dtype=tf.float32)
+    b2 = bias_variable(num_classes, dtype=tf.float32)
     logits = matmul(out1, W2) + b2
     return logits, l2loss(W1)+l2loss(W2)
+
 
 
 
@@ -283,7 +280,7 @@ def simple_mlp(batch, num_classes, hidden_size=64):
 def make_graph(model, chunk_shape, num_classes, l2reg=0,
                optimizer_fn=lambda:tf.train.AdamOptimizer()):
     with tf.Graph().as_default() as g:
-        data_ph = tf.placeholder(tf.float16, shape=((None,)+chunk_shape),
+        data_ph = tf.placeholder(tf.float32, shape=((None,)+chunk_shape),
                                  name="data_placeholder")
         labels_ph = tf.placeholder(tf.int32, shape=(None),
                                    name="labels_placeholder")
@@ -296,8 +293,6 @@ def make_graph(model, chunk_shape, num_classes, l2reg=0,
         predictions = tf.argmax(logits, 1, output_type=tf.int32)
         return g, [data_ph, labels_ph], [logits, loss,global_step,minimizer,
                                          predictions]
-
-
 
 
 ################################################################################
@@ -315,7 +310,7 @@ def run_training(train_subset, cv_subset, test_subset, model,
     logger = SummaryWriter()
     # CREATE TF GRAPH
     graph,[data_ph,labels_ph],[logits,loss,global_step,minimizer,predictions]=(
-        make_graph(model, (chunk_size,), len(CLASSES), l2reg, optimizer_fn))
+        make_graph(model, (chunk_size,), len(classes), l2reg, optimizer_fn))
     # START SESSION (log_device_placement=True)
     with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
         sess.run(tf.global_variables_initializer()) # compiler will warn you
@@ -332,8 +327,7 @@ def run_training(train_subset, cv_subset, test_subset, model,
                 cm_train = ConfusionMatrix(classes.keys(), "BATCH")
                 cm_train.add([classes_inv[x] for x in p], label_batch)
                 acc, by_class_acc = cm_train.accuracy()
-                print(cm_train)
-                print(">>>>>>", logts)
+                print("step:%d"%i, cm_train)
                 logger.add_scalars("TRAINING", {"acc":acc, "loss":l}, i)
             # LOG CROSS-VALIDATION
             if(step%cv_freq==0):
@@ -351,6 +345,7 @@ def run_training(train_subset, cv_subset, test_subset, model,
                     cm_cv.add([classes_inv[x] for x in p], cv_labels)
                 # once loss and matrix has been calculated for every class...
                 acc, by_class_acc = cm_cv.accuracy()
+                print(cm_cv)
                 logger.add_scalars("CV", {"acc":acc, "loss":cv_total_loss}, i)
         # AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
         # here for brevity, code is identical to the one for cross-validation)
@@ -365,28 +360,78 @@ def run_training(train_subset, cv_subset, test_subset, model,
 # RUN TF SESSION
 ################################################################################
 
+def load_mnist_as_ddicts():
+    """
+    """
+    # load the dataset from TF dependencies
+    from tensorflow.examples.tutorials.mnist import input_data
+    mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
+    # extract the tensors and print their shape
+    train_labels = mnist.train._labels # 55000
+    train_images = mnist.train._images.reshape((-1, 28*28))
+    cv_labels = mnist.validation._labels # 5000
+    cv_images = mnist.validation._images.reshape((-1, 28*28))
+    test_labels = mnist.test._labels # 10000
+    test_images = mnist.test._images.reshape((-1, 28*28))
+    print(train_labels.shape, train_images.shape, cv_labels.shape, cv_images.shape,
+          test_labels.shape, test_images.shape)
+    # store them as dicts of lists
+    train_dict = {str(i):[] for i in xrange(10)} # this are still empty!
+    cv_dict = {str(i):[] for i in xrange(10)}
+    test_dict = {str(i):[] for i in xrange(10)}
+    for i in xrange(len(train_labels)):
+        train_dict[str(train_labels[i])].append(train_images[i])
+    for i in xrange(len(cv_labels)):
+        cv_dict[str(cv_labels[i])].append(cv_images[i])
+    for i in xrange(len(test_labels)):
+        test_dict[str(test_labels[i])].append(test_images[i])
+    # return them
+    return train_dict, cv_dict, test_dict
+
+
+def test_with_mnist():
+    classes = [str(x) for x in range(10)]
+    model = lambda batch, num_classes: simple_mlp(batch, num_classes, 128)
+    batch_size = 1000
+    chunk_size = 784
+    max_steps = 1001
+    l2_reg = 0
+    optimizer_fn = lambda: tf.train.AdamOptimizer(1e-3)
+    train_freq = 50
+    cv_freq = 1000
+    train_subset, cv_subset, test_subset = load_mnist_as_ddicts()
+    #
+    run_training(train_subset, cv_subset, test_subset, model,
+                 batch_size, chunk_size, max_steps,
+                 l2_reg, optimizer_fn,
+                 train_freq, cv_freq)
+
+
+# test_with_mnist()
+
 
 # SET HYPERPARAMETERS ##########################################################
 # reggae, classical, country, jazz, metal, pop, disco, hiphop, rock, blues
 CLASSES = ["reggae", "classical"]
-MODEL= lambda batch, num_classes: simple_mlp(batch, num_classes, 1024)
-BATCH_SIZE = 50
-CHUNK_SIZE = 22050 # for GTZAN(22050) this has to be smaller than 660000
+MODEL= lambda batch, num_classes: simple_mlp(batch, num_classes, 128)
+BATCH_SIZE = 1000
+CHUNK_SIZE = 22050*2 # for GTZAN(22050) this has to be smaller than 660000
 MAX_STEPS=10000
 L2_REG = 0
-OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-5)
-TRAIN_FREQ=5
-CV_FREQ=50
-DOWNSAMPLE=2
+OPTIMIZER_FN = lambda: tf.train.GradientDescentOptimizer(1e-2)
+TRAIN_FREQ=10
+CV_FREQ=1000009000
+# DOWNSAMPLE=2
 ################################################################################
-DATA = get_dataset(DATASET_PATH, downsample=DOWNSAMPLE)
-print(">>>>>>>>>>", DATA.values()[0][0].dtype)
-raw_input("stop")
+
+
+DATA = get_dataset(DATASET_PATH, normalize=False)#, downsample=DOWNSAMPLE)
 TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO,
                                                      CLASSES)
-
 # CV_SUBSET = {k:v[0:2] for k,v in CV_SUBSET.iteritems()}
 del DATA # data won't be needed anymore and may free some useful RAM
+
+
 
 # check that the proportions are correct
 for c in TRAIN_SUBSET.iterkeys(): # c is classname
