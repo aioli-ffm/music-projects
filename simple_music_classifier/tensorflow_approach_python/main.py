@@ -4,26 +4,32 @@ import numpy as np
 import tensorflow as tf
 from tensorboardX import SummaryWriter
 from tabulate import tabulate
+import datetime
 
 import os
 import random
 from six.moves import xrange
 from scipy import signal
 
+# the other file holding the model definitions
+import models
+
 
 
 
 ################################################################################
-# PREPROCESSING GLOBALS
+# GLOBALS
 ################################################################################
 
 DATASET_PATH = "../../datasets/gtzan/"
 SAMPLE_RATE = 22050
 TRAIN_CV_TEST_RATIO = [0.7, 0.1, 0.2]
 
+def make_timestamp():
+    return '{:%d_%b_%Y_%Hh%Mm%Ss}'.format(datetime.datetime.now())
 
-
-
+# tf alias
+softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
 
 ################################################################################
 # LOAD DATA: files are samplerate=22050, 16-bit wavs
@@ -230,45 +236,7 @@ class ConfusionMatrix(object):
 # DEFINE TENSORFLOW MODELS
 ################################################################################
 
-# aliases
-matmul = tf.matmul
-relu = tf.nn.relu
-dropout = tf.nn.dropout
-l2loss = tf.nn.l2_loss
-softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
-# conv1d = tf.nn.conv1d
-# conv2d = tf.nn.conv2d
-# max_pool = tf.nn.max_pool
-# batch_norm = tf.layers.batch_normalization
-
-def weight_variable(shape, stddev=0.001, dtype=tf.float32):
-    return tf.Variable(tf.truncated_normal(shape, stddev=stddev, dtype=dtype))
-
-def bias_variable(shape, dtype=tf.float32):
-    return tf.Variable(tf.constant(0.1, shape=[shape], dtype=dtype))
-
-def simple_mlp(batch, num_classes, hidden_size=64):
-    """A simple MLP. For every element of the input batch, performs:
-       ========= LAYER 0 (input)==================================
-                                         batch_size x chunk_size
-       ========= LAYER 1 (hidden)=================================
-       fully(chunk_sizexhidden_size)     batch_size x hidden_size
-       ========= LAYER 2 (logits) ================================
-       fully(hidden_size x num_classes ) batch_size x num_classes
-    """
-    # add one extra dim at the end (needed by matmul)
-    batch_size, chunk_size = batch.get_shape().as_list()
-    #
-    W1 = weight_variable([chunk_size, hidden_size], dtype=tf.float32)
-    b1 = bias_variable(hidden_size, dtype=tf.float32)
-    out1 = relu(matmul(batch, W1)+b1)
-    #
-    W2 = weight_variable([hidden_size, num_classes], dtype=tf.float32)
-    b2 = bias_variable(num_classes, dtype=tf.float32)
-    logits = matmul(out1, W2) + b2
-    return logits, l2loss(W1)+l2loss(W2)
-
-
+# see the models.py file
 
 
 
@@ -299,6 +267,16 @@ def make_graph(model, chunk_shape, num_classes, l2reg=0,
 # DEFINE TF SESSION
 ################################################################################
 
+def make_session_datastring(model, optimizer_fn, batch_size, chunk_size, l2_reg,  extra_info="", separator="||"):
+    s = str(separator)
+    if extra_info:
+        extra_info = s+extra_info
+    return (make_timestamp()+"/"+model.__name__+s+str(opt_manager)+s+"batchsize_"+
+            str(batch_size)+s+"chunksize_"+str(chunk_size)+s+"L2_"+str(l2_0)+s+"dropout_"+
+            str(dropout_0)+s+"cvvotingsize_"+str(cv_voting_size)+s+"testvotingsize_"+
+            str(test_voting_size)+s+"normalizechunks_"+str(normalize_chunks)+extra_info)
+
+
 def run_training(train_subset, cv_subset, test_subset, model,
                  batch_size, chunk_size, max_steps=float("inf"),
                  l2reg=0, optimizer_fn=lambda: tf.train.AdamOptimizer(),
@@ -306,8 +284,11 @@ def run_training(train_subset, cv_subset, test_subset, model,
     # get current classes and map them to 0,1,2,3... integers
     classes = {c:i for i, c in enumerate(train_subset.keys())}
     classes_inv = {v:k for k,v in classes.iteritems()}
-    # MATRIX OBJECTS (for the metrics) AND LOGGER (to plot them to TENSORBOARD)
+    #  LOGGER (to plot them to TENSORBOARD)
     logger = SummaryWriter()
+    logger.add_text("Session info", make_timestamp() +
+                    " batchsz=%d chunksz=%d l2reg=%f" % (batch_size, chunk_size,
+                                                         l2reg), 0)
     # CREATE TF GRAPH
     graph,[data_ph,labels_ph],[logits,loss,global_step,minimizer,predictions]=(
         make_graph(model, (chunk_size,), len(classes), l2reg, optimizer_fn))
@@ -411,17 +392,17 @@ def test_with_mnist():
 
 
 # SET HYPERPARAMETERS ##########################################################
-#  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
-CLASSES = ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
-MODEL= lambda batch, num_classes: simple_mlp(batch, num_classes, 128)
+CLASSES = ["reggae", "classical", "country", "jazz", "metal",
+           "pop", "disco", "hiphop", "rock", "blues"]
+MODEL= lambda batch, num_classes: models.deep_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
+DOWNSAMPLE=7
 BATCH_SIZE = 1000
-CHUNK_SIZE = 22050*2 # for GTZAN(22050) this has to be smaller than 660000
-MAX_STEPS=10000
-L2_REG = 0
+CHUNK_SIZE = 22050//DOWNSAMPLE # for GTZAN(22050) this has to be smaller than 660000
+MAX_STEPS=40001
+L2_REG = 1e-3
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
-TRAIN_FREQ=10
-CV_FREQ=100
-DOWNSAMPLE=3
+TRAIN_FREQ=50
+CV_FREQ=1000
 ################################################################################
 
 
