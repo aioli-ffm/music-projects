@@ -33,7 +33,6 @@ def simple_mlp(batch, num_classes, hidden_size=64):
        ========= LAYER 2 (logits) ================================
        fully(hidden_size x num_classes ) batch_size x num_classes
     """
-    # add one extra dim at the end (needed by matmul)
     batch_size, chunk_size = batch.get_shape().as_list()
     #
     W1 = weight_variable([chunk_size, hidden_size], dtype=tf.float32)
@@ -57,7 +56,6 @@ def deep_mlp(batch, num_classes, hidden_size1=256, hidden_size2=128):
        ========= LAYER 3 (logits) ================================
        fully(hidden_size2 x num_classes ) batch_size x num_classes
     """
-    # add one extra dim at the end (needed by matmul)
     batch_size, chunk_size = batch.get_shape().as_list()
     #
     W1 = weight_variable([chunk_size, hidden_size1], dtype=tf.float32)
@@ -72,3 +70,24 @@ def deep_mlp(batch, num_classes, hidden_size1=256, hidden_size2=128):
     b3 = bias_variable(num_classes, dtype=tf.float32)
     logits = matmul(out2, W3) + b3
     return logits, l2loss(W1)+l2loss(W2)+l2loss(W3)
+
+
+
+
+def fft_mlp(batch, num_classes, hidden_size=256):
+    """This MLP takes into account the time-series wave together with
+       the magnitudes of the RFFT of that wave.
+    """
+    batch_fft_magnitudes = tf.abs(tf.spectral.rfft(batch, name="fft"))
+    batch_mix = tf.concat([tf.nn.l2_normalize(batch,dim=-1),
+                           tf.nn.l2_normalize(batch_fft_magnitudes,dim=-1)], -1)
+    batch_size, chunk_size = batch_mix.get_shape().as_list()
+    #
+    W1 = weight_variable([chunk_size, hidden_size], dtype=tf.float32)
+    b1 = bias_variable(hidden_size, dtype=tf.float32)
+    out1 = relu(matmul(batch_mix, W1)+b1)
+    #
+    W2 = weight_variable([hidden_size, num_classes], dtype=tf.float32)
+    b2 = bias_variable(num_classes, dtype=tf.float32)
+    logits = matmul(out1, W2) + b2
+    return logits, l2loss(W1)+l2loss(W2)

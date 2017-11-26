@@ -394,12 +394,13 @@ def test_with_mnist():
 # SET HYPERPARAMETERS ##########################################################
 CLASSES = ["reggae", "classical", "country", "jazz", "metal",
            "pop", "disco", "hiphop", "rock", "blues"]
-MODEL= lambda batch, num_classes: models.deep_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
+MODEL= models.fft_mlp
+# lambda batch, num_classes: models.deep_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
 DOWNSAMPLE=7
 BATCH_SIZE = 1000
-CHUNK_SIZE = 22050//DOWNSAMPLE # for GTZAN(22050) this has to be smaller than 660000
+CHUNK_SIZE = (22050*2)//DOWNSAMPLE
 MAX_STEPS=40001
-L2_REG = 1e-3
+L2_REG = 1e-5
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=50
 CV_FREQ=1000
