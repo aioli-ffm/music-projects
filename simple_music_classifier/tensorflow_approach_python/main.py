@@ -326,7 +326,7 @@ def run_training(train_subset, cv_subset, test_subset, model,
                     cm_cv.add([classes_inv[x] for x in p], cv_labels)
                 # once loss and matrix has been calculated for every class...
                 acc, by_class_acc = cm_cv.accuracy()
-                print(cm_cv)
+                print("step:%d"%i, cm_cv)
                 logger.add_scalars("CV", {"acc":acc, "loss":cv_total_loss}, i)
         # AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
         # here for brevity, code is identical to the one for cross-validation)
@@ -373,10 +373,10 @@ def load_mnist_as_ddicts():
 def test_with_mnist():
     classes = [str(x) for x in range(10)]
     model = lambda batch, num_classes: simple_mlp(batch, num_classes, 128)
-    batch_size = 1000
+    batch_size = 500
     chunk_size = 784
     max_steps = 1001
-    l2_reg = 0
+    l2_reg = 1e-7
     optimizer_fn = lambda: tf.train.AdamOptimizer(1e-3)
     train_freq = 50
     cv_freq = 1000
@@ -392,17 +392,17 @@ def test_with_mnist():
 
 
 # SET HYPERPARAMETERS ##########################################################
-CLASSES = ["reggae", "classical", "country", "jazz", "metal",
-           "pop", "disco", "hiphop", "rock", "blues"]
-MODEL= models.fft_mlp
+CLASSES =  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
+MODEL= models.basic_convnet
+# models.fft_mlp
 # lambda batch, num_classes: models.deep_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
 DOWNSAMPLE=7
 BATCH_SIZE = 1000
 CHUNK_SIZE = (22050*2)//DOWNSAMPLE
-MAX_STEPS=40001
+MAX_STEPS=60001
 L2_REG = 1e-5
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
-TRAIN_FREQ=50
+TRAIN_FREQ=100
 CV_FREQ=1000
 ################################################################################
 

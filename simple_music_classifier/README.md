@@ -44,8 +44,7 @@ Continue following the instructions to get started with the
 This approach is implemented in `<THIS_REPO>/simple_music_classifier/tensorflow_approach_python`, noted here as `<TFP_APPROACH>`
 
 1. Log in the virtual environment as described before
-2. Without GPU (CPU only): `pip install --upgrade tensorflow`. With GPU: `pip install --upgrade tensorflow-gpu`. 
-   1. With GPU: TensorFlow+GPU needs the CUDA+CUDNN libraries. See [this link](https://www.tensorflow.org/install/install_linux#nvidia_requirements_to_run_tensorflow_with_gpu_support).
+2. Without GPU (CPU only): `pip install --upgrade tensorflow`. With GPU: see [this link](https://stackoverflow.com/a/47503155/4511978) for detailed instructions on how to install the latest CUDA+CUDNN+TensorFlow.
 3. Further requirements
 ```
 pip install scipy # just to load the .wav files as numpy array. A bit of overkill but convenient and "only" 50MB
