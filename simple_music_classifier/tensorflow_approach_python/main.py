@@ -113,8 +113,6 @@ def split_dataset(dataset, train_cv_test_ratio, classes=None):
 
 
 
-
-
 ################################################################################
 # FEED DATA: random for training, per-class for CV and test
 ################################################################################
