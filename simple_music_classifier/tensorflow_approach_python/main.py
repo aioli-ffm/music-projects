@@ -287,8 +287,8 @@ def run_training(train_subset, cv_subset, test_subset, model,
     #  LOGGER (to plot them to TENSORBOARD)
     logger = SummaryWriter()
     logger.add_text("Session info", make_timestamp() +
-                    " batchsz=%d chunksz=%d l2reg=%f" % (batch_size, chunk_size,
-                                                         l2reg), 0)
+                    " model=%s batchsz=%d chunksz=%d l2reg=%f" %
+                    (model.__name__, batch_size, chunk_size, l2reg), 0)
     # CREATE TF GRAPH
     graph,[data_ph,labels_ph],[logits,loss,global_step,minimizer,predictions]=(
         make_graph(model, (chunk_size,), len(classes), l2reg, optimizer_fn))
@@ -309,10 +309,10 @@ def run_training(train_subset, cv_subset, test_subset, model,
                 cm_train.add([classes_inv[x] for x in p], label_batch)
                 acc, by_class_acc = cm_train.accuracy()
                 print("step:%d"%i, cm_train)
-                logger.add_scalars("TRAINING", {"acc":acc, "loss":l}, i)
+                logger.add_scalars("TRAIN", {"acc":acc, "avg_loss":l} ,i)
             # LOG CROSS-VALIDATION
             if(step%cv_freq==0):
-                cv_total_loss = 0
+                cv_loss = 0
                 cm_cv = ConfusionMatrix(classes.keys(), "CV")
                 for c_cv in classes:
                     print("validating class %s: this may take a while..."%c_cv)
@@ -322,12 +322,13 @@ def run_training(train_subset, cv_subset, test_subset, model,
                     lbl = [classes[c_cv] for _ in xrange(len(cv_data))]
                     p,l,i = sess.run([predictions, loss, global_step],
                                      feed_dict={data_ph:cv_data, labels_ph:lbl})
-                    cv_total_loss += l
+                    cv_loss += l
                     cm_cv.add([classes_inv[x] for x in p], cv_labels)
                 # once loss and matrix has been calculated for every class...
                 acc, by_class_acc = cm_cv.accuracy()
                 print("step:%d"%i, cm_cv)
-                logger.add_scalars("CV", {"acc":acc, "loss":cv_total_loss}, i)
+                logger.add_scalars("CV", {"acc":acc,
+                                          "avg_loss":cv_loss/len(classes)}, i)
         # AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
         # here for brevity, code is identical to the one for cross-validation)
         print("here could be your amazing test with 99.9% accuracy!!")
@@ -400,10 +401,10 @@ DOWNSAMPLE=7
 BATCH_SIZE = 1000
 CHUNK_SIZE = (22050*2)//DOWNSAMPLE
 MAX_STEPS=60001
-L2_REG = 1e-5
+L2_REG = 1e-3
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
-TRAIN_FREQ=100
-CV_FREQ=1000
+TRAIN_FREQ=10
+CV_FREQ=100
 ################################################################################
 
 
