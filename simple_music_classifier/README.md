@@ -30,7 +30,7 @@
 
 ```
 3. Convert the audio files from .au to .wav. In each of the genre folders (rock, reggae...). In Linux this can be nicely done with [sox](https://ubuntuforums.org/showthread.php?t=1577560) `for i in *.au; do sox "$i" "${i%.au}.wav"; done && find . -type f -name "*.au" -delete` or alternatively run the `au2wav.sh` script that can be found in `<THIS_REPO>` **WARNING: the .au files will be deleted**.
-4. The Python work will be performed on Python2.7. Make sure you have it installed, together with the `pip` package manager (ensure last pip is activated: `easy_install -U pip`)
+4. The Python work will be performed on Python2.7. Make sure you have it installed, together with the `pip` package manager (ensure last pip is activated: `easy_install -U pip`, you may need `sudo` for this)
 5. Also install virtualenv. 1 and 2 in ubuntu: `sudo apt-get install python-pip python-dev python-virtualenv`.
 6. Create a virtual environment for the whole Python dependecies that we will need: `virtualenv -p python2 --system-site-packages ~/aioli_ve`
 7. Before installing python packages and running python programs, log in to the venv with `source ~/aioli_ve/bin/activate`
@@ -45,6 +45,7 @@ This approach is implemented in `<THIS_REPO>/simple_music_classifier/tensorflow_
 
 1. Log in the virtual environment as described before
 2. Without GPU (CPU only): `pip install --upgrade tensorflow`. With GPU: see [this link](https://stackoverflow.com/a/47503155/4511978) for detailed instructions on how to install the latest CUDA+CUDNN+TensorFlow.
+   1. If you want a TF version with the latest CPU instructions (may be a little faster) the installation process is a little more involved: `pip install https://github.com/mind/wheels/releases/download/tf1.4-cpu/tensorflow-1.4.0-cp27-cp27mu-linux_x86_64.whl`, and `sudo apt install mklibs` will probably do the trick.
 3. Further requirements
 ```
 pip install scipy # just to load the .wav files as numpy array. A bit of overkill but convenient and "only" 50MB
@@ -60,7 +61,7 @@ c = a+b
 sess = tf.Session()
 sess.run(c) # should output 7
 ```
-5. Run the code! `python <TFP_APPROACH>/main.py`
+5. Run the code! `cd <TF_APPROACH> && python main.py`
 
 6. To visualize the training data with TensorBoard, run `tensorboard --logdir=<TFP_APPROACH>/runs` and visit `localhost:6006` with a valid web browser (google's chrome is usually well supported, others like firefox not so).
    1. To run tensorboard via SSH, see [here](https://stackoverflow.com/a/45024736)
