@@ -46,7 +46,7 @@ def simple_mlp(batch, num_classes, hidden_size=64):
     return logits, l2loss(W1)+l2loss(W2)
 
 
-def deep_mlp(batch, num_classes, hidden_size1=256, hidden_size2=128):
+def deeper_mlp(batch, num_classes, hidden_size1=256, hidden_size2=128):
     """An MLP with 2 hidden layers:
        ========= LAYER 0 (input)==================================
                                          batch_size x chunk_size

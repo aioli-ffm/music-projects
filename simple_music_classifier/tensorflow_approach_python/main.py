@@ -278,7 +278,9 @@ def make_session_datastring(model, optimizer_fn, batch_size, chunk_size, l2_reg,
 def run_training(train_subset, cv_subset, test_subset, model,
                  batch_size, chunk_size, max_steps=float("inf"),
                  l2reg=0, optimizer_fn=lambda: tf.train.AdamOptimizer(),
-                 train_freq=10, cv_freq=100):
+                 train_freq=10, cv_freq=100,
+                 save_name="model.ckpt",
+                 restore_name=None):
     # get current classes and map them to 0,1,2,3... integers
     classes = {c:i for i, c in enumerate(train_subset.keys())}
     classes_inv = {v:k for k,v in classes.iteritems()}
@@ -287,12 +289,19 @@ def run_training(train_subset, cv_subset, test_subset, model,
     logger.add_text("Session info", make_timestamp() +
                     " model=%s batchsz=%d chunksz=%d l2reg=%f" %
                     (model.__name__, batch_size, chunk_size, l2reg), 0)
+    # SAVER: snapshot of the variables, can be loaded by TF (also from java)
+    ### saver = tf.train.Saver(max_to_keep=2)
     # CREATE TF GRAPH
     graph,[data_ph,labels_ph],[logits,loss,global_step,minimizer,predictions]=(
         make_graph(model, (chunk_size,), len(classes), l2reg, optimizer_fn))
     # START SESSION (log_device_placement=True)
     with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
-        sess.run(tf.global_variables_initializer()) # compiler will warn you
+        # Either initialize the vars or restore a previously trained model
+        # if restore_path:
+        #     saver.restore(sess, "./checkpoints/"+restore_name)
+        # else:
+        #     sess.run(tf.global_variables_initializer())
+        sess.run(tf.global_variables_initializer())
         # START TRAINING
         for step in xrange(max_steps):
             data_batch, label_batch = get_random_batch(train_subset, chunk_size,
@@ -327,6 +336,10 @@ def run_training(train_subset, cv_subset, test_subset, model,
                 print("step:%d"%i, cm_cv)
                 logger.add_scalars("CV", {"acc":acc,
                                           "avg_loss":cv_loss/len(classes)}, i)
+                # Save the variables to disk.
+                ### save_path = saver.save(sess, "./checkpoints/"+save_name)
+                ### print("Model saved in file: %s" % save_path)
+
         # AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
         # here for brevity, code is identical to the one for cross-validation)
         print("here could be your amazing test with 99.9% accuracy!!")
@@ -394,7 +407,7 @@ def test_with_mnist():
 CLASSES =  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
 MODEL= models.basic_convnet
 # models.fft_mlp
-# lambda batch, num_classes: models.deep_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
+# lambda batch, num_classes: models.deeper_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
 DOWNSAMPLE=7
 BATCH_SIZE = 1000
 CHUNK_SIZE = (22050*2)//DOWNSAMPLE
@@ -423,4 +436,6 @@ for c in TRAIN_SUBSET.iterkeys(): # c is classname
 run_training(TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET, MODEL,
              BATCH_SIZE, CHUNK_SIZE, MAX_STEPS,
              L2_REG, OPTIMIZER_FN,
-             TRAIN_FREQ, CV_FREQ)
+             TRAIN_FREQ, CV_FREQ,
+             save_name="model.ckpt",
+             restore_name=None)
