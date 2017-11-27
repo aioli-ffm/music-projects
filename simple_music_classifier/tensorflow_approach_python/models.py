@@ -19,7 +19,7 @@ conv2d = tf.nn.conv2d
 max_pool = tf.nn.max_pool
 batch_norm = tf.layers.batch_normalization
 
-def weight_variable(shape, stddev=0.001, dtype=tf.float32):
+def weight_variable(shape, stddev=0.1, dtype=tf.float32):
     return tf.Variable(tf.truncated_normal(shape, stddev=stddev, dtype=dtype))
 
 def bias_variable(shape, dtype=tf.float32):
