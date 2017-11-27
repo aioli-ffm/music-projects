@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     cv_frequency = 100
 
-    categories = data.generate_categories("/home/str/@wasteland/ml/genres")
+    categories = data.generate_categories("../../../datasets/gtzan")
     optimizer = optim.Adam(graph.mlp.parameters())
     loss_fn = nn.CrossEntropyLoss()
 
