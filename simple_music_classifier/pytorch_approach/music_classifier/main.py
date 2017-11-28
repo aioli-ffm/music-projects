@@ -1,7 +1,9 @@
+#!/usr/bin/python
 import data
 import graph
 import torch
 from torch import optim, nn
+import numpy as np
 
 is_gpu = torch.cuda.is_available()
 
@@ -14,10 +16,10 @@ if __name__ == "__main__":
 
     cv_frequency = 100
 
-    categories = data.generate_categories("../../../datasets/gtzan")
+    categories = data.generate_categories("/data/gtzan")
     CLASSES = categories.keys() # ["rock", "blues", ...]
     model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 300, 100)
-    optimizer = optim.Adam(model.parameters(), LEARNING_RATE, weight_decay=1e-3)
+    optimizer = optim.Adam(model.parameters(), LEARNING_RATE, weight_decay=1e-4)
     loss_fn = nn.CrossEntropyLoss()
 
     if is_gpu:
@@ -25,7 +27,8 @@ if __name__ == "__main__":
         loss_fn = loss_fn.cuda()
 
     losses = []
-    conf_matrix = data.ConfMatrix(categories)
+
+    from sklearn.metrics import confusion_matrix
 
     for i in xrange(iterations):
 
@@ -44,9 +47,18 @@ if __name__ == "__main__":
         loss.backward()
         optimizer.step()
 
-        _, bla = torch.max(output.data, 1)
-        print(loss.data)
-        print(bla, target_tensor.data)
+        y_test = target_tensor.cpu().data.numpy()
+        y_pred_all = output.cpu().data.numpy()
+        y_pred = np.argmax(y_pred_all, axis=1)
+
+
+        cnf_matrix = confusion_matrix(y_test, y_pred)
+        print loss
+        print cnf_matrix
+
+        #_, bla = torch.max(output.data, 1)
+        #print(loss.data)
+        #print(bla, target_tensor.data)
         """
         uargh = 0
         for pred in output.data:
