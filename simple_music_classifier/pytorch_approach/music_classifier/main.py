@@ -8,18 +8,16 @@ import numpy as np
 is_gpu = torch.cuda.is_available()
 
 if __name__ == "__main__":
-    CHUNK_SIZE = 100000
+    CHUNK_SIZE = 6500
     BATCH_SIZE = None
-    LEARNING_RATE = 1e-3
+    LEARNING_RATE = 1e-4
 
     iterations = 100000
 
-    cv_frequency = 100
-
     categories = data.generate_categories("/data/gtzan")
     CLASSES = categories.keys() # ["rock", "blues", ...]
-    model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 300, 100)
-    optimizer = optim.Adam(model.parameters(), LEARNING_RATE, weight_decay=1e-4)
+    model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 512, 512)
+    optimizer = optim.Adam(model.parameters(), LEARNING_RATE)
     loss_fn = nn.CrossEntropyLoss()
 
     if is_gpu:
@@ -30,41 +28,31 @@ if __name__ == "__main__":
 
     from sklearn.metrics import confusion_matrix
 
+    model.train()
     for i in xrange(iterations):
 
-        sample_cats, target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE)
+        sample_cats, target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE, batch_size=512)
 
         if is_gpu:
             target_tensor = target_tensor.cuda()
             sample_tensor = sample_tensor.cuda()
 
-        sample_tensor.data = torch.squeeze(sample_tensor.data)
-
-        output = model.forward(sample_tensor)
-        loss = loss_fn(output, target_tensor)
+        input_var = torch.autograd.Variable(sample_tensor)
+        target_var = torch.autograd.Variable(target_tensor)
 
         optimizer.zero_grad()
+        output = model.forward(input_var)
+        loss = loss_fn(output, target_var)
+
         loss.backward()
         optimizer.step()
 
-        y_test = target_tensor.cpu().data.numpy()
-        y_pred_all = output.cpu().data.numpy()
-        y_pred = np.argmax(y_pred_all, axis=1)
+        if i % 5 == 0:
+            print "============== Epoch ", i
+            y_test = target_var.cpu().data.numpy()
+            y_pred_all = output.cpu().data.numpy()
+            y_pred = np.argmax(y_pred_all, axis=1)
 
-
-        cnf_matrix = confusion_matrix(y_test, y_pred)
-        print loss
-        print cnf_matrix
-
-        #_, bla = torch.max(output.data, 1)
-        #print(loss.data)
-        #print(bla, target_tensor.data)
-        """
-        uargh = 0
-        for pred in output.data:
-            conf_matrix.add_prediction(pred, sample_cats[uargh])
-            uargh += 1
-
-        if i % cv_frequency == cv_frequency - 1:
-            print conf_matrix
-        """
+            cnf_matrix = confusion_matrix(y_test, y_pred)
+            print loss
+            print cnf_matrix
