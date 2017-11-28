@@ -60,19 +60,30 @@ def random_sample(categories, slice_size=20000, debug=False):
     :param categories: dict Of categories
     :param slice_size: int Number of values in sample
     """
-    category = random.choice(list(categories.keys()))
-    category_index = sorted(list(categories.keys())).index(category)
-    #category_tensor = torch.zeros(len(categories))
-    #category_tensor[category_index] = 1.0
-    category_tensor = torch.LongTensor([category_index])
 
-    random_file = random.choice(list(categories[category]))
-    # force extra dimension for batch
-    sample_data = np.array([random_wav_slice(random_file, slice_size)])
-    sample_tensor = torch.from_numpy(sample_data)
+    sample_tensors = []
+    target_tensors = []
+    sample_categories = []
 
-    return (category_index, category), Variable(category_tensor), \
-    Variable(sample_tensor)
+    for batch_i in xrange(256):
+
+        category = random.choice(list(categories.keys()))
+        category_index = sorted(list(categories.keys())).index(category)
+        #category_tensor = torch.zeros(len(categories))
+        #category_tensor[category_index] = 1.0
+
+        random_file = random.choice(list(categories[category]))
+        # force extra dimension for batch
+        sample_data = np.array(random_wav_slice(random_file, slice_size))
+
+        target_tensors.append(category_index)
+        sample_tensors.append(sample_data)
+        sample_categories.append(category)
+
+    sample_tensors = torch.from_numpy(np.array(sample_tensors, dtype=np.float32))
+    target_tensors = torch.from_numpy(np.array(target_tensors, dtype=np.int64))
+
+    return sample_categories, Variable(target_tensors), Variable(sample_tensors)
 
 
 def print_predictions(output_tensor, categories):
