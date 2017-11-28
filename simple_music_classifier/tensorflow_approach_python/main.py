@@ -1,35 +1,51 @@
-from __future__ import print_function, division
-import scipy.io.wavfile as pywav
-import numpy as np
-import tensorflow as tf
-from tensorboardX import SummaryWriter
-from tabulate import tabulate
-import datetime
+"""
+    Simple Music Classifier: machine learning on music with TensorFlow.
 
-import os
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    ############################################################################
+
+    STRUCTURE:
+    The file has several parts:
+    1. LOAD DATA: get the .wav files as float arrays
+    2. SPLIT DATA: functionality to split data in train/test/cv disjoint subsets
+    3. FEED DATA: functionality to sample from the subsets to feed the model
+    4. ERROR METRICS: functionality for measuring the output of the model
+    5. DEFINE TF MODELS: models are actually defined in the models.py file
+    6. DEFINE TF GRAPH: a TF superv. class. setup using a model and some config
+    7. DEFINE TF SESSION: train and save a model, show results on TensorBoard
+    8. RELOAD TF SESSION: reload a pre-trained model and efficiently run it
+"""
+
+from __future__ import print_function, division
+import numpy as np
+import datetime # timestamp for sessions
+import os # for listdir and path.join
 import random
 from six.moves import xrange
-from scipy import signal
-
-# the other file holding the model definitions
+from tabulate import tabulate # pretty-print of confusion matrices on terminal
+import scipy.io.wavfile as pywav
+from scipy import signal # for downsampling
+# tensorflow-specific imports
+import tensorflow as tf
+from tensorboardX import SummaryWriter
+# another python file holding the model definitions
 import models
 
 
 
 
-################################################################################
-# GLOBALS
-################################################################################
-
-DATASET_PATH = "../../datasets/gtzan/"
-SAMPLE_RATE = 22050
-TRAIN_CV_TEST_RATIO = [0.7, 0.1, 0.2]
-
-def make_timestamp():
-    return '{:%d_%b_%Y_%Hh%Mm%Ss}'.format(datetime.datetime.now())
-
-# tf alias
-softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
 
 ################################################################################
 # LOAD DATA: files are samplerate=22050, 16-bit wavs
@@ -61,17 +77,6 @@ def get_dataset(dataset_path, downsample=0, normalize=True):
             wavlist.append(arr)
     return data
 
-# DATA = get_dataset(DATASET_PATH)
-# DATASET_CLASSES = DATA.keys()
-# # note that wav sizes differ slightly: range [660000, 675808]~=(29.93s, 30.65)
-# wav_sizes = set([len(w) for wavlist in DATA.values() for w in wavlist])
-# MIN_CHUNKSIZE = min(wav_sizes)
-# MAX_CHUNKSIZE = max(wav_sizes)
-# print("wav sizes range (min, max): [%d, %d]\n"%(MIN_CHUNKSIZE, MAX_CHUNKSIZE))
-
-
-
-
 
 ################################################################################
 # SPLIT DATA:
@@ -102,14 +107,6 @@ def split_dataset(dataset, train_cv_test_ratio, classes=None):
         cv_subset[classname] = wavlist[cv_0:test_0]
         test_subset[classname] = wavlist[test_0:]
     return train_subset, cv_subset, test_subset
-
-# TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO, ["reggae", "classical"])
-# del DATA # release unused reference just in case
-
-# # check that the proportions are correct
-# for c in TRAIN_SUBSET.iterkeys(): # c is classname
-#     print("  %s(train, cv, test): (%d, %d, %d)" %
-#           (c, len(TRAIN_SUBSET[c]), len(CV_SUBSET[c]), len(TEST_SUBSET[c])))
 
 
 
@@ -242,6 +239,8 @@ class ConfusionMatrix(object):
 # DEFINE TENSORFLOW GRAPH
 ################################################################################
 
+softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
+signature = tf.saved_model.signature_def_utils.predict_signature_def
 
 def make_graph(model, chunk_shape, num_classes, l2reg=0,
                optimizer_fn=lambda:tf.train.AdamOptimizer()):
@@ -256,14 +255,19 @@ def make_graph(model, chunk_shape, num_classes, l2reg=0,
             loss += l2reg*l2nodes
         global_step = tf.Variable(0, name="global_step", trainable=False)
         minimizer = optimizer_fn().minimize(loss, global_step=global_step)
-        predictions = tf.argmax(logits, 1, output_type=tf.int32)
-        return g, [data_ph, labels_ph], [logits, loss,global_step,minimizer,
-                                         predictions]
+        predictions = tf.argmax(logits, 1, output_type=tf.int32, name="preds")
+        inputs = [data_ph, labels_ph]
+        outputs = [logits, loss, global_step, minimizer, predictions]
+        return g, inputs, outputs
+
 
 
 ################################################################################
 # DEFINE TF SESSION
 ################################################################################
+
+def make_timestamp():
+    return '{:%d_%b_%Y_%Hh%Mm%Ss}'.format(datetime.datetime.now())
 
 def make_session_datastring(model, optimizer_fn, batch_size, chunk_size, l2_reg,  extra_info="", separator="||"):
     s = str(separator)
@@ -298,7 +302,6 @@ def run_training(train_subset, cv_subset, test_subset, model,
     # START SESSION (log_device_placement=True)
     with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
         sess.run(tf.global_variables_initializer())
-        graph_signature = tf.saved_model.signature_def_utils.predict_signature_def(inputs={"data":data_ph, "classes":labels_ph}, outputs={"logits":logits,"loss":loss,"global_step":global_step, "predictions":predictions})
         # START TRAINING
         for step in xrange(max_steps):
             data_batch, label_batch = get_random_batch(train_subset, chunk_size,
@@ -338,11 +341,37 @@ def run_training(train_subset, cv_subset, test_subset, model,
         print("here could be your amazing test with 99.9% accuracy!!")
         # save graph
         if save_path:
+            graph_signature = tf.saved_model.signature_def_utils.predict_signature_def(inputs={"data":data_ph, "classes":labels_ph}, outputs={"logits":logits,"loss":loss,"global_step":global_step, "predictions":predictions})
             saver.add_meta_graph_and_variables(sess, ["my_model"],
                                                signature_def_map={"my_signature":graph_signature})
             saver.save()
             print("trained model saved to", save_path)
 
+
+
+################################################################################
+# RELOAD TF SESSION
+################################################################################
+
+class TrainedModel(object):
+    def __init__(self, chunk_size, savepath, model_name="my_model"):
+        self.chunk_size = chunk_size
+        self.g = tf.Graph()
+        self.sess = tf.Session(graph=self.g)
+        tf.saved_model.loader.load(self.sess, [model_name], savepath)
+        self.data_ph = self.g.get_tensor_by_name("data_placeholder:0")
+        self.predictions = self.g.get_tensor_by_name("preds:0")
+    def run(self, data_batch):
+        return
+    def run_and_eval(self, data_subset, batch_size):
+        data_batch, label_batch = get_random_batch(data_subset,
+                                                   self.chunk_size, batch_size)
+        argmx = self.sess.run(self.predictions,feed_dict={self.data_ph:data_batch})
+        cm = ConfusionMatrix(data_subset.keys(), "RELOADED")
+        cm.add([INT2CLASS[x] for x in argmx], label_batch)
+        return cm
+    def close(self):
+        self.sess.close()
 
 
 
@@ -401,17 +430,18 @@ def test_with_mnist():
 # test_with_mnist()
 
 
-
-# SET HYPERPARAMETERS ##########################################################
+# GLOBALS AND HYPERPARAMETERS ##################################################
+DATASET_PATH = "../../datasets/gtzan/"
+TRAIN_CV_TEST_RATIO = [0.7, 0.1, 0.2]
 CLASSES =  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
 CLASS2INT = {"reggae":0, "classical":1, "country":2, "jazz":3, "metal":4, "pop":5, "disco":6, "hiphop":7, "rock":8, "blues":9}
 INT2CLASS = {v:k for k,v in CLASS2INT.iteritems()}
-MODEL= models.fft_mlp # models.basic_convnet
+MODEL=  models.basic_convnet
 # lambda batch, num_classes: models.deeper_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
 DOWNSAMPLE=7
 BATCH_SIZE = 1000
 CHUNK_SIZE = (22050*2)//DOWNSAMPLE
-MAX_STEPS=1001
+MAX_STEPS=2001
 L2_REG = 1e-3
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=10
@@ -440,18 +470,28 @@ run_training(TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET, MODEL,
 
 print("\n\n\n\n\n\n\n\n\n")
 
-g = tf.Graph()
-with tf.Session(graph=g) as sess:
-    tf.saved_model.loader.load(sess, ["my_model"], savepath)
-    data_ph = g.get_tensor_by_name("data_placeholder:0")
-    k = g.get_tensor_by_name("ArgMax:0")
-    for i in xrange(5):
-        data_batch, label_batch = get_random_batch(TRAIN_SUBSET, CHUNK_SIZE,
-                                                   BATCH_SIZE)
-        lbl = [CLASS2INT[l] for l in label_batch] # convert from str to int
-        argmx = sess.run(k, feed_dict={data_ph:data_batch})
-        cm_train = ConfusionMatrix(TRAIN_SUBSET.keys(), "RELOADED")
-        cm_train.add([INT2CLASS[x] for x in argmx], label_batch)
-        acc, by_class_acc = cm_train.accuracy()
-        print("step:%d"%i, cm_train)
-raw_input("stop")
+# # saved_model_cli show --dir saved_models/28_Nov_2017_16h43m53s/ --tag_set my_model --signature_def model
+
+# g = tf.Graph()
+# with tf.Session(graph=g) as sess:
+#     tf.saved_model.loader.load(sess, ["my_model"], savepath)
+#     data_ph = g.get_tensor_by_name("data_placeholder:0")
+#     k = g.get_tensor_by_name("ArgMax:0")
+#     for i in xrange(5):
+#         data_batch, label_batch = get_random_batch(TRAIN_SUBSET, CHUNK_SIZE,
+#                                                    BATCH_SIZE)
+#         lbl = [CLASS2INT[l] for l in label_batch] # convert from str to int
+#         argmx = sess.run(k, feed_dict={data_ph:data_batch})
+#         cm_train = ConfusionMatrix(TRAIN_SUBSET.keys(), "RELOADED")
+#         cm_train.add([INT2CLASS[x] for x in argmx], label_batch)
+#         acc, by_class_acc = cm_train.accuracy()
+#         print("step:%d"%i, cm_train)
+
+
+m  = TrainedModel(CHUNK_SIZE, savepath)
+for i in xrange(10000):
+    if (i%1000==0):
+        m.run_and_eval(TRAIN_SUBSET, 1000)
+        print("quack!", i)
+
+m.close()

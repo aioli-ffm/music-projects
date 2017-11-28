@@ -1,8 +1,8 @@
 ### TODO:
   - [x] Find and download a suitable dataset: **GTZAN: 1.3GB, 1000 unique 30-sec chunks of 10 single-labeled genres**
   - [x] `tensorflow_approach_python`: Clean Andres' Python+TF code for a working minimal example that does preprocessing, GPU-training, evaluation and plotting
-  - [ ] `pytorch_approach`: Adapt TF code to work with PyTorch
-  - [ ] Explore further ML frameworks (Java client for TF, ???)
+  - [x] `pytorch_approach`: Adapt TF code to work with PyTorch
+  - [x] Explore further ML frameworks (Java client for TF, ???)
   - [x] Document installation process from clean virtual environments, and script them if possible. Also adapt to CPU?
   - [ ] Make slides (a latex template is already in the repo)
 
@@ -48,6 +48,7 @@ This approach is implemented in `<THIS_REPO>/simple_music_classifier/tensorflow_
    1. If you want a TF version with the latest CPU instructions (may be a little faster) the installation process is a little more involved: `pip install https://github.com/mind/wheels/releases/download/tf1.4-cpu/tensorflow-1.4.0-cp27-cp27mu-linux_x86_64.whl`, and `sudo apt install mklibs` will probably do the trick.
 3. Further requirements
 ```
+pip install numpy
 pip install scipy # just to load the .wav files as numpy array. A bit of overkill but convenient and "only" 50MB
 pip install git+https://github.com/lanpa/tensorboard-pytorch # 
 pip install tabulate
@@ -70,8 +71,3 @@ sess.run(c) # should output 7
 
 1. Make sure you are logged in the virtual environment as described before.
 2. The installation of pyorch is well documented in their web page [http://pytorch.org/](http://pytorch.org/)
-3. deje
-
-
-## TODO SAMSTAG:
-1. remove scipy dependencies and au->wav conversion
