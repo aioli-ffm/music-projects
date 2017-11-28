@@ -3,8 +3,6 @@ import random
 from scipy.io import wavfile
 import numpy as np
 import torch
-from torch.autograd import Variable
-from tabulate import tabulate
 import matplotlib.pyplot as plt
 
 
@@ -18,10 +16,8 @@ def random_wav_slice(path, slice_size, debug=False, category="bla", downsample=7
     # save a snippet with cat label to listen to
     #wavfile.write("cat_%s.wav"%category, sample_rate, data[slice_start:slice_end])
 
-
     convert_16_bit = float(2**15)
     data = data[slice_start:slice_end]/(convert_16_bit+1.0)
-    #data = (data[slice_start:slice_end] - np.min(data[slice_start:slice_end])) / (np.max(data[slice_start:slice_end]) - np.min(data[slice_start:slice_end]) + 1e-15)
 
     # save a plot of the data with category label
     '''
@@ -52,7 +48,6 @@ def generate_categories(path):
 def random_sample(categories, slice_size=20000, debug=False, batch_size=128):
     sample_tensors = []
     target_tensors = []
-    sample_categories = []
 
     for batch_i in xrange(batch_size):
 
@@ -64,12 +59,11 @@ def random_sample(categories, slice_size=20000, debug=False, batch_size=128):
 
         target_tensors.append(category_index)
         sample_tensors.append(sample_data)
-        sample_categories.append(category)
 
     sample_tensors = torch.from_numpy(np.array(sample_tensors, dtype=np.float32))
     target_tensors = torch.from_numpy(np.array(target_tensors, dtype=np.int64))
 
-    return sample_categories, target_tensors, sample_tensors
+    return target_tensors, sample_tensors
 
 
 def print_predictions(output_tensor, categories):

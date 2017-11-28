@@ -4,19 +4,24 @@ import graph
 import torch
 from torch import optim, nn
 import numpy as np
-
-is_gpu = torch.cuda.is_available()
+from sklearn.metrics import confusion_matrix
 
 if __name__ == "__main__":
-    CHUNK_SIZE = 6500
-    BATCH_SIZE = None
-    LEARNING_RATE = 1e-4
+    # OPTIONS
 
+    CHUNK_SIZE = 6500
+    BATCH_SIZE = 512
+
+    LEARNING_RATE = 1e-4
     iterations = 100000
+
+    is_gpu = torch.cuda.is_available()
 
     categories = data.generate_categories("/data/gtzan")
     CLASSES = categories.keys() # ["rock", "blues", ...]
+
     model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 512, 512)
+
     optimizer = optim.Adam(model.parameters(), LEARNING_RATE)
     loss_fn = nn.CrossEntropyLoss()
 
@@ -26,12 +31,11 @@ if __name__ == "__main__":
 
     losses = []
 
-    from sklearn.metrics import confusion_matrix
-
     model.train()
+
     for i in xrange(iterations):
 
-        sample_cats, target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE, batch_size=512)
+        target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE, batch_size=BATCH_SIZE)
 
         if is_gpu:
             target_tensor = target_tensor.cuda()
