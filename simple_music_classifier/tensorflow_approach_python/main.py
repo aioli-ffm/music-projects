@@ -279,71 +279,69 @@ def run_training(train_subset, cv_subset, test_subset, model,
                  batch_size, chunk_size, max_steps=float("inf"),
                  l2reg=0, optimizer_fn=lambda: tf.train.AdamOptimizer(),
                  train_freq=10, cv_freq=100,
-                 save_name="model.ckpt",
-                 restore_name=None):
+                 save_path=None):
     # get current classes and map them to 0,1,2,3... integers
-    classes = {c:i for i, c in enumerate(train_subset.keys())}
-    classes_inv = {v:k for k,v in classes.iteritems()}
+    # classes = {c:i for i, c in enumerate(train_subset.keys())}
+    # classes_inv = {v:k for k,v in classes.iteritems()}
     #  LOGGER (to plot them to TENSORBOARD)
     logger = SummaryWriter()
     logger.add_text("Session info", make_timestamp() +
                     " model=%s batchsz=%d chunksz=%d l2reg=%f" %
                     (model.__name__, batch_size, chunk_size, l2reg), 0)
-    # SAVER: snapshot of the variables, can be loaded by TF (also from java)
-    ### saver = tf.train.Saver(max_to_keep=2)
     # CREATE TF GRAPH
     graph,[data_ph,labels_ph],[logits,loss,global_step,minimizer,predictions]=(
-        make_graph(model, (chunk_size,), len(classes), l2reg, optimizer_fn))
+        make_graph(model, (chunk_size,), len(train_subset), l2reg,optimizer_fn))
+    # CREATE AND CONFIGURE GRAPH SAVER:
+    out_path = os.path.join("./saved_models", make_timestamp())
+    if save_path:
+        saver = tf.saved_model.builder.SavedModelBuilder(save_path)
     # START SESSION (log_device_placement=True)
     with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
-        # Either initialize the vars or restore a previously trained model
-        # if restore_path:
-        #     saver.restore(sess, "./checkpoints/"+restore_name)
-        # else:
-        #     sess.run(tf.global_variables_initializer())
         sess.run(tf.global_variables_initializer())
+        graph_signature = tf.saved_model.signature_def_utils.predict_signature_def(inputs={"data":data_ph, "classes":labels_ph}, outputs={"logits":logits,"loss":loss,"global_step":global_step, "predictions":predictions})
         # START TRAINING
         for step in xrange(max_steps):
             data_batch, label_batch = get_random_batch(train_subset, chunk_size,
                                                        batch_size)
-            lbl = [classes[l] for l in label_batch] # convert from str to int
+            lbl = [CLASS2INT[l] for l in label_batch] # convert from str to int
             sess.run(minimizer, feed_dict={data_ph:data_batch, labels_ph:lbl})
             # LOG TRAINING
             if(step%train_freq==0):
                 p, l, i, logts = sess.run([predictions,loss,global_step,logits],
                                 feed_dict={data_ph:data_batch, labels_ph:lbl})
-                cm_train = ConfusionMatrix(classes.keys(), "BATCH")
-                cm_train.add([classes_inv[x] for x in p], label_batch)
+                cm_train = ConfusionMatrix(train_subset.keys(), "BATCH")
+                cm_train.add([INT2CLASS[x] for x in p], label_batch)
                 acc, by_class_acc = cm_train.accuracy()
                 print("step:%d"%i, cm_train)
                 logger.add_scalars("TRAIN", {"acc":acc, "avg_loss":l} ,i)
             # LOG CROSS-VALIDATION
             if(step%cv_freq==0):
                 cv_loss = 0
-                cm_cv = ConfusionMatrix(classes.keys(), "CV")
-                for c_cv in classes:
+                cm_cv = ConfusionMatrix(train_subset.keys(), "CV")
+                for c_cv in train_subset:
                     print("validating class %s: this may take a while..."%c_cv)
                     # extract ALL chunks of selected class and corresponding lbl
                     cv_data = get_class_batch(cv_subset, c_cv, chunk_size)
                     cv_labels = [c_cv for _ in xrange(len(cv_data))]
-                    lbl = [classes[c_cv] for _ in xrange(len(cv_data))]
+                    lbl = [CLASS2INT[c_cv] for _ in xrange(len(cv_data))]
                     p,l,i = sess.run([predictions, loss, global_step],
                                      feed_dict={data_ph:cv_data, labels_ph:lbl})
                     cv_loss += l
-                    cm_cv.add([classes_inv[x] for x in p], cv_labels)
+                    cm_cv.add([INT2CLASS[x] for x in p], cv_labels)
                 # once loss and matrix has been calculated for every class...
                 acc, by_class_acc = cm_cv.accuracy()
                 print("step:%d"%i, cm_cv)
                 logger.add_scalars("CV", {"acc":acc,
-                                          "avg_loss":cv_loss/len(classes)}, i)
-                # Save the variables to disk.
-                ### save_path = saver.save(sess, "./checkpoints/"+save_name)
-                ### print("Model saved in file: %s" % save_path)
-
+                                          "avg_loss":cv_loss/len(cv_subset)}, i)
         # AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
         # here for brevity, code is identical to the one for cross-validation)
         print("here could be your amazing test with 99.9% accuracy!!")
-        return
+        # save graph
+        if save_path:
+            saver.add_meta_graph_and_variables(sess, ["my_model"],
+                                               signature_def_map={"my_signature":graph_signature})
+            saver.save()
+            print("trained model saved to", save_path)
 
 
 
@@ -403,15 +401,17 @@ def test_with_mnist():
 # test_with_mnist()
 
 
+
 # SET HYPERPARAMETERS ##########################################################
 CLASSES =  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
-MODEL= models.basic_convnet
-# models.fft_mlp
+CLASS2INT = {"reggae":0, "classical":1, "country":2, "jazz":3, "metal":4, "pop":5, "disco":6, "hiphop":7, "rock":8, "blues":9}
+INT2CLASS = {v:k for k,v in CLASS2INT.iteritems()}
+MODEL= models.fft_mlp # models.basic_convnet
 # lambda batch, num_classes: models.deeper_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
 DOWNSAMPLE=7
 BATCH_SIZE = 1000
 CHUNK_SIZE = (22050*2)//DOWNSAMPLE
-MAX_STEPS=60001
+MAX_STEPS=1001
 L2_REG = 1e-3
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=10
@@ -427,15 +427,31 @@ del DATA # data won't be needed anymore and may free some useful RAM
 
 
 
-# check that the proportions are correct
-for c in TRAIN_SUBSET.iterkeys(): # c is classname
-    print("  %s(train, cv, test): (%d, %d, %d)" %
-          (c, len(TRAIN_SUBSET[c]), len(CV_SUBSET[c]), len(TEST_SUBSET[c])))
 
 
+savepath = os.path.join("./saved_models", make_timestamp())
 run_training(TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET, MODEL,
              BATCH_SIZE, CHUNK_SIZE, MAX_STEPS,
              L2_REG, OPTIMIZER_FN,
              TRAIN_FREQ, CV_FREQ,
-             save_name="model.ckpt",
-             restore_name=None)
+             save_path=savepath)
+
+
+
+print("\n\n\n\n\n\n\n\n\n")
+
+g = tf.Graph()
+with tf.Session(graph=g) as sess:
+    tf.saved_model.loader.load(sess, ["my_model"], savepath)
+    data_ph = g.get_tensor_by_name("data_placeholder:0")
+    k = g.get_tensor_by_name("ArgMax:0")
+    for i in xrange(5):
+        data_batch, label_batch = get_random_batch(TRAIN_SUBSET, CHUNK_SIZE,
+                                                   BATCH_SIZE)
+        lbl = [CLASS2INT[l] for l in label_batch] # convert from str to int
+        argmx = sess.run(k, feed_dict={data_ph:data_batch})
+        cm_train = ConfusionMatrix(TRAIN_SUBSET.keys(), "RELOADED")
+        cm_train.add([INT2CLASS[x] for x in argmx], label_batch)
+        acc, by_class_acc = cm_train.accuracy()
+        print("step:%d"%i, cm_train)
+raw_input("stop")

@@ -23,7 +23,7 @@ def weight_variable(shape, stddev=0.1, dtype=tf.float32):
     return tf.Variable(tf.truncated_normal(shape, stddev=stddev, dtype=dtype))
 
 def bias_variable(shape, dtype=tf.float32):
-    return tf.Variable(tf.constant(0.1, shape=[shape], dtype=dtype))
+    return tf.Variable(tf.constant(0.2, shape=[shape], dtype=dtype))
 
 def simple_mlp(batch, num_classes, hidden_size=64):
     """A simple MLP. For every element of the input batch, performs:
@@ -88,7 +88,7 @@ def concat_1d_with_fft(batch, norm_both=True):
     else:
         return tf.concat([batch, spectrum], -1)
 
-def fft_mlp(batch, num_classes, hidden_size=128):
+def fft_mlp(batch, num_classes, hidden_size=32):
     """This MLP takes into account the time-series wave together with
        the magnitudes of the RFFT of that wave.
        ========= LAYER 0 (input)==================================
