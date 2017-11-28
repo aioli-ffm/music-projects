@@ -1,5 +1,8 @@
-import tensorflow as tf
+"""This file complements main.py, holding the definitions of the TF models that
+   are passed to main's make_graph function.
+"""
 
+import tensorflow as tf
 
 
 
@@ -20,10 +23,15 @@ max_pool = tf.nn.max_pool
 batch_norm = tf.layers.batch_normalization
 
 def weight_variable(shape, stddev=0.1, dtype=tf.float32):
+    """Initializes a TF variable of 'shape', with truncated normal values of
+       zero mean and given stddev.
+    """
     return tf.Variable(tf.truncated_normal(shape, stddev=stddev, dtype=dtype))
 
-def bias_variable(shape, dtype=tf.float32):
-    return tf.Variable(tf.constant(0.1, shape=[shape], dtype=dtype))
+def bias_variable(size, dtype=tf.float32):
+    """Initializes a TF variable of rank 1 and length 'size' with values 0.1
+    """
+    return tf.Variable(tf.constant(0.1, shape=[size], dtype=dtype))
 
 def simple_mlp(batch, num_classes, hidden_size=64):
     """A simple MLP. For every element of the input batch, performs:
@@ -31,6 +39,7 @@ def simple_mlp(batch, num_classes, hidden_size=64):
                                          batch_size x chunk_size
        ========= LAYER 1 (hidden)=================================
        fully(chunk_sizexhidden_size)     batch_size x hidden_size
+       relu
        ========= LAYER 2 (logits) ================================
        fully(hidden_size x num_classes ) batch_size x num_classes
     """
@@ -52,8 +61,10 @@ def deeper_mlp(batch, num_classes, hidden_size1=256, hidden_size2=128):
                                          batch_size x chunk_size
        ========= LAYER 1 (hidden1)================================
        fully(chunk_sizexhidden_size1)    batch_size x hidden_size
+       relu
        ========= LAYER 2 (hidden2)================================
        fully(chunk_sizexhidden_size2)    batch_size x hidden_size2
+       relu
        ========= LAYER 3 (logits) ================================
        fully(hidden_size2 x num_classes ) batch_size x num_classes
     """
@@ -95,6 +106,7 @@ def fft_mlp(batch, num_classes, hidden_size=32):
        concat_1d_with_fft(batch, True) batch_size x chunk_size+(chunk_size//2+1)
        ========= LAYER 1 (hidden)=================================
        fully(chunk_size*1.5xhidden_size) batch_size x hidden_size
+       relu
        ========= LAYER 2 (logits) ================================
        fully(hidden_size x num_classes ) batch_size x num_classes
     """
@@ -115,7 +127,23 @@ def fft_mlp(batch, num_classes, hidden_size=32):
 
 def basic_convnet(batch, num_classes, patch_size=10, basenum_patches=20,
                   hidden_size=32):
-    """
+    """A basic convnet with a minimal MLP on top:
+       B:=batch_size, C:=chunk_size, P:=patch_size, K:=basenum_patches
+       input:       B x C
+       reshaped to  B x C x 1 x 1 (needed by conv2d)
+       =========LAYER1========
+       conv(P)      B x C-P+1     x K
+       maxpool(2)   B x (C-P+1)/2 x K
+       =========LAYER2========
+       given L:=(C-P+1)/2
+       conv(P)      B x L-P+1     x 2K
+       maxpool(2)   B x (L-P+1)/2 x 2K
+       reshaped to  B x (L-P+1)/2 *2*K
+       =========FCN1========
+       given M:=(L-P+1)/2 *2*K
+       fully(M x hidden_size)           B x hidden_size
+       =========TOP===========
+       fully(hidden_size x num_classes) B x num_classes
     """
     batch_size, chunk_size = batch.get_shape().as_list()
     batch_expanded = tf.expand_dims(batch, -1)

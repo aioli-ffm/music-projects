@@ -17,16 +17,19 @@
     ############################################################################
 
     STRUCTURE:
-    The file has several parts:
+    Following a 'notebook' approach, this file holds the complete pipeline in a
+    sequence:
     1. LOAD DATA: get the .wav files as float arrays
     2. SPLIT DATA: functionality to split data in train/test/cv disjoint subsets
     3. FEED DATA: functionality to sample from the subsets to feed the model
     4. ERROR METRICS: functionality for measuring the output of the model
     5. DEFINE TF MODELS: models are actually defined in the models.py file
     6. DEFINE TF GRAPH: a TF superv. class. setup using a model and some config
-    7. DEFINE TF SESSION: train and save a model, show results on TensorBoard
-    8. RELOAD TF SESSION: reload a pre-trained model and efficiently run it
+    7. TRAINING TF SESSION: train and save a model, show results on TensorBoard
+    8. RELOADING TF SESSION: reload a pre-trained model and efficiently run it
+    9. RUN ALL: load data, train+eval+save+reload model, show in TensorBoard
 """
+
 
 from __future__ import print_function, division
 import numpy as np
@@ -45,8 +48,6 @@ import models
 
 
 
-
-
 ################################################################################
 # LOAD DATA: files are samplerate=22050, 16-bit wavs
 # 10 classes, 100 unique 30s wavs per class
@@ -54,15 +55,19 @@ import models
 ################################################################################
 
 def normalize_array(nparr):
+    """Given a NumPy array, returns it as float32 with values between -1 and 1
+    """
     peak = max(abs(nparr.max()), abs(nparr.min()))
     return nparr.astype(np.float32)/peak
 
-def get_dataset(dataset_path, downsample=0, normalize=True):
+def get_dataset(dataset_path, downsample_ratio=0):
     """Returns GTZAN dataset as a dictionary of key='classname',
-       value='wavlist', where wavlist[XX] corresponds to
-       'dataset_path/classname/classname.000XX.wav' as numpy array
-       :param downsample: int By which factor the audio files are downsampled.
-        if this is 0, the data won't be downsampled.
+       value='wavlist' where wavlist is a python list of np.float32 arrays.
+       If normalize=True
+       with values between -1 and 1, and wavlist[23]corresponds to
+       'dataset_path/classname/classname.00023.wav'.
+       :param downsample_ratio: is a positive integer by which factor the audio
+       files are downsampled. If 0 or 1, the data won't be downsampled.
     """
     data = {c:[] for c in os.listdir(dataset_path)}
     # fill the data dictionary: "DATASET_PATH/classname/classname.000XX.wav"
@@ -71,11 +76,13 @@ def get_dataset(dataset_path, downsample=0, normalize=True):
         for i in xrange(100):
             wav_path = os.path.join(class_path, classname+"."+str(i).zfill(5))
             arr = pywav.read(wav_path+".wav")[1].astype(np.float32)
-            if normalize: arr /= max(abs(arr.max()), abs(arr.min()))
-            if downsample > 0:
-                arr = signal.decimate(arr, downsample).astype(np.float32)
+            arr /= max(abs(arr.max()), abs(arr.min()))
+            # decimate is a scipy function that downsamples the array
+            if downsample_ratio > 0:
+                arr = signal.decimate(arr, downsample_ratio).astype(np.float32)
             wavlist.append(arr)
     return data
+
 
 
 ################################################################################
@@ -165,26 +172,42 @@ def get_class_batch(dataset,clss, chunk_size):
 
 
 
-
-
 ################################################################################
 # ERROR METRICS
 ################################################################################
 
 class ConfusionMatrix(object):
+    """Minimal implementation of a confusion matrix as dict of dicts, with
+       basic functionality to add_batch, pretty-print and get overall and
+       per-class accuracy. Usage example:
+        cm = ConfusionMatrix(["classical", "swing", "reggae"])
+        cm.add(["swing", "swing", "swing"], ["classical", "reggae", "swing"])
+        print(cm)
     """
-    """
+
     def __init__(self, class_domain, name=""):
+        """Class domain is any iterable holding hashable items (usually a list
+           of strings), which will serve as indexes for the add method and as
+           labels for the pretty-printing. The name is optional also for pretty-
+           printing purposes.
+        """
         self.matrix = {c:{c:0 for c in class_domain} for c in class_domain}
         self.name = name
+
     def add(self, predictions, labels):
         """Given a list of predictions and their respective labels, adds every
-           corresponding entry to the confusion matrix.
+           corresponding entry to the confusion matrix. Note that the contents
+           of both lists have to be members of the class_domain iterable given
+           when
         """
         pred_lbl = zip(predictions, labels)
         for pred, lbl in pred_lbl:
             self.matrix[lbl][pred] += 1
+
     def __str__(self):
+        """Pretty-print for the confusion matrix, showing the title, the
+           contents and the accuracy (overall and by-class).
+        """
         acc, acc_by_class = self.accuracy()
         classes = sorted(self.matrix.keys())
         short_classes = {c: c[0:8]+"..." if len(c)>8 else c for c in classes}
@@ -197,11 +220,12 @@ class ConfusionMatrix(object):
                                 ["acc. by class"])
         return ("\n"+self.name+" CONFUSION MATRIX\n"+prettymatrix+
                 "\n"+self.name+" ACCURACY="+str(acc)+"\n")
+
     def accuracy(self):
-        """Returns the total accuracy, and a dict with the accuracy per class
+        """Returns the total accuracy, and a dict with {class : by-class-acc}.
         """
-        total = 0
-        right = 0
+        total = 0    # accuracy is right/total
+        diagonal = 0 # "right" entries are in the diagonal
         by_class = {c: [0,0] for c in self.matrix}
         acc = float("nan")
         by_class_acc = {c:float("nan") for c in self.matrix}
@@ -210,10 +234,11 @@ class ConfusionMatrix(object):
                 total += n
                 by_class[clss][1] += n
                 if clss==pred:
-                    right += n
+                    diagonal += n
                     by_class[clss][0] += n
+        # if some "total" was zero, acc is NaN. Else calculate diagonal/total
         try:
-            acc = float(right)/total
+            acc = float(diagonal)/total
         except ZeroDivisionError:
             pass
         for c,x in by_class.iteritems():
@@ -222,8 +247,6 @@ class ConfusionMatrix(object):
             except ZeroDivisionError:
                 pass
         return acc, by_class_acc
-
-
 
 
 
@@ -240,22 +263,37 @@ class ConfusionMatrix(object):
 ################################################################################
 
 softmax = tf.nn.sparse_softmax_cross_entropy_with_logits
-signature = tf.saved_model.signature_def_utils.predict_signature_def
 
 def make_graph(model, chunk_shape, num_classes, l2reg=0,
                optimizer_fn=lambda:tf.train.AdamOptimizer()):
+    """Every supervised learning setup has common requirements. This function
+       implements them, leaving the input parameters modular:
+        * model: a python function. It will be called like this:
+          logits, l2nodes = model(data_ph, num_classes) so it must fulfill this
+          interface: accept a tf.float32 placeholder and an integer, and return
+          the logits and the l2loss nodes. See the models.py file for examples
+        * chunk_shape: a tuple. For rank 1 tensors of length X, it is (X,).
+        * l2reg: a positive float being the L2 regularization factor. Note that
+          it is added to the loss without averaging, e.g. loss+=l2reg*l2nodes.
+        * optimizer_fn: the wanted optimizer wrapped in a lambda, e.g.:
+          lambda: tf.train.MomentumOptimizer(learning_rate=0.1, momentum=0.5)
+    """
     with tf.Graph().as_default() as g:
+        # GRAPH INPUTS
         data_ph = tf.placeholder(tf.float32, shape=((None,)+chunk_shape),
                                  name="data_placeholder")
         labels_ph = tf.placeholder(tf.int32, shape=(None),
                                    name="labels_placeholder")
+        # EMBEDDING MODEL IN GRAPH
         logits, l2nodes = model(data_ph, num_classes)
+        predictions = tf.argmax(logits, 1, output_type=tf.int32, name="preds")
+        # COST FUNCTION AND OPTIMIZER ON TOP OF MODEL
         loss = tf.reduce_mean(softmax(logits=logits, labels=labels_ph))
         if l2reg>0:
             loss += l2reg*l2nodes
         global_step = tf.Variable(0, name="global_step", trainable=False)
         minimizer = optimizer_fn().minimize(loss, global_step=global_step)
-        predictions = tf.argmax(logits, 1, output_type=tf.int32, name="preds")
+        # RETURN GRAPH AND ITS IN/OUT SIGNATURE
         inputs = [data_ph, labels_ph]
         outputs = [logits, loss, global_step, minimizer, predictions]
         return g, inputs, outputs
@@ -263,52 +301,53 @@ def make_graph(model, chunk_shape, num_classes, l2reg=0,
 
 
 ################################################################################
-# DEFINE TF SESSION
+# TRAINING TF SESSION
 ################################################################################
 
+signature = tf.saved_model.signature_def_utils.predict_signature_def
+
 def make_timestamp():
+    """Sample output: 01_Jan_2019_12h00m05s
+    """
     return '{:%d_%b_%Y_%Hh%Mm%Ss}'.format(datetime.datetime.now())
-
-def make_session_datastring(model, optimizer_fn, batch_size, chunk_size, l2_reg,  extra_info="", separator="||"):
-    s = str(separator)
-    if extra_info:
-        extra_info = s+extra_info
-    return (make_timestamp()+"/"+model.__name__+s+str(opt_manager)+s+"batchsize_"+
-            str(batch_size)+s+"chunksize_"+str(chunk_size)+s+"L2_"+str(l2_0)+s+"dropout_"+
-            str(dropout_0)+s+"cvvotingsize_"+str(cv_voting_size)+s+"testvotingsize_"+
-            str(test_voting_size)+s+"normalizechunks_"+str(normalize_chunks)+extra_info)
-
 
 def run_training(train_subset, cv_subset, test_subset, model,
                  batch_size, chunk_size, max_steps=float("inf"),
                  l2reg=0, optimizer_fn=lambda: tf.train.AdamOptimizer(),
                  train_freq=10, cv_freq=100,
                  save_path=None):
-    # get current classes and map them to 0,1,2,3... integers
-    # classes = {c:i for i, c in enumerate(train_subset.keys())}
-    # classes_inv = {v:k for k,v in classes.iteritems()}
-    #  LOGGER (to plot them to TENSORBOARD)
+    """This function is kept within the scope of a single 'with' tf.Session
+       context for (believe it or not!) the sake of readability. Given the
+       (hopefully) self-explained parameter list, it performs the following
+       sequence:
+        1. Instantiate the TensorBoard logger and TF graph
+        2. Start the TF session based on the instantiated TF graph and init vars
+           3. Training loop: for every step, load a random batch and train on it
+              4. Every train_freq steps, log the results and error metrics on
+                 the given training batch
+              5. Every cv_freq steps, log results and error metrics on the whole
+                 validation subset
+           6. After training ends, same as 5. but for test subset (not impl.)
+           7. Save the graph and variable values to save_path
+    """
+    #  LOGGER (for the interaction with TensorBoard)
     logger = SummaryWriter()
     logger.add_text("Session info", make_timestamp() +
                     " model=%s batchsz=%d chunksz=%d l2reg=%f" %
                     (model.__name__, batch_size, chunk_size, l2reg), 0)
-    # CREATE TF GRAPH
+    # 1. CREATE TF GRAPH
     graph,[data_ph,labels_ph],[logits,loss,global_step,minimizer,predictions]=(
         make_graph(model, (chunk_size,), len(train_subset), l2reg,optimizer_fn))
-    # CREATE AND CONFIGURE GRAPH SAVER:
-    out_path = os.path.join("./saved_models", make_timestamp())
-    if save_path:
-        saver = tf.saved_model.builder.SavedModelBuilder(save_path)
-    # START SESSION (log_device_placement=True)
+    # 2. START SESSION (log_device_placement=True)
     with tf.Session(graph=graph, config=tf.ConfigProto()) as sess:
         sess.run(tf.global_variables_initializer())
-        # START TRAINING
+        # 3. TRAINING
         for step in xrange(max_steps):
             data_batch, label_batch = get_random_batch(train_subset, chunk_size,
                                                        batch_size)
             lbl = [CLASS2INT[l] for l in label_batch] # convert from str to int
             sess.run(minimizer, feed_dict={data_ph:data_batch, labels_ph:lbl})
-            # LOG TRAINING
+            # 4. LOG TRAINING
             if(step%train_freq==0):
                 p, l, i, logts = sess.run([predictions,loss,global_step,logits],
                                 feed_dict={data_ph:data_batch, labels_ph:lbl})
@@ -317,7 +356,7 @@ def run_training(train_subset, cv_subset, test_subset, model,
                 acc, by_class_acc = cm_train.accuracy()
                 print("step:%d"%i, cm_train)
                 logger.add_scalars("TRAIN", {"acc":acc, "avg_loss":l} ,i)
-            # LOG CROSS-VALIDATION
+            # 5. LOG CROSS-VALIDATION
             if(step%cv_freq==0):
                 cv_loss = 0
                 cm_cv = ConfusionMatrix(train_subset.keys(), "CV")
@@ -336,162 +375,131 @@ def run_training(train_subset, cv_subset, test_subset, model,
                 print("step:%d"%i, cm_cv)
                 logger.add_scalars("CV", {"acc":acc,
                                           "avg_loss":cv_loss/len(cv_subset)}, i)
-        # AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
+        # 6. AFTER TRAINING LOOP ENDS, DO VALIDATION ON THE TEST SUBSET (omitted
         # here for brevity, code is identical to the one for cross-validation)
         print("here could be your amazing test with 99.9% accuracy!!")
-        # save graph
+        # 7. SAVE GRAPH STRUCTURE AND VARIABLES
         if save_path:
-            graph_signature = tf.saved_model.signature_def_utils.predict_signature_def(inputs={"data":data_ph, "classes":labels_ph}, outputs={"logits":logits,"loss":loss,"global_step":global_step, "predictions":predictions})
+            out_path = os.path.join("./saved_models", make_timestamp())
+            saver = tf.saved_model.builder.SavedModelBuilder(save_path)
+            graph_sig = signature(inputs={"data":data_ph, "classes":labels_ph},
+                                  outputs={"logits":logits,"loss":loss,
+                                           "global_step":global_step,
+                                           "predictions":predictions})
             saver.add_meta_graph_and_variables(sess, ["my_model"],
-                                               signature_def_map={"my_signature":graph_signature})
+                                               signature_def_map={"my_signature"
+                                                                  :graph_sig})
             saver.save()
             print("trained model saved to", save_path)
 
 
 
 ################################################################################
-# RELOAD TF SESSION
+# RELOADING TF SESSION
 ################################################################################
 
 class TrainedModel(object):
+    """This class can load a model that has been pre-trained and saved by the
+       run_training function. For that, it has been passed the same chunk_size
+       and savepath parameters. Once Instantiated, the model can be efficiently
+       run on batches of shape (X, chunk_size) for arbitrary X using
+       run_and_eval. The class implements the context interface, so it can be
+       used like this:
+         with TrainedModel(CHUNK_SIZE, savepath) as m:
+          for i in xrange(100000):
+              if (i%1000==0):
+                  m.run_and_eval(TRAIN_SUBSET, 1000)
+                  print("model runned", i, "times")
+       Alternatively:
+         m = TrainedModel(CHUNK_SIZE, savepath)
+         for ...
+         m.close()
+    """
     def __init__(self, chunk_size, savepath, model_name="my_model"):
+        """Given a path to a pre-saved model, and the chunk size that the
+           model accepts, loads the model into a new TF graph, so it can
+           be used with the run_and_eval method
+        """
         self.chunk_size = chunk_size
         self.g = tf.Graph()
         self.sess = tf.Session(graph=self.g)
         tf.saved_model.loader.load(self.sess, [model_name], savepath)
         self.data_ph = self.g.get_tensor_by_name("data_placeholder:0")
         self.predictions = self.g.get_tensor_by_name("preds:0")
-    def run(self, data_batch):
-        return
+
     def run_and_eval(self, data_subset, batch_size):
+        """This is a test function to show how to use a reloaded model and
+           measure its performance. Given a dataset and a batch size,
+             1. Samples data+labels of shape (batch_size, chunk_size) from the
+                subset, where chunk_size was given at construction time and is
+                accepted by the model.
+             2. Creates and returns the resulting confusion matrix
+        """
         data_batch, label_batch = get_random_batch(data_subset,
                                                    self.chunk_size, batch_size)
         argmx = self.sess.run(self.predictions,feed_dict={self.data_ph:data_batch})
         cm = ConfusionMatrix(data_subset.keys(), "RELOADED")
         cm.add([INT2CLASS[x] for x in argmx], label_batch)
         return cm
+
     def close(self):
         self.sess.close()
 
+    # minimal implementation for the context manager interface
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is not None:
+            print(exc_type, exc_value, traceback)
+            return False
+        self.close() # the single purpose for the context manager is this
 
 
 
 ################################################################################
-# RUN TF SESSION
+# RUN ALL
 ################################################################################
 
-def load_mnist_as_ddicts():
-    """
-    """
-    # load the dataset from TF dependencies
-    from tensorflow.examples.tutorials.mnist import input_data
-    mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
-    # extract the tensors and print their shape
-    train_labels = mnist.train._labels # 55000
-    train_images = mnist.train._images.reshape((-1, 28*28))
-    cv_labels = mnist.validation._labels # 5000
-    cv_images = mnist.validation._images.reshape((-1, 28*28))
-    test_labels = mnist.test._labels # 10000
-    test_images = mnist.test._images.reshape((-1, 28*28))
-    print(train_labels.shape, train_images.shape, cv_labels.shape, cv_images.shape,
-          test_labels.shape, test_images.shape)
-    # store them as dicts of lists
-    train_dict = {str(i):[] for i in xrange(10)} # this are still empty!
-    cv_dict = {str(i):[] for i in xrange(10)}
-    test_dict = {str(i):[] for i in xrange(10)}
-    for i in xrange(len(train_labels)):
-        train_dict[str(train_labels[i])].append(train_images[i])
-    for i in xrange(len(cv_labels)):
-        cv_dict[str(cv_labels[i])].append(cv_images[i])
-    for i in xrange(len(test_labels)):
-        test_dict[str(test_labels[i])].append(test_images[i])
-    # return them
-    return train_dict, cv_dict, test_dict
-
-
-def test_with_mnist():
-    classes = [str(x) for x in range(10)]
-    model = lambda batch, num_classes: simple_mlp(batch, num_classes, 128)
-    batch_size = 500
-    chunk_size = 784
-    max_steps = 1001
-    l2_reg = 1e-7
-    optimizer_fn = lambda: tf.train.AdamOptimizer(1e-3)
-    train_freq = 50
-    cv_freq = 1000
-    train_subset, cv_subset, test_subset = load_mnist_as_ddicts()
-    #
-    run_training(train_subset, cv_subset, test_subset, model,
-                 batch_size, chunk_size, max_steps,
-                 l2_reg, optimizer_fn,
-                 train_freq, cv_freq)
-
-
-# test_with_mnist()
-
-
-# GLOBALS AND HYPERPARAMETERS ##################################################
+# GLOBALS AND HYPERPARAMETERS
 DATASET_PATH = "../../datasets/gtzan/"
 TRAIN_CV_TEST_RATIO = [0.7, 0.1, 0.2]
-CLASSES =  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco", "hiphop", "rock", "blues"]
-CLASS2INT = {"reggae":0, "classical":1, "country":2, "jazz":3, "metal":4, "pop":5, "disco":6, "hiphop":7, "rock":8, "blues":9}
+CLASSES =  ["reggae", "classical", "country", "jazz", "metal", "pop", "disco",
+            "hiphop", "rock", "blues"]
+CLASS2INT = {"reggae":0, "classical":1, "country":2, "jazz":3, "metal":4,
+             "pop":5, "disco":6, "hiphop":7, "rock":8, "blues":9}
 INT2CLASS = {v:k for k,v in CLASS2INT.iteritems()}
-MODEL=  models.basic_convnet
-# lambda batch, num_classes: models.deeper_mlp(batch, num_classes, 512, 64) #simple_mlp(batch, num_classes, 1000)
-DOWNSAMPLE=7
+MODEL=  models.simple_mlp # basic_convnet
+# lambda batch, num_classes: models.deeper_mlp(batch, num_classes, 512, 64)
+#simple_mlp(batch, num_classes, 1000)
+DOWNSAMPLE= 7
 BATCH_SIZE = 1000
 CHUNK_SIZE = (22050*2)//DOWNSAMPLE
-MAX_STEPS=2001
+MAX_STEPS=501
 L2_REG = 1e-3
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=10
 CV_FREQ=100
-################################################################################
 
+def main():
+    ### DATA LOADING
+    DATA = get_dataset(DATASET_PATH, downsample_ratio=DOWNSAMPLE)
+    TRAIN_SUBSET,CV_SUBSET,TEST_SUBSET = split_dataset(DATA,TRAIN_CV_TEST_RATIO,
+                                                       CLASSES)
+    del DATA # data won't be needed anymore and may free some useful RAM
+    ### MODEL TRAINING
+    savepath = os.path.join("./saved_models", make_timestamp())
+    run_training(TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET, MODEL,
+                 BATCH_SIZE, CHUNK_SIZE, MAX_STEPS,
+                 L2_REG, OPTIMIZER_FN,
+                 TRAIN_FREQ, CV_FREQ,
+                 save_path=savepath)
+    ### LOAD AND USE TRAINED MODEL
+    with TrainedModel(CHUNK_SIZE, savepath) as m:
+        for i in xrange(100000):
+            if (i%1000==0):
+                m.run_and_eval(TRAIN_SUBSET, 1000)
+                print("reloaded model runned", i, "times")
 
-DATA = get_dataset(DATASET_PATH, downsample=DOWNSAMPLE, normalize=True)
-TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET = split_dataset(DATA, TRAIN_CV_TEST_RATIO,
-                                                     CLASSES)
-# CV_SUBSET = {k:v[0:2] for k,v in CV_SUBSET.iteritems()}
-del DATA # data won't be needed anymore and may free some useful RAM
-
-
-
-
-
-savepath = os.path.join("./saved_models", make_timestamp())
-run_training(TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET, MODEL,
-             BATCH_SIZE, CHUNK_SIZE, MAX_STEPS,
-             L2_REG, OPTIMIZER_FN,
-             TRAIN_FREQ, CV_FREQ,
-             save_path=savepath)
-
-
-
-print("\n\n\n\n\n\n\n\n\n")
-
-# # saved_model_cli show --dir saved_models/28_Nov_2017_16h43m53s/ --tag_set my_model --signature_def model
-
-# g = tf.Graph()
-# with tf.Session(graph=g) as sess:
-#     tf.saved_model.loader.load(sess, ["my_model"], savepath)
-#     data_ph = g.get_tensor_by_name("data_placeholder:0")
-#     k = g.get_tensor_by_name("ArgMax:0")
-#     for i in xrange(5):
-#         data_batch, label_batch = get_random_batch(TRAIN_SUBSET, CHUNK_SIZE,
-#                                                    BATCH_SIZE)
-#         lbl = [CLASS2INT[l] for l in label_batch] # convert from str to int
-#         argmx = sess.run(k, feed_dict={data_ph:data_batch})
-#         cm_train = ConfusionMatrix(TRAIN_SUBSET.keys(), "RELOADED")
-#         cm_train.add([INT2CLASS[x] for x in argmx], label_batch)
-#         acc, by_class_acc = cm_train.accuracy()
-#         print("step:%d"%i, cm_train)
-
-
-m  = TrainedModel(CHUNK_SIZE, savepath)
-for i in xrange(10000):
-    if (i%1000==0):
-        m.run_and_eval(TRAIN_SUBSET, 1000)
-        print("quack!", i)
-
-m.close()
+if __name__ == "__main__":
+    main()
