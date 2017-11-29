@@ -1,51 +1,63 @@
+#!/usr/bin/python
 import data
 import graph
-import train
-
+import torch
 from torch import optim, nn
-
-
-# args.cuda = not args.no_cuda and torch.cuda.is_available()
-
-
-# torch.manual_seed(args.seed)
-# if args.cuda:
-#     torch.cuda.manual_seed(args.seed)
-
-        # if args.cuda:
-        #     data, target = data.cuda(), target.cuda()
-        # data, target = Variable(data), Variable(target)
+import numpy as np
+from sklearn.metrics import confusion_matrix
 
 if __name__ == "__main__":
-    CHUNK_SIZE = 10000
-    BATCH_SIZE = None
+    CHUNK_SIZE = 20000
+    BATCH_SIZE = 512
     LEARNING_RATE = 1e-3
-
     iterations = 100000
 
-    cv_frequency = 100
+    is_gpu = torch.cuda.is_available()
 
-    categories = data.generate_categories("../../../datasets/gtzan")
+    categories = data.generate_categories("/data/gtzan")
     CLASSES = categories.keys() # ["rock", "blues", ...]
-    model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 128, 64)
-    optimizer = optim.Adam(model.parameters(), LEARNING_RATE)
+    model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 256, 128)
+    optimizer = optim.Adam(model.parameters(), LEARNING_RATE, weight_decay=1e-4)
     loss_fn = nn.CrossEntropyLoss()
 
+    if is_gpu:
+        model = model.cuda()
+        loss_fn = loss_fn.cuda()
+
     losses = []
-    conf_matrix = data.ConfMatrix(categories)
-    k = 0
+
+    model.train()
 
     for i in xrange(iterations):
+
+        target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE, batch_size=BATCH_SIZE)
+
+        if is_gpu:
+            target_tensor = target_tensor.cuda()
+            sample_tensor = sample_tensor.cuda()
+
+        input_var = torch.autograd.Variable(sample_tensor)
+        target_var = torch.autograd.Variable(target_tensor)
+
         optimizer.zero_grad()
-        category, target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE)
-        output = model.forward(sample_tensor)[0]
-        loss = loss_fn(output, target_tensor)
+        output = model.forward(input_var)
+        loss = loss_fn(output, target_var)
+
         loss.backward()
         optimizer.step()
 
-        losses.append(loss.data[0])
-        k += 1
-        conf_matrix.add_prediction(output, category[1])
+        correct = 0
+        total = 0
 
-        if i % cv_frequency == cv_frequency - 1:
-            print conf_matrix
+        if i % 5 == 0:
+            print "============== Epoch ", i
+            y_test = target_var.cpu().data.numpy()
+            y_pred_all = output.cpu().data.numpy()
+            y_pred = np.argmax(y_pred_all, axis=1)
+
+            correct += (y_pred == y_test).sum()
+            total += y_pred.shape[0]
+
+            cnf_matrix = confusion_matrix(y_test, y_pred)
+            print "Loss: ", loss.data[0], ", Acc: ", (correct / float(total))
+            print cnf_matrix
