@@ -496,7 +496,7 @@ def main():
                  save_path=savepath)
     ### LOAD AND USE TRAINED MODEL
     with TrainedModel(CHUNK_SIZE, savepath) as m:
-        for i in xrange(100000):
+        for i in xrange(1000000):
             if (i%1000==0):
                 m.run_and_eval(TRAIN_SUBSET, 1000)
                 print("reloaded model runned", i, "times")
