@@ -176,3 +176,59 @@ def basic_convnet(batch, num_classes, patch_size=10, basenum_patches=20,
     #
     l2reg = l2loss(W1)+l2loss(W1)+l2loss(W_top1)+l2loss(W_top2)
     return logits, l2reg
+
+
+
+def deep_convnet(batch, num_classes, patch_size=3, basenum_patches=30,
+                  hidden_size=64):
+    """
+    """
+    batch_size, chunk_size = batch.get_shape().as_list()
+    batch_expanded = tf.expand_dims(batch, -1)
+    batch_expanded = tf.expand_dims(batch_expanded, -1)
+    # conv layer 1
+    W1 = weight_variable([patch_size, 1, 1, basenum_patches]) # h_w_cin_cout
+    b1 = bias_variable(basenum_patches)
+    conv1 = conv2d(batch_expanded, W1, [1, patch_size//2, 1, 1], "VALID")+b1
+    pool1 = max_pool(conv1, [1,2,1,1], [1,2,1,1], "VALID") # ksize, strides, pad
+    out1  = relu(pool1)
+    # conv layer 2
+    W2 = weight_variable([patch_size, 1, basenum_patches, basenum_patches*2])
+    b2 = bias_variable(basenum_patches*2)
+    conv2 = conv2d(out1, W2, [1, patch_size//2, 1, 1], "VALID")+b2
+    pool2 = max_pool(conv2, [1,2,1,1], [1,2,1,1], "VALID") # ksize, strides, pad
+    out2  = relu(pool2)
+    # conv layer 3
+    W3 = weight_variable([patch_size, 1, basenum_patches*2, basenum_patches*3])
+    b3 = bias_variable(basenum_patches*3)
+    conv3 = conv2d(out2, W3, [1, patch_size//2, 1, 1], "VALID")+b3
+    pool3 = max_pool(conv3, [1,2,1,1], [1,2,1,1], "VALID") # ksize, strides, pad
+    out3  = relu(pool3)
+    # conv layer 4
+    W4 = weight_variable([patch_size, 1, basenum_patches*3, basenum_patches*4])
+    b4 = bias_variable(basenum_patches*4)
+    conv4 = conv2d(out3, W4, [1, patch_size//2, 1, 1], "VALID")+b4
+    pool4 = max_pool(conv4, [1,2,1,1], [1,2,1,1], "VALID") # ksize, strides, pad
+    out4  = relu(pool4)
+    # conv layer 5
+    W5 = weight_variable([patch_size, 1, basenum_patches*4, basenum_patches*5])
+    b5 = bias_variable(basenum_patches*5)
+    conv5 = conv2d(out4, W5, [1, patch_size//2, 1, 1], "VALID")+b5
+    pool5 = max_pool(conv5, [1,2,1,1], [1,2,1,1], "VALID") # ksize, strides, pad
+    out5  = relu(pool5)
+    conv_out = out5 # alias for the last conv layer
+    # reshape last conv layer to (batch_size, h*w*c) to allow fully connected
+    conv_shape = conv_out.get_shape().as_list() # [n, h, w, c]
+    flatsize   = conv_shape[1]*conv_shape[2]*conv_shape[3] # h*w*c
+    conv_flat  = tf.reshape(conv_out, [tf.shape(conv_out)[0], flatsize])
+    # fully connected hidden layer:
+    W_top1 = weight_variable([flatsize, hidden_size])
+    b_top1 = bias_variable(hidden_size)
+    top1   = relu(matmul(conv_flat, W_top1)+b_top1)
+    # fully connected top layer
+    W_top2 = weight_variable([hidden_size, num_classes])
+    b_top2 = bias_variable(num_classes)
+    logits = tf.matmul(top1, W_top2)+b_top2
+    #
+    l2reg = l2loss(W1)+l2loss(W1)+l2loss(W_top1)+l2loss(W_top2)
+    return logits, l2reg

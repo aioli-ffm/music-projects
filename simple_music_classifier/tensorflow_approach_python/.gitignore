@@ -1,3 +1,4 @@
 saved_models/
 runs/
 MNIST_data/
+./ipynb_checkpoints/
