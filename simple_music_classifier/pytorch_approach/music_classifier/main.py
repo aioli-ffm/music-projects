@@ -8,16 +8,16 @@ import numpy as np
 is_gpu = torch.cuda.is_available()
 
 if __name__ == "__main__":
-    CHUNK_SIZE = 6500
+    CHUNK_SIZE = 20000
     BATCH_SIZE = None
-    LEARNING_RATE = 1e-4
+    LEARNING_RATE = 1e-3
 
     iterations = 100000
 
     categories = data.generate_categories("/data/gtzan")
     CLASSES = categories.keys() # ["rock", "blues", ...]
-    model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 512, 512)
-    optimizer = optim.Adam(model.parameters(), LEARNING_RATE)
+    model = graph.mlp_def(CHUNK_SIZE, len(CLASSES), 256, 128)
+    optimizer = optim.Adam(model.parameters(), LEARNING_RATE, weight_decay=1e-4)
     loss_fn = nn.CrossEntropyLoss()
 
     if is_gpu:
@@ -47,12 +47,18 @@ if __name__ == "__main__":
         loss.backward()
         optimizer.step()
 
+        correct = 0
+        total = 0
+
         if i % 5 == 0:
             print "============== Epoch ", i
             y_test = target_var.cpu().data.numpy()
             y_pred_all = output.cpu().data.numpy()
             y_pred = np.argmax(y_pred_all, axis=1)
 
+            correct += (y_pred == y_test).sum()
+            total += y_pred.shape[0]
+
             cnf_matrix = confusion_matrix(y_test, y_pred)
-            print loss
+            print "Loss: ", loss, ", Acc: ", (correct / float(total))
             print cnf_matrix
