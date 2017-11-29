@@ -4,15 +4,15 @@ import graph
 import torch
 from torch import optim, nn
 import numpy as np
-
-is_gpu = torch.cuda.is_available()
+from sklearn.metrics import confusion_matrix
 
 if __name__ == "__main__":
     CHUNK_SIZE = 20000
-    BATCH_SIZE = None
+    BATCH_SIZE = 512
     LEARNING_RATE = 1e-3
-
     iterations = 100000
+
+    is_gpu = torch.cuda.is_available()
 
     categories = data.generate_categories("/data/gtzan")
     CLASSES = categories.keys() # ["rock", "blues", ...]
@@ -26,12 +26,11 @@ if __name__ == "__main__":
 
     losses = []
 
-    from sklearn.metrics import confusion_matrix
-
     model.train()
+
     for i in xrange(iterations):
 
-        sample_cats, target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE, batch_size=512)
+        target_tensor, sample_tensor = data.random_sample(categories, slice_size=CHUNK_SIZE, batch_size=BATCH_SIZE)
 
         if is_gpu:
             target_tensor = target_tensor.cuda()
@@ -60,5 +59,5 @@ if __name__ == "__main__":
             total += y_pred.shape[0]
 
             cnf_matrix = confusion_matrix(y_test, y_pred)
-            print "Loss: ", loss, ", Acc: ", (correct / float(total))
+            print "Loss: ", loss.data[0], ", Acc: ", (correct / float(total))
             print cnf_matrix
