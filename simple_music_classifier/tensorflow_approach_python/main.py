@@ -34,6 +34,7 @@
 from __future__ import print_function, division
 import numpy as np
 import datetime # timestamp for sessions
+from time import time # rough time measurements
 import os # for listdir and path.join
 import random
 from six.moves import xrange
@@ -409,7 +410,7 @@ class TrainedModel(object):
           for i in xrange(100000):
               if (i%1000==0):
                   m.run_and_eval(TRAIN_SUBSET, 1000)
-                  print("model runned", i, "times")
+                  print("model ran", i, "times")
        Alternatively:
          m = TrainedModel(CHUNK_SIZE, savepath)
          for ...
@@ -427,20 +428,11 @@ class TrainedModel(object):
         self.data_ph = self.g.get_tensor_by_name("data_placeholder:0")
         self.predictions = self.g.get_tensor_by_name("preds:0")
 
-    def run_and_eval(self, data_subset, batch_size):
-        """This is a test function to show how to use a reloaded model and
-           measure its performance. Given a dataset and a batch size,
-             1. Samples data+labels of shape (batch_size, chunk_size) from the
-                subset, where chunk_size was given at construction time and is
-                accepted by the model.
-             2. Creates and returns the resulting confusion matrix
+    def run(self, data_batch):
+        """Runs the model for the given data batch. Note that the chunk size
+           has to be accepted by the model.
         """
-        data_batch, label_batch = get_random_batch(data_subset,
-                                                   self.chunk_size, batch_size)
-        argmx = self.sess.run(self.predictions,feed_dict={self.data_ph:data_batch})
-        cm = ConfusionMatrix(data_subset.keys(), "RELOADED")
-        cm.add([INT2CLASS[x] for x in argmx], label_batch)
-        return cm
+        return self.sess.run(self.predictions, feed_dict={self.data_ph:data_batch})
 
     def close(self):
         self.sess.close()
@@ -475,11 +467,27 @@ MODEL=  models.simple_mlp # basic_convnet
 DOWNSAMPLE= 7
 BATCH_SIZE = 1000
 CHUNK_SIZE = (22050*2)//DOWNSAMPLE
-MAX_STEPS=501
+MAX_STEPS=1001
 L2_REG = 1e-3
 OPTIMIZER_FN = lambda: tf.train.AdamOptimizer(1e-3)
 TRAIN_FREQ=10
 CV_FREQ=100
+
+def run_pretrained_model(data_subset, savepath, chunk_size, batch_size, iters):
+    """
+    """
+    with TrainedModel(chunk_size, savepath) as m:
+        cm = ConfusionMatrix(data_subset.keys(), "RELOADED")
+        t = time()
+        for i in xrange(iters):
+            data_batch, label_batch = get_random_batch(data_subset,
+                                                       chunk_size, batch_size)
+            predictions = m.run(data_batch)
+            if (i%100==0):
+                print("reloaded model ran", i, "times")
+                cm.add([INT2CLASS[x] for x in predictions], label_batch)
+        print(cm)
+        print("elapsed time:", time()-t)
 
 def main():
     ### DATA LOADING
@@ -487,19 +495,24 @@ def main():
     TRAIN_SUBSET,CV_SUBSET,TEST_SUBSET = split_dataset(DATA,TRAIN_CV_TEST_RATIO,
                                                        CLASSES)
     del DATA # data won't be needed anymore and may free some useful RAM
-    ### MODEL TRAINING
-    savepath = os.path.join("./saved_models", make_timestamp())
+    SAVE_PATH = os.path.join("./saved_models", make_timestamp())
     run_training(TRAIN_SUBSET, CV_SUBSET, TEST_SUBSET, MODEL,
                  BATCH_SIZE, CHUNK_SIZE, MAX_STEPS,
                  L2_REG, OPTIMIZER_FN,
                  TRAIN_FREQ, CV_FREQ,
-                 save_path=savepath)
+                 save_path=SAVE_PATH)
     ### LOAD AND USE TRAINED MODEL
-    with TrainedModel(CHUNK_SIZE, savepath) as m:
-        for i in xrange(1000000):
-            if (i%1000==0):
-                m.run_and_eval(TRAIN_SUBSET, 1000)
-                print("reloaded model runned", i, "times")
+    test_pretrained_model(TRAIN_SUBSET, SAVE_PATH,
+                          CHUNK_SIZE, 1,50000)
+
+def test_pretrained():
+    """
+    """
+    run_pretrained_model(split_dataset(get_dataset(DATASET_PATH,
+                                                   downsample_ratio=DOWNSAMPLE),
+                                       TRAIN_CV_TEST_RATIO, CLASSES)[0],
+                         "./saved_models/30_Nov_2017_10h23m58s", 6300, 1, 50000)
 
 if __name__ == "__main__":
-    main()
+    # main()
+    test_pretrained()

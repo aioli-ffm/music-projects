@@ -1,0 +1,22 @@
+[0] Config.pm:340> INFO - This is Biber 2.4
+[0] Config.pm:343> INFO - Logfile is 'afr_bachelor_presentation.blg'
+[45] biber:287> INFO - === Sa Okt 14, 2017, 04:16:17
+[147] Biber.pm:348> INFO - Reading 'afr_bachelor_presentation.bcf'
+[308] Biber.pm:742> INFO - Found 14 citekeys in bib section 0
+[315] Biber.pm:3151> INFO - Processing section 0
+[348] Biber.pm:3308> INFO - Looking for bibtex format file 'assets/references.bib' for section 0
+[452] bibtex.pm:1113> INFO - Decoding LaTeX character macros into UTF-8
+[544] bibtex.pm:974> INFO - Found BibTeX data source 'assets/references.bib'
+[818] UCollate.pm:65> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[818] UCollate.pm:65> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[818] Biber.pm:3028> INFO - Sorting list 'nty/global' of type 'entry' with scheme 'nty' and locale 'en-US'
+[818] Biber.pm:3032> INFO - No sort tailoring available for locale 'en-US'
+[848] bbl.pm:519> INFO - Writing 'afr_bachelor_presentation.bbl' with encoding 'ascii'
+[900] Utils.pm:147> WARN - The entry 'choi-fcn' has characters which cannot be encoded in 'ascii'. Recoding problematic characters into macros.
+[909] Utils.pm:147> WARN - The entry 'choi-explaining' has characters which cannot be encoded in 'ascii'. Recoding problematic characters into macros.
+[918] Utils.pm:147> WARN - The entry 'choi-robustness' has characters which cannot be encoded in 'ascii'. Recoding problematic characters into macros.
+[928] Utils.pm:147> WARN - The entry 'choi-crnn' has characters which cannot be encoded in 'ascii'. Recoding problematic characters into macros.
+[937] Utils.pm:147> WARN - The entry 'convtransfer' has characters which cannot be encoded in 'ascii'. Recoding problematic characters into macros.
+[945] Utils.pm:147> WARN - The entry 'andres-bachelor' has characters which cannot be encoded in 'ascii'. Recoding problematic characters into macros.
+[968] bbl.pm:615> INFO - Output to afr_bachelor_presentation.bbl
+[969] Biber.pm:109> INFO - WARNINGS: 6

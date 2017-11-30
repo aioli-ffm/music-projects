@@ -1,0 +1,17 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\beamer@endinputifotherversion {3.36pt}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {1}{About Carnatic Music}{3}{0}{1}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {2}{Related Work on R\=aga Classification}{7}{0}{2}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {3}{Approach and Task Definition}{11}{0}{3}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {4}{Related Work on End-to-end Music Classification}{13}{0}{4}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {5}{Experiments and Results}{18}{0}{5}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {6}{Conclusions and Follow-Up}{26}{0}{6}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {7}{Bibliography}{29}{1}{7}

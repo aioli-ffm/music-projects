@@ -1,14 +1,14 @@
 \documentclass[aspectratio=169]{beamer}
 \usepackage{tikz}
 % numbering=none,counter,fraction - frame number at bottom right
-\usetheme[block=fill,numbering=none,progressbar=foot]{metropolis}           % Use metropolis theme
+% \usetheme[block=fill,numbering=none,progressbar=foot]{metropolis}           % Use metropolis theme
 
 \definecolor{RoyalBlue}{cmyk}{1, 0.50, 0, 0}
 \definecolor{BgBlue}{cmyk}{1, 0.5, 0,0.8}
 
 \setbeamercolor{progress bar}{fg=RoyalBlue!100, bg=RoyalBlue!30}
 \setbeamercolor{frametitle}{bg=BgBlue!100}
-\title{AIOLI - AI Open Lab Initiative}
+\title{AIOLI - Automatic Music Classification\\with PyTorch and TensorFlow}
 \date{\today}
 %\author{Tobias Weis - weis@ccc.cs.uni-frankfurt.de}
 \author{\texorpdfstring{\url{[mundt,weis]@ccc.cs.uni-frankfurt.de}}{Tobias Weis}}
@@ -16,6 +16,9 @@
 
 %%%%%%%%%%%%%%%%%%% TITLE RIGHT
 \makeatletter
+
+\beamertemplatenavigationsymbolsempty
+
 \setbeamertemplate{title page}{
 
   \begin{minipage}[b][\paperheight]{\textwidth}
@@ -90,8 +93,7 @@
 
 	\begin{frame}{Our data}
 		\begin{block}{What data will we feed into our program?}
-			From what we've discovered so far: 2s of audio are sufficient to distinguish musical genres.
-			We will be using 2s long slices of audio.
+			From what we've discovered so far: 2s of audio are sufficient to distinguish the musical genre of most cases.
 		\end{block}
 
 		\bigskip
@@ -143,9 +145,9 @@
 	\begin{frame}{GTZAN dataset}
 		We will be using the GTZAN dataset:
 		\vfill
-		\begin{itemize}
+		\begin{itemize} 
 			\item 10 musical genres
-			\item 100 audio files
+			\item 100 audio files (mono, samplerate=22050)
 			\item 30s per audio file
 		\end{itemize}
 		\vfill

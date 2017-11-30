@@ -1,0 +1,373 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.6 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \sortlist[entry]{nty/global}
+    \entry{goodfellow}{unpublished}{}
+      \name{author}{2}{}{%
+        {{hash=d67c43e0d327e0fa7bd73aa848aabb14}{%
+           family={Bengio},
+           family_i={B\bibinitperiod},
+           given={Ian\bibnamedelimb Goodfellow\bibnamedelima Yoshua},
+           given_i={I\bibinitperiod\bibinitdelim G\bibinitperiod\bibinitdelim Y\bibinitperiod}}}%
+        {{hash=ccec1ccd2e1aa86960eb2e872c6b7020}{%
+           family={Courville},
+           family_i={C\bibinitperiod},
+           given={Aaron},
+           given_i={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{92586f69fd41c07daac5d2948089fbb5}
+      \strng{fullhash}{92586f69fd41c07daac5d2948089fbb5}
+      \field{sortinit}{B}
+      \field{sortinithash}{4ecbea03efd0532989d3836d1a048c32}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Book in preparation for MIT Press}
+      \field{title}{Deep Learning}
+      \field{year}{2016}
+      \verb{url}
+      \verb http://www.deeplearningbook.org
+      \endverb
+    \endentry
+    \entry{tf-cnn}{online}{}
+      \field{sortinit}{C}
+      \field{sortinithash}{59f25d509f3381b07695554a9f35ecb2}
+      \field{labeltitlesource}{title}
+      \field{note}{Tutorial part of the TensorFlow API}
+      \field{title}{Convolutional Neural Networks -- Model Training}
+      \field{year}{2017}
+      \verb{url}
+      \verb https://www.tensorflow.org/tutorials/deep_cnn#model_training
+      \endverb
+    \endentry
+    \entry{gulati}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=1c12dd97fb67b94d4bfb77dd674141c3}{%
+           family={Gulati},
+           family_i={G\bibinitperiod},
+           given={Sankalp},
+           given_i={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{1c12dd97fb67b94d4bfb77dd674141c3}
+      \strng{fullhash}{1c12dd97fb67b94d4bfb77dd674141c3}
+      \field{sortinit}{G}
+      \field{sortinithash}{1c854ef9177a91bf894e66485bdbd3ed}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{PhD Thesis directed by Prof. Xavier Serra Casals at the Universitat Pompeu Fabra in Barcelona}
+      \field{title}{Computational Approaches for Melodic Description in Indian Art Music Corpora}
+      \field{type}{phdthesis}
+      \field{year}{2016}
+    \endentry
+    \entry{gulati-slides}{online}{}
+      \name{author}{1}{}{%
+        {{hash=1c12dd97fb67b94d4bfb77dd674141c3}{%
+           family={Gulati},
+           family_i={G\bibinitperiod},
+           given={Sankalp},
+           given_i={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{1c12dd97fb67b94d4bfb77dd674141c3}
+      \strng{fullhash}{1c12dd97fb67b94d4bfb77dd674141c3}
+      \field{sortinit}{G}
+      \field{sortinithash}{1c854ef9177a91bf894e66485bdbd3ed}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Slides for the PhD Dissertation the Universitat Pompeu Fabra in Barcelona}
+      \field{title}{Computational Approaches for Melodic Description in Indian Art Music Corpora}
+      \field{year}{2016}
+      \verb{url}
+      \verb mtg.upf.edu/system/files/publications/PhD_SankalpGulati.pdf
+      \endverb
+    \endentry
+    \entry{wavspaper}{article}{}
+      \name{author}{2}{}{%
+        {{hash=9c3b639f92f1285afeb9ff8b7660635f}{%
+           family={Jongpil\bibnamedelima Lee},
+           family_i={J\bibinitperiod\bibinitdelim L\bibinitperiod},
+           suffix={Jiyoung\bibnamedelima Park},
+           suffix_i={J\bibinitperiod\bibinitdelim P\bibinitperiod},
+           given={Keunhyoung\bibnamedelimb Luke\bibnamedelima Kim},
+           given_i={K\bibinitperiod\bibinitdelim L\bibinitperiod\bibinitdelim K\bibinitperiod}}}%
+        {{hash=b7c57c9ad12471fb5ec7eb082cd69eeb}{%
+           family={Nam},
+           family_i={N\bibinitperiod},
+           given={Juhan},
+           given_i={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{b31a9b5a62f64018df8da123681b2069}
+      \strng{fullhash}{b31a9b5a62f64018df8da123681b2069}
+      \field{sortinit}{J}
+      \field{sortinithash}{ec3950a647c092421b9fcca6d819504a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Korea Advanced Institute of Science and Technology (KAIST)}
+      \field{title}{Sample-Level Deep Convolutional Neural Networks For Music Auto-Tagging Using Raw Waveforms}
+      \field{year}{2017}
+      \verb{url}
+      \verb http://arxiv.org/abs/1703.01789
+      \endverb
+    \endentry
+    \entry{choi-fcn}{article}{}
+      \name{author}{2}{}{%
+        {{hash=bb5bde6a351e1f91f7a3358e358ab347}{%
+           family={Keunwoo\bibnamedelima Choi},
+           family_i={K\bibinitperiod\bibinitdelim C\bibinitperiod},
+           given={Gy\"{o}rgy\bibnamedelima Fazekas},
+           given_i={G\bibinitperiod\bibinitdelim F\bibinitperiod}}}%
+        {{hash=8f90fd131c2bbfde4d0e9fdd7ed4ea8b}{%
+           family={Sandler},
+           family_i={S\bibinitperiod},
+           given={Mark},
+           given_i={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{9c65cf2d1c694402c4b01789a11d61bc}
+      \strng{fullhash}{9c65cf2d1c694402c4b01789a11d61bc}
+      \field{sortinit}{K}
+      \field{sortinithash}{a7d5b3aec5a0890aae7baf85a209abfc}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{17th International Society for Music Information Retrieval Conference}
+      \field{title}{Automatic Tagging Using Deep Convolutional Neural Networks}
+      \field{year}{2016}
+      \verb{url}
+      \verb http://arxiv.org/abs/1606.00298
+      \endverb
+    \endentry
+    \entry{choi-explaining}{article}{}
+      \name{author}{2}{}{%
+        {{hash=5f74f607e229689319d894cc883e734b}{%
+           family={Keunwoo\bibnamedelima Choi},
+           family_i={K\bibinitperiod\bibinitdelim C\bibinitperiod},
+           suffix={Gy\"{o}rgy\bibnamedelima Fazekas},
+           suffix_i={G\bibinitperiod\bibinitdelim F\bibinitperiod},
+           given={Kyunghyun\bibnamedelima Cho},
+           given_i={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=6094f14dd93b5629b86cb43f1035c70c}{%
+           family={Sandler},
+           family_i={S\bibinitperiod},
+           given={Mark\bibnamedelima B.},
+           given_i={M\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \strng{namehash}{0ddb2594362f107c4214ff75f89a8de3}
+      \strng{fullhash}{0ddb2594362f107c4214ff75f89a8de3}
+      \field{sortinit}{K}
+      \field{sortinithash}{a7d5b3aec5a0890aae7baf85a209abfc}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{CoRR}
+      \field{title}{Explaining Deep Convolutional Neural Networks on Music Classification}
+      \field{year}{2016}
+      \verb{url}
+      \verb http://arxiv.org/abs/1607.02444
+      \endverb
+    \endentry
+    \entry{choi-robustness}{article}{}
+      \name{author}{2}{}{%
+        {{hash=5f74f607e229689319d894cc883e734b}{%
+           family={Keunwoo\bibnamedelima Choi},
+           family_i={K\bibinitperiod\bibinitdelim C\bibinitperiod},
+           suffix={Gy\"{o}rgy\bibnamedelima Fazekas},
+           suffix_i={G\bibinitperiod\bibinitdelim F\bibinitperiod},
+           given={Kyunghyun\bibnamedelima Cho},
+           given_i={K\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=6094f14dd93b5629b86cb43f1035c70c}{%
+           family={Sandler},
+           family_i={S\bibinitperiod},
+           given={Mark\bibnamedelima B.},
+           given_i={M\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \strng{namehash}{0ddb2594362f107c4214ff75f89a8de3}
+      \strng{fullhash}{0ddb2594362f107c4214ff75f89a8de3}
+      \field{sortinit}{K}
+      \field{sortinithash}{a7d5b3aec5a0890aae7baf85a209abfc}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{CoRR}
+      \field{title}{On the Robustness of Deep Convolutional Neural Networks for Music Classification}
+      \field{year}{2017}
+      \verb{url}
+      \verb http://arxiv.org/abs/1706.02361
+      \endverb
+    \endentry
+    \entry{choi-crnn}{article}{}
+      \name{author}{2}{}{%
+        {{hash=943f81e7d30e0b265c6a08175fb9549c}{%
+           family={Keunwoo\bibnamedelima Choi},
+           family_i={K\bibinitperiod\bibinitdelim C\bibinitperiod},
+           suffix={Gy\"{o}rgy\bibnamedelima Fazekas},
+           suffix_i={G\bibinitperiod\bibinitdelim F\bibinitperiod},
+           given={Mark\bibnamedelimb B.\bibnamedelimi Sandler},
+           given_i={M\bibinitperiod\bibinitdelim B\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=3da7501a79d9346572c7fd6e41b615df}{%
+           family={Cho},
+           family_i={C\bibinitperiod},
+           given={Kyunghyun},
+           given_i={K\bibinitperiod}}}%
+      }
+      \strng{namehash}{b00f6d80c37b281d7d87b415175a537f}
+      \strng{fullhash}{b00f6d80c37b281d7d87b415175a537f}
+      \field{sortinit}{K}
+      \field{sortinithash}{a7d5b3aec5a0890aae7baf85a209abfc}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{CoRR}
+      \field{title}{Convolutional Recurrent Neural Networks for Music Classification}
+      \field{year}{2016}
+      \verb{url}
+      \verb http://arxiv.org/abs/1609.04243
+      \endverb
+    \endentry
+    \entry{convtransfer}{article}{}
+      \name{author}{2}{}{%
+        {{hash=943f81e7d30e0b265c6a08175fb9549c}{%
+           family={Keunwoo\bibnamedelima Choi},
+           family_i={K\bibinitperiod\bibinitdelim C\bibinitperiod},
+           suffix={Gy\"{o}rgy\bibnamedelima Fazekas},
+           suffix_i={G\bibinitperiod\bibinitdelim F\bibinitperiod},
+           given={Mark\bibnamedelimb B.\bibnamedelimi Sandler},
+           given_i={M\bibinitperiod\bibinitdelim B\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=3da7501a79d9346572c7fd6e41b615df}{%
+           family={Cho},
+           family_i={C\bibinitperiod},
+           given={Kyunghyun},
+           given_i={K\bibinitperiod}}}%
+      }
+      \strng{namehash}{b00f6d80c37b281d7d87b415175a537f}
+      \strng{fullhash}{b00f6d80c37b281d7d87b415175a537f}
+      \field{sortinit}{K}
+      \field{sortinithash}{a7d5b3aec5a0890aae7baf85a209abfc}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{CoRR}
+      \field{title}{Transfer Learning for Music Classification and Regression Tasks}
+      \field{year}{2017}
+      \verb{url}
+      \verb http://arxiv.org/abs/1703.09179
+      \endverb
+    \endentry
+    \entry{andres-bachelor}{unpublished}{}
+      \name{author}{1}{}{%
+        {{hash=f8378dc59dc65cf4035fd7df8ca5d675}{%
+           family={Rodr\'\i{}guez},
+           family_i={R\bibinitperiod},
+           given={Andr\'{e}s\bibnamedelima Fern\'{a}ndez},
+           given_i={A\bibinitperiod\bibinitdelim F\bibinitperiod}}}%
+      }
+      \strng{namehash}{f8378dc59dc65cf4035fd7df8ca5d675}
+      \strng{fullhash}{f8378dc59dc65cf4035fd7df8ca5d675}
+      \field{sortinit}{R}
+      \field{sortinithash}{c7387613477035a752d935acfc3e3ea2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Bachelor's thesis supervised by Prof. V. Ramesh at the Goethe University Frankfurt a. M.}
+      \field{title}{Machine Learning for Music Classification}
+      \field{year}{2016}
+      \verb{url}
+      \verb https://github.com/andres-fr/bachelor-thesis
+      \endverb
+    \endentry
+    \entry{serra-comp11}{article}{}
+      \name{author}{1}{}{%
+        {{hash=f69acf45f53ac7c6a66d991fef16781a}{%
+           family={Serra},
+           family_i={S\bibinitperiod},
+           given={Xavier},
+           given_i={X\bibinitperiod}}}%
+      }
+      \strng{namehash}{f69acf45f53ac7c6a66d991fef16781a}
+      \strng{fullhash}{f69acf45f53ac7c6a66d991fef16781a}
+      \field{sortinit}{S}
+      \field{sortinithash}{fd1e7c5ab79596b13dbbb67f8d70fb5a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{12th International Society for Music Information Retrieval Conference (ISMIR)}
+      \field{title}{A Multicultural Approach in Music Information Research}
+      \field{year}{2011}
+      \verb{url}
+      \verb http://mtg.upf.edu/node/2276
+      \endverb
+    \endentry
+    \entry{serra-comp14}{article}{}
+      \name{author}{1}{}{%
+        {{hash=f69acf45f53ac7c6a66d991fef16781a}{%
+           family={Serra},
+           family_i={S\bibinitperiod},
+           given={Xavier},
+           given_i={X\bibinitperiod}}}%
+      }
+      \strng{namehash}{f69acf45f53ac7c6a66d991fef16781a}
+      \strng{fullhash}{f69acf45f53ac7c6a66d991fef16781a}
+      \field{sortinit}{S}
+      \field{sortinithash}{fd1e7c5ab79596b13dbbb67f8d70fb5a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{AES 53rd International Conference on Semantic Audio}
+      \field{isbn}{978-1-63266-284-2}
+      \field{title}{Creating Research Corpora for the Computational Study of Music: the case of the CompMusic Project}
+      \field{year}{2014}
+      \verb{url}
+      \verb http://mtg.upf.edu/node/2899
+      \endverb
+    \endentry
+    \entry{indian-corpora}{article}{}
+      \name{author}{5}{}{%
+        {{hash=07ddd3f15c17af89b2f510f5e7c894e0}{%
+           family={Srinivasamurthy},
+           family_i={S\bibinitperiod},
+           given={Ajay},
+           given_i={A\bibinitperiod}}}%
+        {{hash=c4cbb7057e03d6ccc544425d3510ffcb}{%
+           family={Koduri},
+           family_i={K\bibinitperiod},
+           given={Gopala\bibnamedelima Krishna},
+           given_i={G\bibinitperiod\bibinitdelim K\bibinitperiod}}}%
+        {{hash=1c12dd97fb67b94d4bfb77dd674141c3}{%
+           family={Gulati},
+           family_i={G\bibinitperiod},
+           given={Sankalp},
+           given_i={S\bibinitperiod}}}%
+        {{hash=5b90256a676227febc2f991c38a8cc70}{%
+           family={Ishwar},
+           family_i={I\bibinitperiod},
+           given={Vignesh},
+           given_i={V\bibinitperiod}}}%
+        {{hash=f69acf45f53ac7c6a66d991fef16781a}{%
+           family={Serra},
+           family_i={S\bibinitperiod},
+           given={Xavier},
+           given_i={X\bibinitperiod}}}%
+      }
+      \strng{namehash}{3d65858f264dbd146e9a56943d819fbe}
+      \strng{fullhash}{1cd04e38e8c2d812cd0ccbca68100aec}
+      \field{sortinit}{S}
+      \field{sortinithash}{fd1e7c5ab79596b13dbbb67f8d70fb5a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{International Computer Music Conference/Sound and Music Computing Conference (Athens, Greece)}
+      \field{title}{Corpora for Music Information Research in Indian Art Music}
+      \field{year}{2014}
+      \verb{url}
+      \verb http://mtg.upf.edu/node/2990
+      \endverb
+    \endentry
+  \endsortlist
+\endrefsection
+\endinput
+
