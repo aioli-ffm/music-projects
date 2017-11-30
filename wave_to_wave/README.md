@@ -41,14 +41,14 @@ Development/Test:
 - [ ] Add basic synth doing real morlet-wavelets (chi2 envelope). It should generate signal objects. Build and run utests.
 - [ ] Make prototype of optimizer as a collection of convolvers plus a "result" signal. Benchmark and utest.
 
-Cmake/Make related:
-
-- [ ] cmake/make should generate all build-related files in the build dir, and the executable in the bin dir.
+Cmake/Make related (thank you Christian!):
 - [x] `make build` to compile the whole program, with main in `wave_to_wave.cpp`
-- [ ] `make run-tests` (see explanation further, currently running with `for i in utest_*.cpp; do g++ -std=c++11 main_utest.o "$i" -o tests && ./tests -r compact; done`)
-- [ ] `make clean` to clean all build-related and executable files (build and bin directories).
-- [ ] `make run-benchmarks` with a dummy output for the moment
+- [x] `make test` (see explanation further, currently running with `for i in utest_*.cpp; do g++ -std=c++11 main_utest.o "$i" -o tests && ./tests -r compact; done`)
+- [x] `make clean` to clean all build-related and executable files (build and bin directories).
+- [x] `make run-benchmarks` compiles and runs benchmarks
 - [ ] `make` or `make all` should run clean, test, benchmark, and build in that order.
+- [ ] STRUCTURE: Have a single CMakeLists (is it good/possible?)
+- [ ] have "downloadproject" files be generated in build (probably we should get rid of the third-party dir)
 
 ### LOWER PRIORITY
 - [ ] Input parser: How to get the flags:values as a ` map<string, string>` in an elegant way?
