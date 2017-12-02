@@ -49,6 +49,11 @@ public:
       std::cout << name << "[" << i << "]\t=\t" << data_[i] << std::endl;
     }
   }
+  T* begin(){return &data_[0];}
+  T* end(){return &data_[size_];}
+  const T* begin() const{return &data_[0];}
+  const T* end() const{return &data_[size_];}
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

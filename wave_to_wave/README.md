@@ -11,10 +11,13 @@ This repository uses third-party libraries, but doesn't include them. The THIRD-
 # RUN:
 
 ### Build program:
-`g++ -O3 -std=c++11 -Wall -Wextra wave_to_wave.cpp -fopenmp -lfftw3f -lpython2.7 -o ./bin/test && ./bin/test -z -y wisdom -i 10`
+`g++ -O3 -std=c++11 -Wall -Wextra wave_to_wave.cpp -Ithird_party -fopenmp -lfftw3f -lpython2.7 -o ./build/wave_to_wave && ./build/wave_to_wave -z -y wisdom -i 10g`
 
 ### UTests:
-In the tests directory: `for i in utest_*.cpp; do g++ -std=c++11 main_utest.o "$i" -o tests && ./tests -r compact; done`
+In the tests directory: 
+1. `// g++ -std=c++11 -Wall -Wextra main_utest.cpp -I../third_party -c`
+2. `for i in utest_*.cpp; do g++ -std=c++11 main_utest.o "$i" -o tests -I../third_party -fopenmp -lfftw3f -lpython2.7 && ./tests -r compact; done`
+
 
 ### Benchmarks:
 In the benchmarks directory: `mkdir -p bin && g++ -std=c++11 -Wall -Wextra -L../third_party/google_benchmark  benchmark_example.cpp -lbenchmark -lpthread -o bin/benchmark && ./bin/benchmark`
@@ -49,7 +52,7 @@ Cmake/Make related (thank you Christian!):
 - [ ] `make` or `make all` should run clean, test, benchmark, and build in that order.
 - [ ] STRUCTURE: Have a single CMakeLists (is it good/possible?)
 - [ ] have "downloadproject" files be generated in build (probably we should get rid of the third-party dir)
-
+- [ ] IMPORTANT: test compilation doesn't scalate well (see [here](https://github.com/catchorg/Catch2/blob/master/docs/slow-compiles.md) and this README for details). It shouldn't re-compile the `catch.hpp` header everytime, linking `main_utest.o` is the recommended way.
 ### LOWER PRIORITY
 - [ ] Input parser: How to get the flags:values as a ` map<string, string>` in an elegant way?
 - [ ] Input parser: How to check if no flag was activated, to plot the `-h` flag?
