@@ -17,7 +17,7 @@
 // g++ -O3 -std=c++11 -Wall -Wextra wave_to_wave.cpp -Ithird_party -fopenmp -lfftw3f -lpython2.7 -o ./build/wave_to_wave && ./build/wave_to_wave -z -y wisdom -i 10g
 
 // STL INCLUDES
-#include <string.h>
+#include <string>
 #include <iostream>
 // LOCAL THIRD-PARTY
 // #include "third_party/matplotlibcpp.h"

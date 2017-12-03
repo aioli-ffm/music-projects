@@ -53,7 +53,9 @@ public:
   // this condition doesn't hold. Since the signals and the superclass already have proper
   // destructors, no special memory management has to be done.
   explicit FftForwardPlan(FloatSignal &fs, ComplexSignal &cs)
-    : FftPlan(fftwf_plan_dft_r2c_1d(fs.getSize(), fs.getData(), cs.getData(), FFTW_ESTIMATE)){
+    : FftPlan(fftwf_plan_dft_r2c_1d(fs.getSize(), fs.getData(),
+                                    reinterpret_cast<fftwf_complex*>(&cs.getData()[0]),
+                                    FFTW_ESTIMATE)){
     CheckRealComplexRatio(fs.getSize(), cs.getSize(), "FftForwardPlan");
   }
 };
@@ -67,7 +69,9 @@ public:
   // this condition doesn't hold. Since the signals and the superclass already have proper
   // destructors, no special memory management has to be done.
   explicit FftBackwardPlan(ComplexSignal &cs, FloatSignal &fs)
-    : FftPlan(fftwf_plan_dft_c2r_1d(fs.getSize(), cs.getData(), fs.getData(), FFTW_ESTIMATE)){
+    : FftPlan(fftwf_plan_dft_c2r_1d(fs.getSize(),
+                                    reinterpret_cast<fftwf_complex*>(&cs.getData()[0]),
+                                    fs.getData(), FFTW_ESTIMATE)){
     CheckRealComplexRatio(fs.getSize(), cs.getSize(), "FftBackwardPlan");
   }
 };
@@ -86,7 +90,7 @@ void MakeAndExportFftwWisdom(const std::string path_out, const size_t min_2pow=0
     size_t size = pow(2, i);
     FloatSignal fs(size);
     ComplexSignal cs(size/2+1);
-    printf("creating forward and backward plans for size=2**%zu=%zu and flag %u...\n", i, size, flag);
+    printf("creating forward and backward plans for size=2**%zu=%zu and flag %u...\n",i,size, flag);
     FftForwardPlan fwd(fs, cs);
     FftBackwardPlan bwd(cs, fs);
   }
@@ -118,7 +122,7 @@ void ImportFftwWisdom(const std::string path_in, const bool throw_exception_if_f
 
 // This class performs an efficient version of the spectral convolution/cross-correlation between
 // two 1D float arrays, <SIGNAL> and <PATCH>, called overlap-save:
-// http://www.comm.utoronto.ca/~dkundur/course_info/real-time-DSP/notes/8_Kundur_Overlap_Save_Add.pdf
+//http://www.comm.utoronto.ca/~dkundur/course_info/real-time-DSP/notes/8_Kundur_Overlap_Save_Add.pdf
 // This algorithm requires that the length of <PATCH> is less or equal the length of <SIGNAL>,
 // so an exception is thrown otherwise. The algorithm works as follows:
 // given signal of length S and patch of length P, and being the conv (or xcorr) length U=S+P-1
@@ -189,7 +193,8 @@ private:
     #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
     #endif
     for (size_t i =0; i<result_chunks_.size();i++){
-      operation(*s_chunks_complex_.at(i), this->padded_patch_complex_, *result_chunks_complex_.at(i));
+      operation(*s_chunks_complex_.at(i), this->padded_patch_complex_,
+                *result_chunks_complex_.at(i));
     }
     // do iffts
     #ifdef WITH_OPENMP_ABOVE
@@ -197,7 +202,7 @@ private:
     #endif
     for (size_t i =0; i<result_chunks_.size();i++){
       backward_plans_.at(i)->execute();
-      *result_chunks_.at(i) /= result_chunksize_;
+      *result_chunks_.at(i) *= (1.0f/result_chunksize_);
     }
   }
 
@@ -219,7 +224,8 @@ public:
       result_stride_(result_chunksize_-patch_size_+1),
       padded_patch_complex_(result_chunksize_complex_),
       //
-      padded_signal_(signal.getData(),signal_size_,patch_size_-1, result_chunksize_-(result_size_%result_stride_)),
+      padded_signal_(signal.getData(),signal_size_,patch_size_-1,
+                     result_chunksize_-(result_size_%result_stride_)),
       _state_(State::kUninitialized){
       // end of initializer list, now check that len(signal)>=len(patch)
     CheckLessEqual(patch_size_, signal_size_,
@@ -257,6 +263,8 @@ public:
   void printChunks(const std::string name="convolver"){
     __check_last_executed_not_null("printChunks");
     for (size_t i =0; i<result_chunks_.size();i++){
+      std::cout << name << "_chunk_" << i << std::endl;
+
       result_chunks_.at(i)->print(name+"_chunk_"+std::to_string(i));
     }
   }

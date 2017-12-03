@@ -4,6 +4,7 @@
 // STL INCLUDES
 #include <string.h>
 #include <iostream>
+#include <complex>
 // SYSTEM-INSTALLED LIBRARIES
 #include <fftw3.h>
 // LOCAL INCLUDES
@@ -42,18 +43,18 @@ public:
   // overloaded operators
   T &operator[](size_t idx){return data_[idx];}
   T &operator[](size_t idx) const {return data_[idx];}
-  // basic print function. It may be overriden if, for example, the type <T> is a struct.
-  void print(const std::string name="signal"){
-    std::cout << std::endl;
-    for(size_t i=0; i<size_; ++i){
-      std::cout << name << "[" << i << "]\t=\t" << data_[i] << std::endl;
-    }
-  }
+  // make signals iterable
   T* begin(){return &data_[0];}
   T* end(){return &data_[size_];}
   const T* begin() const{return &data_[0];}
   const T* end() const{return &data_[size_];}
-
+  // basic print function. It may be overriden if, for example, the type <T> is a struct.
+  void print(const std::string name="signal"){
+    std::cout << std::endl;
+    for(size_t i=0; i<size_; ++i){
+      std::cout << name << "[" << i << "]  \t=\t" << data_[i] << std::endl;
+    }
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,9 +75,11 @@ public:
   }
   // the destructor frees the only resource allocated
   ~FloatSignal() {fftwf_free(data_);}
+  // compound assignment operators
   void operator+=(const float x){for(size_t i=0; i<size_; ++i){data_[i] += x;}}
+  void operator-=(const float x){for(size_t i=0; i<size_; ++i){data_[i] -= x;}}
   void operator*=(const float x){for(size_t i=0; i<size_; ++i){data_[i] *= x;}}
-  void operator/=(const float x){for(size_t i=0; i<size_; ++i){data_[i] /= x;}}
+  //
 };
 
 
@@ -84,31 +87,38 @@ public:
 
 // This class is an AudioSignal that works on aligned complex (float[2]) arrays allocated by FFTW.
 // It also overloads some further operators to do basic arithmetic
-class ComplexSignal : public AudioSignal<fftwf_complex>{
+class ComplexSignal : public AudioSignal<std::complex<float> >{
 public:
   // the basic constructor allocates an aligned, float[2] array, which is zeroed by the superclass
   explicit ComplexSignal(size_t size)
-    : AudioSignal(fftwf_alloc_complex(size), size){}
+    : AudioSignal(reinterpret_cast<std::complex<float>*>(fftwf_alloc_complex(size)), size){}
   ~ComplexSignal(){fftwf_free(data_);}
   void operator*=(const float x){
     for(size_t i=0; i<size_; ++i){
-      data_[i][REAL] *= x;
-      data_[i][IMAG] *= x;
+      data_[i] *= x;
+      // data_[i][REAL] *= x;
+      // data_[i][IMAG] *= x;
     }
   }
-  void operator+=(const float x){for(size_t i=0; i<size_; ++i){data_[i][REAL] += x;}}
-  void operator+=(const fftwf_complex x){
+  void operator+=(const float x){
     for(size_t i=0; i<size_; ++i){
-      data_[i][REAL] += x[REAL];
-      data_[i][IMAG] += x[IMAG];
+      data_[i] += x;
+      // data_[i][REAL] += x;
     }
   }
-  // override print method to show both fields of the complex number
-  void print(const std::string name="signal"){
+  void operator+=(const std::complex<float> x){
     for(size_t i=0; i<size_; ++i){
-      printf("%s[%zu]\t=\t(%f, i%f)\n",name.c_str(),i,data_[i][REAL],data_[i][IMAG]);
+      data_[i] += x;
+      // data_[i][REAL] += x[REAL];
+      // data_[i][IMAG] += x[IMAG];
     }
   }
+  // // override print method to show both fields of the complex number
+  // void print(const std::string name="signal"){
+  //   for(size_t i=0; i<size_; ++i){
+  //     printf("%s[%zu]\t=\t(%f, i%f)\n",name.c_str(),i,data_[i][REAL],data_[i][IMAG]);
+  //   }
+  // }
 };
 
 
@@ -128,8 +138,9 @@ void SpectralConvolution(const ComplexSignal &a, const ComplexSignal &b, Complex
                 std::string("SpectralConvolution: all sizes must be equal and are"));
   for(size_t i=0; i<kSize_a; ++i){
     // a+ib * c+id = ac+iad+ibc-bd = ac-bd + i(ad+bc)
-     result[i][REAL] = a[i][REAL]*b[i][REAL] - a[i][IMAG]*b[i][IMAG];
-     result[i][IMAG] = a[i][IMAG]*b[i][REAL] + a[i][REAL]*b[i][IMAG];
+    result[i] = a[i]*b[i];
+     // result[i][REAL] = a[i][REAL]*b[i][REAL] - a[i][IMAG]*b[i][IMAG];
+     // result[i][IMAG] = a[i][IMAG]*b[i][REAL] + a[i][REAL]*b[i][IMAG];
   }
 }
 
@@ -143,8 +154,9 @@ void SpectralCorrelation(const ComplexSignal &a, const ComplexSignal &b, Complex
                   "SpectralCorrelation: all sizes must be equal and are");
   for(size_t i=0; i<kSize_a; ++i){
     // a * conj(b) = a+ib * c-id = ac-iad+ibc+bd = ac+bd + i(bc-ad)
-    result[i][REAL] = a[i][REAL]*b[i][REAL] + a[i][IMAG]*b[i][IMAG];
-    result[i][IMAG] = a[i][IMAG]*b[i][REAL] - a[i][REAL]*b[i][IMAG];
+    result[i] = a[i] * std::conj(b[i]);
+    // result[i][REAL] = a[i][REAL]*b[i][REAL] + a[i][IMAG]*b[i][IMAG];
+    // result[i][IMAG] = a[i][IMAG]*b[i][REAL] - a[i][REAL]*b[i][IMAG];
 
   }
 }
