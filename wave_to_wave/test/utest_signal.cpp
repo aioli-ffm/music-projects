@@ -17,7 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
-  // make and fill a float array for testing purposes
+  // make and fill a float array for testing purposes (gen.constr. is preferred)
   const size_t kTestSize = 27;
   float arr[kTestSize];
   for(size_t i=0; i<kTestSize; ++i){arr[i] = 2*i;}
@@ -42,6 +42,14 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
       sum_pad += abs(fs3[10+kTestSize+i]);
     }
     REQUIRE(sum_pad == 0); // sum of padded cells is zero
+  }
+
+  SECTION("FloatSignal generative constructor"){
+    auto lambda = [](const long int x)->float {return 1.23*(x-50);};
+    FloatSignal fs(lambda, kTestSize);
+    for(size_t i=0; i<kTestSize; ++i){
+      REQUIRE(fs[i] == lambda(i));
+    }
   }
 
   SECTION("FloatSignal is iterable, and can be used by IterableToString"){
@@ -193,6 +201,14 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
       sum_pad += cs3[10+kTestSize+i];
     }
     REQUIRE(sum_pad == kComplexZero); // sum of padded cells is zero
+  }
+
+  SECTION("ComplexSignal generative constructor"){
+    auto lambda = [](const long int x) {return std::complex<float>(6*x,-7);};
+    ComplexSignal cs(lambda, kTestSize);
+    for(size_t i=0; i<kTestSize; ++i){
+      REQUIRE(cs[i] == lambda(i));
+    }
   }
 
   SECTION("ComplexSignal is iterable, and can be used by IterableToString"){

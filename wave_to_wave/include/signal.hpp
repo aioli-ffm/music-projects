@@ -1,6 +1,9 @@
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
+#define WITH_OPENMP_ABOVE 1
+
+
 // STL INCLUDES
 #include <string.h>
 #include <iostream>
@@ -41,7 +44,7 @@ protected:
   }
 
 public:
-  // CONSTRUCTORS AND DESTRUCTOR
+  // BASIC CONSTRUCTORS
   explicit AudioSignal(size_t size)
     : data_((T*)aligned_alloc(64, size*sizeof(T))),
       size_(size){
@@ -55,6 +58,19 @@ public:
     : AudioSignal(size+pad_bef+pad_aft){
     std::copy(data, data+size, data_+pad_bef);
   }
+  // GENERATIVE CONSTRUCTOR
+  // given a (size_t->T) function, instantiates the signal and fills it
+  // with values between function(0) and function(size-1).
+  explicit AudioSignal(std::function<T (const long int)> const&f, size_t size)
+    : AudioSignal(size){
+    #ifdef WITH_OPENMP_ABOVE
+    #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
+    #endif
+    for(size_t i=0; i<size; ++i){
+      data_[i] = f(i);
+    }
+  }
+  // DESTRUCTOR
   ~AudioSignal(){free(data_);}
   // GETTERS/SETTERS/PRETTYPRINT
   size_t &getSize(){return size_;}
@@ -130,6 +146,8 @@ public:
     : AudioSignal(data, size){}
   explicit FloatSignal(float* data, size_t size, size_t pad_bef, size_t pad_aft)
     : AudioSignal(data, size, pad_bef, pad_aft){}
+  explicit FloatSignal(std::function<float (long int)> const&f, size_t size)
+    : AudioSignal(f, size){}
 };
 
 // Wrapper class for AudioSignal<complex64> plus some extra functionality
@@ -141,6 +159,8 @@ public:
     : AudioSignal(data, size){}
   explicit ComplexSignal(std::complex<float>* data, size_t size, size_t pad_bef, size_t pad_aft)
     : AudioSignal(data, size, pad_bef, pad_aft){}
+  explicit ComplexSignal(std::function< std::complex<float> (long int) > const&f, size_t size)
+    : AudioSignal(f, size){}
   // in-class extra functionality
   void conjugate(){
     float* data_flat = &reinterpret_cast<float(&)[2]>(data_[0])[0];

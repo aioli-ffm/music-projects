@@ -20,9 +20,6 @@
 #include <thread>
 // SYSTEM-INSTALLED LIBRARIES
 #include <fftw3.h>
-#ifdef WITH_OPENMP_ABOVE
-# include <omp.h>
-#endif
 // LOCAL INCLUDES
 #include "helpers.hpp"
 #include "signal.hpp"
