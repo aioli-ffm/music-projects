@@ -5,6 +5,7 @@
 #include <string.h>
 #include <iostream>
 #include <complex>
+#include <cstdlib>
 // SYSTEM-INSTALLED LIBRARIES
 #include <fftw3.h>
 // LOCAL INCLUDES
@@ -30,14 +31,26 @@ public:
   // Therefore, **IT DELETES THE CONTENTS OF THE ARRAY**. It is intended to be passed a newly
   // allocated array by the classes that inherit from AudioSignal, because it isn't an expensive
   // operation and avoids memory errors due to non-initialized values.
-  explicit AudioSignal(size_t size) : data_((T*)aligned_alloc(64, size*sizeof(T))){
-    memset(data_, 0, sizeof(T)*size);
+  explicit AudioSignal(size_t size)
+    : data_((T*)aligned_alloc(64, size*sizeof(T))),
+      size_(size),
+      delay_(0){
+    std::fill(this->begin(), this->end(), 0);
+    // memset(data_, 0, sizeof(T)*size);
   }
-  explicit AudioSignal(T* data, size_t size) : data_(data), size_(size){
-    memset(data_, 0, sizeof(T)*size);
+  explicit AudioSignal(T* data, size_t size)
+    : AudioSignal(size){
+    // memcpy(data_, data, sizeof(T)*size);
+    std::copy(data, data+size, data_);
   }
-  // The destructor is empty because this class didn't allocate the contained array
-  virtual ~AudioSignal(){}
+  explicit AudioSignal(T* data, size_t size, size_t pad_bef, size_t pad_aft)
+    : AudioSignal(size+pad_bef+pad_aft){
+    // memcpy(data_+pad_bef, data, sizeof(float)*size);
+    std::copy(data, data+size, data_+pad_bef);
+  }
+  ~AudioSignal(){
+    free(data_);
+  }
   // getters
   size_t &getSize(){return size_;}
   const size_t &getSize() const{return size_;}
@@ -66,35 +79,27 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This class is an AudioSignal that works on aligned float arrays allocated by FFTW.
-// It also overloads some further operators to do basic arithmetic
+
+// Wrapper class for AudioSignal<float32>
 class FloatSignal : public AudioSignal<float>{
 public:
-  // the basic constructor allocates an aligned, float array, which is zeroed by the superclass
   explicit FloatSignal(size_t size)
-    : AudioSignal(fftwf_alloc_real(size), size){}
-  explicit FloatSignal(float* data, size_t size) : FloatSignal(size){
-    memcpy(data_, data, sizeof(float)*size);
-  }
+    : AudioSignal(size){}
+  explicit FloatSignal(float* data, size_t size)
+    : AudioSignal(data, size){}
   explicit FloatSignal(float* data, size_t size, size_t pad_bef, size_t pad_aft)
-    : FloatSignal(size+pad_bef+pad_aft){
-    memcpy(data_+pad_bef, data, sizeof(float)*size);
-  }
-  // the destructor frees the only resource allocated
-  ~FloatSignal() {fftwf_free(data_);}
+    : AudioSignal(data, size, pad_bef, pad_aft){}
 };
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// This class is an AudioSignal that works on aligned complex (float[2]) arrays allocated by FFTW.
-// It also overloads some further operators to do basic arithmetic
+// Wrapper class for AudioSignal<complex64>
 class ComplexSignal : public AudioSignal<std::complex<float> >{
 public:
-  // the basic constructor allocates an aligned, float[2] array, which is zeroed by the superclass
   explicit ComplexSignal(size_t size)
-    : AudioSignal(reinterpret_cast<std::complex<float>*>(fftwf_alloc_complex(size)), size){}
-  ~ComplexSignal(){fftwf_free(data_);}
+    : AudioSignal(size){}
+  explicit ComplexSignal(std::complex<float>* data, size_t size)
+    : AudioSignal(data, size){}
+  explicit ComplexSignal(std::complex<float>* data, size_t size, size_t pad_bef, size_t pad_aft)
+    : AudioSignal(data, size, pad_bef, pad_aft){}
 };
 
 

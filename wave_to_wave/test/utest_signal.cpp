@@ -20,8 +20,9 @@
 TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
   // make and fill a float array for testing purposes
   const size_t kTestSize = 27;
-  float* arr = new float[kTestSize];
+  float arr[kTestSize];
   for(size_t i=0; i<kTestSize; ++i){arr[i] = 2*i;}
+
   // use different constructors:
   FloatSignal fs1(kTestSize);
   FloatSignal fs2(arr, kTestSize);
@@ -87,9 +88,6 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
       }
     }
   }
-
-  // delete array to finish the FloatSignal test
-  delete[] arr;
 }
 
 
@@ -105,14 +103,14 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
   for(size_t i=0; i<kTestSize; ++i){
     arr[i] = (2*i, 0);
   }
-  //
-  ComplexSignal cs1(kTestSize);
-  cs1 += std::complex<float>(0, 1);
-  // cs1 += 5;
-  // cs1 -= std::complex<float>(3, 4);
-  cs1 *= std::complex<float>(1, 2);
-  cs1 *= 10;
-  cs1.print();
+  // //
+  // ComplexSignal cs1(kTestSize);
+  // cs1 += std::complex<float>(0, 1);
+  // // cs1 += 5;
+  // // cs1 -= std::complex<float>(3, 4);
+  // cs1 *= std::complex<float>(1, 2);
+  // cs1 *= 10;
+  // cs1.print();
 
   // SECTION("ComplexSignal constructor and [] operator"){
   //   float sum = 0; // to check that cs1 is initialized with zeros
@@ -166,7 +164,4 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
   //     }
   //   }
   // }
-
-  // // delete array to finish the FloatSignal test
-  // // delete[] arr;
 }
