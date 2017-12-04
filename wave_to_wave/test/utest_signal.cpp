@@ -5,8 +5,7 @@
 #include<vector>
 #include<list>
 #include<complex>
-// SYSTEM-INSTALLED LIBRARIES
-#include <fftw3.h>
+#include<numeric>
 // LOCAL INCLUDES
 #include "../include/helpers.hpp"
 #include "../include/signal.hpp"
@@ -27,11 +26,13 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
   FloatSignal fs1(kTestSize);
   FloatSignal fs2(arr, kTestSize);
   FloatSignal fs3(arr, kTestSize, 10, 10);
+  FloatSignal fs4(fs2.getData(), fs2.getSize());
 
   SECTION("FloatSignal constructors, initialization, padding and operator[]"){
     for(size_t i=0; i<kTestSize; ++i){
       REQUIRE(fs1[i] == 0); // check that fs1 is initialized with zeros
       REQUIRE(fs2[i] == arr[i]); // check all values arr and fs2 are same
+      REQUIRE(fs2[i] == fs4[i]); // check all values fs2 and fs4 are same
       REQUIRE(fs3[i+10] == arr[i]); // check all values arr and fs3 are same
     }
     // check padding:
@@ -48,11 +49,15 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
     std::vector<float> v(arr, arr+kTestSize);
     std::string v_str = IterableToString(v);
     std::string fs2_str = IterableToString(fs2);
-    REQUIRE(v_str.compare(fs2_str) == 0); // check both IterToString are equal
-    for(auto& f : fs2){ // use some iterator loop
-      auto i = &f - &fs2[0];
-      REQUIRE(f == arr[i]);
+    // check both IterToString are equal
+    REQUIRE(v_str.compare(fs2_str) == 0);
+    // check that foreach loops work with FloatSignal, as well as STL dotprod:
+    float dotprod = std::inner_product(fs2.begin(), fs2.end(), fs2.begin(), 0);
+    float check_dotprod = 0;
+    for(auto& f : fs2){
+      check_dotprod += f*f;
     }
+    REQUIRE(dotprod == check_dotprod);
   }
 
   SECTION("FloatSignal getters and setters"){
@@ -63,6 +68,7 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
     // getData
     REQUIRE(fs1.getData() != arr); // constructor makes a copy of arr
     REQUIRE(fs2.getData() != fs1.getData()); // constructor makes a copy of arr
+    REQUIRE(fs2.getData() != fs4.getData()); // also copy-constructor
     REQUIRE(*(fs2.getData()+1) == fs2[1]);
   }
 
@@ -88,30 +94,66 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
   }
 
   SECTION("FloatSignal-to-FloatSignal operators"){
-    FloatSignal other(arr, kTestSize);
-    SECTION("+= with itself and with another:"){
-      // test
-      fs2.addSignal(other, -2000);
+    SECTION("+= and -+, with itself and with another:"){
+      FloatSignal other(arr, kTestSize);
+      // this two should do nothing (since offset is out of bounds)
+      fs2.addSignal(other, -44100*300);
       for(size_t i=0; i<kTestSize; ++i){
         REQUIRE(fs2[i] == arr[i]);
       }
-      fs2.addSignal(other, 2000);
+      fs2.addSignal(other, 44100*300);
       for(size_t i=0; i<kTestSize; ++i){
         REQUIRE(fs2[i] == arr[i]);
       }
+      // test adding and subtracting for offset=0
       fs2.addSignal(other);
       for(size_t i=0; i<kTestSize; ++i){
         REQUIRE(fs2[i] == 2*arr[i]);
       }
-      // test that is possible to add to itself
-      fs2.addSignal(other);
+      fs2.subtractSignal(other);
       for(size_t i=0; i<kTestSize; ++i){
-        REQUIRE(fs2[i] == 3*arr[i]);
+        REQUIRE(fs2[i] == arr[i]);
       }
-      // test compound operator
+      // test the same but with the operators
       fs2 += other;
       for(size_t i=0; i<kTestSize; ++i){
-        REQUIRE(fs2[i] == 4*arr[i]);
+        REQUIRE(fs2[i] == 2*arr[i]);
+      }
+      fs2 -= other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(fs2[i] == arr[i]);
+      }
+      // test the same but with itself
+      fs2 += fs2;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(fs2[i] == 2*arr[i]);
+      }
+      fs2 -= fs2;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(fs2[i] == 0);
+      }
+      // test with some different offset
+      fs2 *= 0;
+      fs2.addSignal(other, -5);
+      for(size_t i=0; i<kTestSize-5; ++i){
+        REQUIRE(fs2[i] == arr[i+5]);
+      }
+    }
+    SECTION("*=, brief test assuming most of += tests hold here"){
+      FloatSignal other(arr, kTestSize);
+      // test "restart" fs2
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(fs2[i] == arr[i]);
+      }
+      // multiply fs2 by other, no offset
+      fs2 *= other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(fs2[i] == arr[i]*arr[i]);
+      }
+      // multiply other by itself, no offset
+      other *= other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(other[i] == arr[i]*arr[i]);
       }
     }
   }
@@ -158,11 +200,16 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
     std::vector<std::complex<float> > v(arr, arr+kTestSize);
     std::string v_str = IterableToString(v);
     std::string cs2_str = IterableToString(cs2);
-    REQUIRE(v_str.compare(cs2_str) == 0); // check both IterToString are equal
-    for(auto& c : cs2){ // use some iterator loop
-      auto i = &c - &cs2[0];
-      REQUIRE(c == arr[i]);
+    // check both IterToString are equal
+    REQUIRE(v_str.compare(cs2_str) == 0);
+    // check that foreach loops work with FloatSignal, as well as STL dotprod:
+    std::complex<float> dotprod = std::inner_product(cs2.begin(), cs2.end(),
+                                                     cs2.begin(), kComplexZero);
+    std::complex<float> check_dotprod = kComplexZero;
+    for(auto& z : cs2){
+      check_dotprod += z*z;
     }
+    REQUIRE(dotprod == check_dotprod);
   }
 
   SECTION("ComplexSignal getters and setters"){
@@ -174,6 +221,19 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
     REQUIRE(cs1.getData() != arr); // constructor makes a copy of arr
     REQUIRE(cs2.getData() != cs1.getData()); // constructor makes a copy of arr
     REQUIRE(*(cs2.getData()+1) == cs2[1]);
+  }
+
+
+  SECTION("ComplexSignal conjugate method"){
+    ComplexSignal cs_conj(arr, kTestSize);
+    cs_conj.conjugate();
+    for(size_t i=0; i<kTestSize; ++i){
+      REQUIRE(cs_conj[i] == std::conj(cs2[i]));
+    }
+    cs_conj.conjugate();
+    for(size_t i=0; i<kTestSize; ++i){
+      REQUIRE(cs_conj[i] == cs2[i]);
+    }
   }
 
   SECTION("ComplexSignal-to-constant compound assignment operators"){
@@ -193,6 +253,73 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
       cs2 *= kOffset;
       for(size_t i=0; i<kTestSize; ++i){
         REQUIRE(cs2[i] == arr[i]*kOffset);
+      }
+    }
+  }
+
+  SECTION("ComplexSignal-to-ComplexSignal operators"){
+    SECTION("+= and -+, with itself and with another:"){
+      ComplexSignal other(arr, kTestSize);
+      // this two should do nothing (since offset is out of bounds)
+      cs2.addSignal(other, -44100*300);
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]);
+      }
+      cs2.addSignal(other, 44100*300);
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]);
+      }
+      // test adding and subtracting for offset=0
+      cs2.addSignal(other);
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]+arr[i]);
+      }
+      cs2.subtractSignal(other);
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]);
+      }
+      // test the same but with the operators
+      cs2 += other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]+arr[i]);
+      }
+      cs2 -= other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]);
+      }
+      // test the same but with itself
+      cs2 += cs2;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]+arr[i]);
+      }
+      cs2 -= cs2;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == kComplexZero);
+      }
+      // test with some different offset
+      cs2 *= 0;
+      cs2.addSignal(other, -5);
+      for(size_t i=0; i<kTestSize-5; ++i){
+        REQUIRE(cs2[i] == arr[i+5]);
+      }
+    }
+    SECTION("*=, brief test assuming most of += tests hold here"){
+      ComplexSignal other(arr, kTestSize);
+      // test "restart" cs2
+      cs2 *= 0;
+      cs2 += other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]);
+      }
+      // multiply cs2 by other, no offset
+      cs2 *= other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(cs2[i] == arr[i]*arr[i]);
+      }
+      // multiply other by itself, no offset
+      other *= other;
+      for(size_t i=0; i<kTestSize; ++i){
+        REQUIRE(other[i] == arr[i]*arr[i]);
       }
     }
   }

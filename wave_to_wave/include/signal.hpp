@@ -6,12 +6,6 @@
 #include <iostream>
 #include <complex>
 #include <cstdlib>
-// SYSTEM-INSTALLED LIBRARIES
-#include <fftw3.h>
-// LOCAL INCLUDES
-#include "helpers.hpp"
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -26,6 +20,26 @@ class AudioSignal {
 protected:
   T* data_;
   size_t size_;
+
+  // SIGNAL-TO-SIGNAL ARITHMETIC
+  // This function is needed by each in-place signal-to-signal operation.
+  // Given the required endpoints (by reference) of both signals, and the wanted "t" offset of the
+  // "other" with respect to "this" (t=13 means that other[0] will be applied to this[13]),
+  // this function adjust the endpoints to match the desired t, and returns the optimal loop size.
+  // Example: see addSignal and mulSignal.
+  const size_t _prepareSignalOpInPlace(T* &begin_this, T* &begin_other,
+                                       const T* end_other, const int t) const {
+    // if t>0, advance this.begin(). If t<0, advance other.begin()
+    if(t>0){
+      begin_this += t;
+    } else if(t<0){
+      begin_other -= t;
+    }
+    // return the minimal distance of both, based on the updated pointers (0 is the smallest)
+    const int len_min = std::min(end()-begin_this, end_other-begin_other);
+    return std::max(len_min, 0);
+  }
+
 public:
   // CONSTRUCTORS AND DESTRUCTOR
   explicit AudioSignal(size_t size)
@@ -55,21 +69,41 @@ public:
   }
   // ITERABLE INTERFACE
   T* begin(){return &data_[0];}
-  T* end(){return &data_[size_];}
   const T* begin() const{return &data_[0];}
+  T* end(){return &data_[size_];}
   const T* end() const{return &data_[size_];}
-  // SIGNAL-TO-SIGNAL ARITHMETIC
+
+  // Element-wise addition of two signals of the same type. Parameter t is the offset of the
+  // "other" with respect to "this" (t=13 means that other[0] will be applied to this[13]),
   void addSignal(AudioSignal<T> &other, const int t=0){
-    // if t>0, advance this.begin(). If t<0, advance signal.begin()
-    T* this_it = begin() + std::max(t, 0);
-    T* other_it = other.begin() - std::min(0, t);
-    // loop length will equal the smallest size
-    const size_t this_len = std::max<int>(std::distance(this_it, end()), 0);
-    const size_t other_len = std::max<int>(std::distance(other_it, other.end()), 0);
-    const size_t len = std::min(this_len, other_len);
-    // loop expression as simple as possible
-    for(size_t i=0; i<len; ++i, ++this_it, ++other_it){
-      *this_it += *other_it;
+    T* begin_this = begin();
+    T* begin_other = other.begin();
+    const T* end_other = other.end();
+    const size_t lenn = _prepareSignalOpInPlace(begin_this, begin_other, end_other, t);
+     for(size_t i=0; i<lenn; ++i, ++begin_this, ++begin_other){
+      *begin_this += *begin_other;
+    }
+  }
+
+  // Analogous to addSignal, performs element-wise subtraction
+  void subtractSignal(AudioSignal<T> &other, const int t=0){
+    T* begin_this = begin();
+    T* begin_other = other.begin();
+    const T* end_other = other.end();
+    const size_t lenn = _prepareSignalOpInPlace(begin_this, begin_other, end_other, t);
+    for(size_t i=0; i<lenn; ++i, ++begin_this, ++begin_other){
+      *begin_this -= *begin_other;
+    }
+  }
+
+  // Analogous to addSignal, performs element-wise multiplication
+  void mulSignal(AudioSignal<T> &other, const int t=0){
+    T* begin_this = begin();
+    T* begin_other = other.begin();
+    const T* end_other = other.end();
+    const size_t lenn = _prepareSignalOpInPlace(begin_this, begin_other, end_other, t);
+    for(size_t i=0; i<lenn; ++i, ++begin_this, ++begin_other){
+      *begin_this *= *begin_other;
     }
   }
   // OVERLOADED OPERATORS
@@ -81,10 +115,11 @@ public:
   void operator*=(const T x){for(size_t i=0; i<size_; ++i){data_[i] *= x;}}
   // signal-to-signal compound assignment operators
   void operator+=(AudioSignal<T> &s){addSignal(s);}
+  void operator-=(AudioSignal<T> &s){subtractSignal(s);}
+  void operator*=(AudioSignal<T> &s){mulSignal(s);}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 // Wrapper class for AudioSignal<float32>
 class FloatSignal : public AudioSignal<float>{
@@ -97,7 +132,7 @@ public:
     : AudioSignal(data, size, pad_bef, pad_aft){}
 };
 
-// Wrapper class for AudioSignal<complex64>
+// Wrapper class for AudioSignal<complex64> plus some extra functionality
 class ComplexSignal : public AudioSignal<std::complex<float> >{
 public:
   explicit ComplexSignal(size_t size)
@@ -106,9 +141,14 @@ public:
     : AudioSignal(data, size){}
   explicit ComplexSignal(std::complex<float>* data, size_t size, size_t pad_bef, size_t pad_aft)
     : AudioSignal(data, size, pad_bef, pad_aft){}
+  // in-class extra functionality
+  void conjugate(){
+    float* data_flat = &reinterpret_cast<float(&)[2]>(data_[0])[0];
+    for(size_t i=1, kFlatSize=2*size_; i<kFlatSize; i+=2){
+      data_flat[i] *= -1;
+    }
+  }
 };
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -116,7 +156,7 @@ public:
 // element-wise multiplication:   a+ib * c+id = ac+iad+ibc-bd = ac-bd + i(ad+bc)   The computation
 // loop isn't sent to OMP because this function itself is already expected to be called by multiple
 // threads, and it would actually slow down the process.
-// It throws an exception if
+// It expects all 3 signals to have equal size, throws an exception otherwise
 void SpectralConvolution(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
   const size_t kSize_a = a.getSize();
   const size_t kSize_b = b.getSize();
@@ -124,15 +164,11 @@ void SpectralConvolution(const ComplexSignal &a, const ComplexSignal &b, Complex
   CheckAllEqual({kSize_a, kSize_b, kSize_result},
                 std::string("SpectralConvolution: all sizes must be equal and are"));
   for(size_t i=0; i<kSize_a; ++i){
-    // a+ib * c+id = ac+iad+ibc-bd = ac-bd + i(ad+bc)
     result[i] = a[i]*b[i];
-     // result[i][REAL] = a[i][REAL]*b[i][REAL] - a[i][IMAG]*b[i][IMAG];
-     // result[i][IMAG] = a[i][IMAG]*b[i][REAL] + a[i][REAL]*b[i][IMAG];
   }
 }
 
-// This function behaves identically to SpectralConvolution, but computes c=a*conj(b) instead
-// of c=a*b:         a * conj(b) = a+ib * c-id = ac-iad+ibc+bd = ac+bd + i(bc-ad)
+// Like SpectralConvolution, but compu
 void SpectralCorrelation(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
   const size_t kSize_a = a.getSize();
   const size_t kSize_b = b.getSize();
@@ -140,15 +176,9 @@ void SpectralCorrelation(const ComplexSignal &a, const ComplexSignal &b, Complex
   CheckAllEqual({kSize_a, kSize_b, kSize_result},
                   "SpectralCorrelation: all sizes must be equal and are");
   for(size_t i=0; i<kSize_a; ++i){
-    // a * conj(b) = a+ib * c-id = ac-iad+ibc+bd = ac+bd + i(bc-ad)
     result[i] = a[i] * std::conj(b[i]);
-    // result[i][REAL] = a[i][REAL]*b[i][REAL] + a[i][IMAG]*b[i][IMAG];
-    // result[i][IMAG] = a[i][IMAG]*b[i][REAL] - a[i][REAL]*b[i][IMAG];
-
   }
 }
-
-
 
 
 

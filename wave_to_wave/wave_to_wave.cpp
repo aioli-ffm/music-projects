@@ -107,3 +107,12 @@ int main(int argc,  char** argv){
 
   return 0;
 }
+
+// TODO:
+// tidy up fft plan class tree (seems verbose).
+// make a decision regarding spectralconv and xcorr. friend funcs?
+// once design and implementation is "stable", utest convolver file (clean MAIN)
+// put the parse into a separate file? clear parser questions.
+// check valgrind... check imports
+// write optimizer. support a lazy dict of {1024: FloatSignal(orig), 2046: orig}
+//                  copies of the original, to be compatible with every patch.

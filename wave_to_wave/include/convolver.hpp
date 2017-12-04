@@ -29,12 +29,11 @@
 
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-// This class is a simple wrapper for the memory management of the fftw plans, plus a
-// parameterless execute() method which is also a wrapper for FFTW's execute.
-// It is not expected to be used directly: rather, to be extended by specific plans, for instance,
-// if working with real, 1D signals, only 1D complex<->real plans are needed.
+// This class is a simple wrapper for the memory management of the fftw plans. It is not expected
+// to be used directly: rather, to be extended by specific plans, for instance, if working with
+// real, 1D signals, only 1D complex<->real plans are needed.
 class FftPlan{
 private:
   fftwf_plan plan_;
@@ -48,10 +47,8 @@ public:
 class FftForwardPlan : public FftPlan{
 public:
   // This constructor creates a real->complex plan that performs the FFT(real) and saves it into the
-  // complex. As explained in the FFTW docs (http://www.fftw.org/#documentation), the size of
-  // the complex has to be size(real)/2+1, so the constructor will throw a runtime error if
-  // this condition doesn't hold. Since the signals and the superclass already have proper
-  // destructors, no special memory management has to be done.
+  // complex. Throws an exception if size(complex)!=size(real)/2+1, s explained in
+  // http://www.fftw.org/#documentation
   explicit FftForwardPlan(FloatSignal &fs, ComplexSignal &cs)
     : FftPlan(fftwf_plan_dft_r2c_1d(fs.getSize(), fs.getData(),
                                     reinterpret_cast<fftwf_complex*>(&cs.getData()[0]),
@@ -63,11 +60,9 @@ public:
 // This backward plan (1D, C->R) is adequate to process spectra of 1D floats (real).
 class FftBackwardPlan : public FftPlan{
 public:
-  // This constructor creates a complex->real plan that performs the IFFT(complex) and saves it
-  // complex. As explained in the FFTW docs (http://www.fftw.org/#documentation), the size of
-  // the complex has to be size(real)/2+1, so the constructor will throw a runtime error if
-  // this condition doesn't hold. Since the signals and the superclass already have proper
-  // destructors, no special memory management has to be done.
+  // This constructor creates a complex->real plan that performs the IFFT(complex) and saves it into
+  // the real. Throws an exception if size(complex)!=size(real)/2+1, s explained in
+  // http://www.fftw.org/#documentation
   explicit FftBackwardPlan(ComplexSignal &cs, FloatSignal &fs)
     : FftPlan(fftwf_plan_dft_c2r_1d(fs.getSize(),
                                     reinterpret_cast<fftwf_complex*>(&cs.getData()[0]),
@@ -75,6 +70,8 @@ public:
     CheckRealComplexRatio(fs.getSize(), cs.getSize(), "FftBackwardPlan");
   }
 };
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,6 +112,8 @@ void ImportFftwWisdom(const std::string path_in, const bool throw_exception_if_f
     else{std::cout << "WARNING: " << message;}
   }
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// PERFORM CONVOLUTION/CORRELATION
