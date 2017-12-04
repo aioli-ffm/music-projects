@@ -30,6 +30,9 @@ public:
   // Therefore, **IT DELETES THE CONTENTS OF THE ARRAY**. It is intended to be passed a newly
   // allocated array by the classes that inherit from AudioSignal, because it isn't an expensive
   // operation and avoids memory errors due to non-initialized values.
+  explicit AudioSignal(size_t size) : data_((T*)aligned_alloc(64, size*sizeof(T))){
+    memset(data_, 0, sizeof(T)*size);
+  }
   explicit AudioSignal(T* data, size_t size) : data_(data), size_(size){
     memset(data_, 0, sizeof(T)*size);
   }
@@ -43,6 +46,10 @@ public:
   // overloaded operators
   T &operator[](size_t idx){return data_[idx];}
   T &operator[](size_t idx) const {return data_[idx];}
+  // compound assignment operators
+  void operator+=(const T x){for(size_t i=0; i<size_; ++i){data_[i] += x;}}
+  void operator-=(const T x){for(size_t i=0; i<size_; ++i){data_[i] -= x;}}
+  void operator*=(const T x){for(size_t i=0; i<size_; ++i){data_[i] *= x;}}
   // make signals iterable
   T* begin(){return &data_[0];}
   T* end(){return &data_[size_];}
@@ -75,11 +82,6 @@ public:
   }
   // the destructor frees the only resource allocated
   ~FloatSignal() {fftwf_free(data_);}
-  // compound assignment operators
-  void operator+=(const float x){for(size_t i=0; i<size_; ++i){data_[i] += x;}}
-  void operator-=(const float x){for(size_t i=0; i<size_; ++i){data_[i] -= x;}}
-  void operator*=(const float x){for(size_t i=0; i<size_; ++i){data_[i] *= x;}}
-  //
 };
 
 
@@ -93,32 +95,6 @@ public:
   explicit ComplexSignal(size_t size)
     : AudioSignal(reinterpret_cast<std::complex<float>*>(fftwf_alloc_complex(size)), size){}
   ~ComplexSignal(){fftwf_free(data_);}
-  void operator*=(const float x){
-    for(size_t i=0; i<size_; ++i){
-      data_[i] *= x;
-      // data_[i][REAL] *= x;
-      // data_[i][IMAG] *= x;
-    }
-  }
-  void operator+=(const float x){
-    for(size_t i=0; i<size_; ++i){
-      data_[i] += x;
-      // data_[i][REAL] += x;
-    }
-  }
-  void operator+=(const std::complex<float> x){
-    for(size_t i=0; i<size_; ++i){
-      data_[i] += x;
-      // data_[i][REAL] += x[REAL];
-      // data_[i][IMAG] += x[IMAG];
-    }
-  }
-  // // override print method to show both fields of the complex number
-  // void print(const std::string name="signal"){
-  //   for(size_t i=0; i<size_; ++i){
-  //     printf("%s[%zu]\t=\t(%f, i%f)\n",name.c_str(),i,data_[i][REAL],data_[i][IMAG]);
-  //   }
-  // }
 };
 
 

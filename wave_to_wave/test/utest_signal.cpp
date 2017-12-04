@@ -107,7 +107,11 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
   }
   //
   ComplexSignal cs1(kTestSize);
-
+  cs1 += std::complex<float>(0, 1);
+  // cs1 += 5;
+  // cs1 -= std::complex<float>(3, 4);
+  cs1 *= std::complex<float>(1, 2);
+  cs1 *= 10;
   cs1.print();
 
   // SECTION("ComplexSignal constructor and [] operator"){
