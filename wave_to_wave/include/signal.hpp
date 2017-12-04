@@ -11,70 +11,76 @@
 // LOCAL INCLUDES
 #include "helpers.hpp"
 
-#define REAL 0
-#define IMAG 1
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-// This is an abstract base class that provides some basic, type-independent functionality for
-// any container that should behave as a signal. It is not intended to be instantiated directly.
+// The AudioSignal class is the central piece for any musical DSP. As a template class it can be
+// instantiated with arbitrary types, although float and complex will suffice for most applications
+// (and are already represented by the FloatSignal and ComplexSignal classes respectively).
+// AudioSignal basically holds an array, provides basic getter/setter/print functionality to it,
+// and (most notably) support for signal-to-constant and signal-to-signal arithmetic. Last but not
+// least, AudioSignal implements the begin() and end() methods and is therefore iterable.
 template <class T>
 class AudioSignal {
 protected:
   T* data_;
   size_t size_;
-  long int delay_;
 public:
-  // Given a size and a reference to an array, it fills the array with <SIZE> zeros.
-  // Therefore, **IT DELETES THE CONTENTS OF THE ARRAY**. It is intended to be passed a newly
-  // allocated array by the classes that inherit from AudioSignal, because it isn't an expensive
-  // operation and avoids memory errors due to non-initialized values.
+  // CONSTRUCTORS AND DESTRUCTOR
   explicit AudioSignal(size_t size)
     : data_((T*)aligned_alloc(64, size*sizeof(T))),
-      size_(size),
-      delay_(0){
+      size_(size){
     std::fill(this->begin(), this->end(), 0);
-    // memset(data_, 0, sizeof(T)*size);
   }
   explicit AudioSignal(T* data, size_t size)
     : AudioSignal(size){
-    // memcpy(data_, data, sizeof(T)*size);
     std::copy(data, data+size, data_);
   }
   explicit AudioSignal(T* data, size_t size, size_t pad_bef, size_t pad_aft)
     : AudioSignal(size+pad_bef+pad_aft){
-    // memcpy(data_+pad_bef, data, sizeof(float)*size);
     std::copy(data, data+size, data_+pad_bef);
   }
-  ~AudioSignal(){
-    free(data_);
-  }
-  // getters
+  ~AudioSignal(){free(data_);}
+  // GETTERS/SETTERS/PRETTYPRINT
   size_t &getSize(){return size_;}
   const size_t &getSize() const{return size_;}
   T* getData(){return data_;}
   const T* getData() const{return data_;}
-  // overloaded operators
-  T &operator[](size_t idx){return data_[idx];}
-  T &operator[](size_t idx) const {return data_[idx];}
-  // compound assignment operators
-  void operator+=(const T x){for(size_t i=0; i<size_; ++i){data_[i] += x;}}
-  void operator-=(const T x){for(size_t i=0; i<size_; ++i){data_[i] -= x;}}
-  void operator*=(const T x){for(size_t i=0; i<size_; ++i){data_[i] *= x;}}
-  // make signals iterable
-  T* begin(){return &data_[0];}
-  T* end(){return &data_[size_];}
-  const T* begin() const{return &data_[0];}
-  const T* end() const{return &data_[size_];}
-  // basic print function. It may be overriden if, for example, the type <T> is a struct.
   void print(const std::string name="signal"){
     std::cout << std::endl;
     for(size_t i=0; i<size_; ++i){
       std::cout << name << "[" << i << "]  \t=\t" << data_[i] << std::endl;
     }
   }
+  // ITERABLE INTERFACE
+  T* begin(){return &data_[0];}
+  T* end(){return &data_[size_];}
+  const T* begin() const{return &data_[0];}
+  const T* end() const{return &data_[size_];}
+  // SIGNAL-TO-SIGNAL ARITHMETIC
+  void addSignal(AudioSignal<T> &other, const int t=0){
+    // if t>0, advance this.begin(). If t<0, advance signal.begin()
+    T* this_it = begin() + std::max(t, 0);
+    T* other_it = other.begin() - std::min(0, t);
+    // loop length will equal the smallest size
+    const size_t this_len = std::max<int>(std::distance(this_it, end()), 0);
+    const size_t other_len = std::max<int>(std::distance(other_it, other.end()), 0);
+    const size_t len = std::min(this_len, other_len);
+    // loop expression as simple as possible
+    for(size_t i=0; i<len; ++i, ++this_it, ++other_it){
+      *this_it += *other_it;
+    }
+  }
+  // OVERLOADED OPERATORS
+  T &operator[](size_t idx){return data_[idx];}
+  T &operator[](size_t idx) const {return data_[idx];}
+  // signal-to-constant compound assignment operators
+  void operator+=(const T x){for(size_t i=0; i<size_; ++i){data_[i] += x;}}
+  void operator-=(const T x){for(size_t i=0; i<size_; ++i){data_[i] -= x;}}
+  void operator*=(const T x){for(size_t i=0; i<size_; ++i){data_[i] *= x;}}
+  // signal-to-signal compound assignment operators
+  void operator+=(AudioSignal<T> &s){addSignal(s);}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
