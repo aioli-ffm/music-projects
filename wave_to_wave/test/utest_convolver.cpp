@@ -17,40 +17,57 @@
 /// TESTING THE CONVOLVER CLASS
 ////////////////////////////////////////////////////////////////////////////////
 
+// This test function returns the dot product between two signals, assuming
+// that patch is smaller than sig. Offset is applied to patch, e.g
+// dotprod += sig[i]*patch[i+offset]. If any index is out of bounds
+float dotProdAt(FloatSignal &sig, FloatSignal &patch, const int offset){
+  float result = 0;
+  for(int i=0, j=offset, n=patch.getSize(), m=sig.getSize(); i<n; ++i, ++j){
+    if(j>=0 && j<m){
+      result += patch[i] * sig[j];
+    }
+  }
+  return result;
+}
+
+
 TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
-  // settings
-  const size_t kSizeS = 10;
+  // create signals
+  const size_t kSizeS = 50;
   const size_t kSizeP1 = 3;
-  // create a test signal {1, 2, 3, ... kSizeS}
-  float s_arr[kSizeS];
-  for(size_t i=0; i<kSizeS; ++i){s_arr[i] = i+1;}
-  FloatSignal s(s_arr, kSizeS);
-  // create a test patch {1, 2, 3 ... kSizeP1}
-  float p1_arr[kSizeP1];
-  for(size_t i=0; i<kSizeP1; ++i){p1_arr[i]=i+1;}
-  FloatSignal p1(p1_arr, kSizeP1);
+  auto lin = [](const long int n)->float {return n+1;};
+  auto const1 = [](const long int n)->float {return 1;};
+
+  SECTION("test dotProdAt"){
+    FloatSignal s(lin, kSizeS);
+    FloatSignal p1(const1,  kSizeP1);
+    REQUIRE(dotProdAt(s, p1, -1000) == 0);
+    REQUIRE(dotProdAt(s, p1, -3) == 0);
+    REQUIRE(dotProdAt(s, p1, -2) == 1);
+    REQUIRE(dotProdAt(s, p1, -1) == 1+2);
+    REQUIRE(dotProdAt(s, p1, 0) == 1+2+3);
+    REQUIRE(dotProdAt(s, p1, 1) == 2+3+4);
+    REQUIRE(dotProdAt(s, p1, 2) == 3+4+5);
+    REQUIRE(dotProdAt(s, p1, kSizeS-1) == kSizeS);
+    REQUIRE(dotProdAt(s, p1, kSizeS) == 0);
+    REQUIRE(dotProdAt(s, p1, 1000) == 0);
+  }
 
   SECTION("Convolver constructor and init fields"){
-    // instantiate convolver
-    OverlapSaveConvolver xx(s, p1);
-    // the convolution between s and p1
-    FloatSignal testConv(kSizeS+kSizeP1-1);
-    testConv[4] = 123;
-    float kTestConv[]{1, 4, 10, 16, 22, 28, 34, 40, 46, 52, 47, 30};
-    // the cross-correlation between s and p1
-    float kTestXcorr[]{3, 8, 14, 20, 26, 32, 38, 44, 50, 56, 29, 10};
-    // make and test convolution
-    xx.executeConv();
-    FloatSignal conv = xx.extractResult();
-    conv.print("nowtest");
-    for(size_t i=0; i<(kSizeS+kSizeP1-1); ++i){
-      REQUIRE(Approx(conv[i]) == kTestConv[i]);
-    }
-    // make and test cross-correlation
-    xx.executeXcorr();
-    FloatSignal xcorr = xx.extractResult();
-    for(size_t i=0; i<(kSizeS+kSizeP1-1); ++i){
-      REQUIRE(Approx(xcorr[i]) == kTestXcorr[i]);
+    FloatSignal s(lin, kSizeS);
+    FloatSignal p1(lin, kSizeP1);
+    FloatSignal p1_reversed(p1.getData(),p1.getSize());
+    std::reverse(p1_reversed.begin(), p1_reversed.end());
+    // instantiate convolver, and extract conv and xcorr
+    OverlapSaveConvolver x(s, p1);
+    x.executeConv();
+    FloatSignal conv = x.extractResult();
+    x.executeXcorr();
+    FloatSignal xcorr = x.extractResult();
+    // compare results with tests using dotProdAt
+    for(size_t i=0, n=kSizeS+kSizeP1-1; i<n; ++i){
+      REQUIRE(Approx(xcorr[i]) == dotProdAt(s, p1, i-kSizeP1+1));
+      REQUIRE(Approx(conv[i]) == dotProdAt(s, p1_reversed, i-kSizeP1+1));
     }
   }
 

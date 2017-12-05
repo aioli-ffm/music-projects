@@ -1,3 +1,19 @@
+// Copyright (C) 2017 Andres Fernandez (https://github.com/andres-fr)
+
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
@@ -6,6 +22,7 @@
 #include <iostream>
 #include <complex>
 #include <cstdlib>
+#include<sndfile.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +59,7 @@ protected:
 
 public:
   // BASIC CONSTRUCTORS
+  explicit AudioSignal() : data_(nullptr), size_(0){}
   explicit AudioSignal(size_t size)
     : data_((T*)aligned_alloc(64, size*sizeof(T))),
       size_(size){
@@ -65,7 +83,9 @@ public:
     }
   }
   // DESTRUCTOR
-  ~AudioSignal(){free(data_);}
+  ~AudioSignal(){
+    if(data_!=nullptr){free(data_);}
+  }
   // GETTERS/SETTERS/PRETTYPRINT
   size_t &getSize(){return size_;}
   const size_t &getSize() const{return size_;}
@@ -143,6 +163,40 @@ public:
     : AudioSignal(data, size, pad_bef, pad_aft){}
   explicit FloatSignal(std::function<float (long int)> const&f, size_t size)
     : AudioSignal(f, size){}
+  // from wav
+  explicit FloatSignal(const std::string wav_path)
+    :AudioSignal() {
+    SF_INFO sf_info;
+    sf_info.format = 0;
+    SNDFILE* infile = sf_open(wav_path.c_str(), SFM_READ, &sf_info);
+    if(infile == nullptr){
+      throw std::invalid_argument("FloatSignal: Unable to open input stream: "+wav_path);
+    } else { // if file opens...
+      size_ = sf_info.frames;
+      data_ = ((float*)aligned_alloc(64, size_*sizeof(float)));
+      sf_read_float(infile, data_, size_);
+      sf_close(infile);
+    }
+  }
+  //
+  void toWav(const std::string path_out, const size_t samplerate,
+             const size_t format=SF_FORMAT_PCM_16){
+    SF_INFO sf_info;
+    // sf_info.frames = size_;
+    sf_info.samplerate = samplerate;
+    sf_info.channels = 1;
+    sf_info.format = SF_FORMAT_WAV | format; // SF_FORMAT_FLOAT; //
+    // declare and try to open outfile
+    SNDFILE* outfile = sf_open(path_out.c_str(), SFM_WRITE, &sf_info);
+    if(outfile == nullptr){ // if file doesn't open...
+      throw std::invalid_argument("toWav: unable to open output stream "+path_out);
+    } else{// if file opens...
+      sf_write_float(outfile, &data_[0], size_);
+      sf_write_sync(outfile);
+      sf_close(outfile);
+      std::cout  << "toWav: succesfully saved to "<< path_out << std::endl;
+    }
+  }
 };
 
 // Wrapper class for AudioSignal<complex64> plus some extra functionality

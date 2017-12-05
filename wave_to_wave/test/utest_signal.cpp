@@ -10,11 +10,18 @@
 #include "../include/helpers.hpp"
 #include "../include/signal.hpp"
 
-
+#include<sndfile.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// TESTING THE FLOATSIGNAL CLASS
 ////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("Testing the AudioSignal default constructor", "[AudioSignal]"){
+  AudioSignal<int> as;
+  REQUIRE(as.getSize() == 0);
+  REQUIRE(as.getData() == nullptr);
+}
+
 
 TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
   // make and fill a float array for testing purposes (gen.constr. is preferred)
@@ -49,6 +56,21 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
     FloatSignal fs(lambda, kTestSize);
     for(size_t i=0; i<kTestSize; ++i){
       REQUIRE(fs[i] == lambda(i));
+    }
+  }
+
+  SECTION("Interaction between FloatSignal and libsndfile"){
+    const std::string kWavPath = "/tmp/test.wav";
+    const size_t kWavSize = 10000;
+    // make a sin signal and save it to kWavPath (FORMAT_FLOAT to allow testing)
+    auto sin_gen = [](const long int x)->float{0.001*std::sin(0.1f*(float)x);};
+    FloatSignal fs(sin_gen, kWavSize);
+    fs.toWav(kWavPath, 44100, SF_FORMAT_FLOAT);
+    // load the wave from kWavPath and check that contents are still the same
+    FloatSignal loaded(kWavPath);
+    REQUIRE(loaded.getSize() == kWavSize);
+    for(size_t i=0; i<kWavSize; ++i){
+      REQUIRE(loaded[i] == sin_gen(i));
     }
   }
 
