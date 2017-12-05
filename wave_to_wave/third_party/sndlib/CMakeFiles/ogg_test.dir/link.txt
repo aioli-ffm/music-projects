@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/ogg_test.dir/tests/ogg_test.c.o  -o ogg_test libsndfile.a libtest_utils.a -lm libsndfile.a -lm -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC 

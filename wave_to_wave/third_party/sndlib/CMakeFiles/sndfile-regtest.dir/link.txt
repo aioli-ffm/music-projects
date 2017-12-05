@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sndfile-regtest.dir/regtest/sndfile-regtest.c.o CMakeFiles/sndfile-regtest.dir/regtest/database.c.o CMakeFiles/sndfile-regtest.dir/regtest/checksum.c.o  -o sndfile-regtest -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build libsndfile.so.1.0.29 -lsqlite3 -lm 

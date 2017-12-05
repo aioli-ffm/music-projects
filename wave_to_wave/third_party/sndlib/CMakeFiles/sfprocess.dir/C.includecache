@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rodriguez/git-work/libsndfile/examples/sfprocess.c
+stdio.h
+-
+string.h
+-
+sndfile.h
+-
+
+src/sndfile.h
+stdio.h
+-
+stdint.h
+-
+sys/types.h
+-
+

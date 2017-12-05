@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sfversion.dir/tests/sfversion.c.o  -o sfversion libsndfile.a -lm -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC 

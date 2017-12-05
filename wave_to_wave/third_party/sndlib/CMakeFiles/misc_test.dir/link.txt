@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/misc_test.dir/tests/misc_test.c.o  -o misc_test libsndfile.a libtest_utils.a -lm libsndfile.a -lm -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC 

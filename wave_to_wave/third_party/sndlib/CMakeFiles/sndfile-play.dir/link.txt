@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sndfile-play.dir/programs/sndfile-play.c.o CMakeFiles/sndfile-play.dir/programs/common.c.o  -o sndfile-play -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build: libsndfile.so.1.0.29 -lasound 

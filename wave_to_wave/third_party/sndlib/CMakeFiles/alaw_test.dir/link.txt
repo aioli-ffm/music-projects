@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/alaw_test.dir/tests/alaw_test.c.o  -o alaw_test libsndfile.a libtest_utils.a -lm libsndfile.a -lm -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC 

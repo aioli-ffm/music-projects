@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/cpp_test.dir/tests/cpp_test.cc.o  -o cpp_test libsndfile.a libtest_utils.a -lm libsndfile.a -lm -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC -logg -lvorbisfile -lvorbis -lvorbisenc -lFLAC 

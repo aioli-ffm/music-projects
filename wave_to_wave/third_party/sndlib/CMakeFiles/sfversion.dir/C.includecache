@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../src/sfconfig.h
+config.h
+../src/config.h
+
+/home/rodriguez/git-work/libsndfile/tests/sfversion.c
+sfconfig.h
+/home/rodriguez/git-work/libsndfile/tests/sfconfig.h
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+stdint.h
+-
+sndfile.h
+-
+
+src/config.h
+
+src/sndfile.h
+stdio.h
+-
+stdint.h
+-
+sys/types.h
+-
+

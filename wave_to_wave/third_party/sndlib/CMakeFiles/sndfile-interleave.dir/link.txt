@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sndfile-interleave.dir/programs/sndfile-interleave.c.o CMakeFiles/sndfile-interleave.dir/programs/common.c.o  -o sndfile-interleave -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build: libsndfile.so.1.0.29 

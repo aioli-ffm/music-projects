@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rodriguez/git-work/libsndfile/examples/make_sine.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+math.h
+-
+sndfile.h
+-
+
+src/sndfile.h
+stdio.h
+-
+stdint.h
+-
+sys/types.h
+-
+

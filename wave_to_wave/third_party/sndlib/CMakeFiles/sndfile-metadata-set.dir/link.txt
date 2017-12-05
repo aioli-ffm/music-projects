@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sndfile-metadata-set.dir/programs/sndfile-metadata-set.c.o CMakeFiles/sndfile-metadata-set.dir/programs/common.c.o  -o sndfile-metadata-set -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build: libsndfile.so.1.0.29 

@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sndfile-to-text.dir/examples/sndfile-to-text.c.o  -o sndfile-to-text -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build libsndfile.so.1.0.29 

@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/sndfilehandle.dir/examples/sndfilehandle.cc.o  -o sndfilehandle -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build libsndfile.so.1.0.29 

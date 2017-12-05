@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sndfile-convert.dir/programs/sndfile-convert.c.o CMakeFiles/sndfile-convert.dir/programs/common.c.o  -o sndfile-convert -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build: libsndfile.so.1.0.29 

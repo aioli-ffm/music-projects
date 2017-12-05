@@ -1,0 +1,181 @@
+Determining if the include file direct.h exists failed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_419e0/fast"
+/usr/bin/make -f CMakeFiles/cmTC_419e0.dir/build.make CMakeFiles/cmTC_419e0.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_419e0.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_419e0.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:20: fatal error: direct.h: No such file or directory
+ #include <direct.h>
+                    ^
+compilation terminated.
+CMakeFiles/cmTC_419e0.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_419e0.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_419e0.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_419e0/fast' failed
+make: *** [cmTC_419e0/fast] Error 2
+
+
+Determining if the include file io.h exists failed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_e34e3/fast"
+/usr/bin/make -f CMakeFiles/cmTC_e34e3.dir/build.make CMakeFiles/cmTC_e34e3.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e34e3.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_e34e3.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:16: fatal error: io.h: No such file or directory
+ #include <io.h>
+                ^
+compilation terminated.
+CMakeFiles/cmTC_e34e3.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_e34e3.dir/CheckIncludeFile.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_e34e3.dir/CheckIncludeFile.c.o] Error 1
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_e34e3/fast' failed
+make: *** [cmTC_e34e3/fast] Error 2
+
+
+Determining size of offt64_t failed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d3ac1/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d3ac1.dir/build.make CMakeFiles/cmTC_d3ac1.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d3ac1.dir/SIZEOF_OFF64_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_d3ac1.dir/SIZEOF_OFF64_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_OFF64_T.c
+/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_OFF64_T.c:23:22: error: ‘offt64_t’ undeclared here (not in a function)
+ #define SIZE (sizeof(offt64_t))
+                      ^
+/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_OFF64_T.c:25:12: note: in expansion of macro ‘SIZE’
+   ('0' + ((SIZE / 10000)%10)),
+            ^
+CMakeFiles/cmTC_d3ac1.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_d3ac1.dir/SIZEOF_OFF64_T.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_d3ac1.dir/SIZEOF_OFF64_T.c.o] Error 1
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_d3ac1/fast' failed
+make: *** [cmTC_d3ac1/fast] Error 2
+
+/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_OFF64_T.c:
+#include <sys/types.h>
+#include <stdint.h>
+#include <stddef.h>
+
+
+#undef KEY
+#if defined(__i386)
+# define KEY '_','_','i','3','8','6'
+#elif defined(__x86_64)
+# define KEY '_','_','x','8','6','_','6','4'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
+#elif defined(__ppc64__)
+# define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__aarch64__)
+# define KEY '_','_','a','a','r','c','h','6','4','_','_'
+#elif defined(__ARM_ARCH_7A__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','A','_','_'
+#elif defined(__ARM_ARCH_7S__)
+# define KEY '_','_','A','R','M','_','A','R','C','H','_','7','S','_','_'
+#endif
+
+#define SIZE (sizeof(offt64_t))
+char info_size[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','[',
+  ('0' + ((SIZE / 10000)%10)),
+  ('0' + ((SIZE / 1000)%10)),
+  ('0' + ((SIZE / 100)%10)),
+  ('0' + ((SIZE / 10)%10)),
+  ('0' +  (SIZE    % 10)),
+  ']',
+#ifdef KEY
+  ' ','k','e','y','[', KEY, ']',
+#endif
+  '\0'};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_size[argc];
+  (void)argv;
+  return require;
+}
+
+
+Performing C SOURCE FILE Test CPU_CLIPS_POSITIVE failed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_6e460/fast"
+/usr/bin/make -f CMakeFiles/cmTC_6e460.dir/build.make CMakeFiles/cmTC_6e460.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6e460.dir/src.c.o
+/usr/bin/cc   -Wall -Wextra -DCPU_CLIPS_POSITIVE   -o CMakeFiles/cmTC_6e460.dir/src.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_6e460
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6e460.dir/link.txt --verbose=1
+/usr/bin/cc  -Wall -Wextra -DCPU_CLIPS_POSITIVE    -rdynamic CMakeFiles/cmTC_6e460.dir/src.c.o  -o cmTC_6e460 /usr/lib/x86_64-linux-gnu/libm.so /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+Return value: 1
+Source file was:
+
+		#define	_ISOC9X_SOURCE	1
+		#define _ISOC99_SOURCE	1
+		#define	__USE_ISOC99	1
+		#define __USE_ISOC9X	1
+		#include <math.h>
+		int main (void)
+		{	double	fval ;
+			int k, ival ;
+
+			fval = 1.0 * 0x7FFFFFFF ;
+			for (k = 0 ; k < 100 ; k++)
+			{	ival = (lrint (fval)) >> 24 ;
+				if (ival != 127)
+					return 1 ;
+			
+				fval *= 1.2499999 ;
+				} ;
+			
+				return 0 ;
+			}
+		
+Performing C SOURCE FILE Test CPU_CLIPS_NEGATIVE failed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_3b022/fast"
+/usr/bin/make -f CMakeFiles/cmTC_3b022.dir/build.make CMakeFiles/cmTC_3b022.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3b022.dir/src.c.o
+/usr/bin/cc   -Wall -Wextra -DCPU_CLIPS_NEGATIVE   -o CMakeFiles/cmTC_3b022.dir/src.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_3b022
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3b022.dir/link.txt --verbose=1
+/usr/bin/cc  -Wall -Wextra -DCPU_CLIPS_NEGATIVE    -rdynamic CMakeFiles/cmTC_3b022.dir/src.c.o  -o cmTC_3b022 /usr/lib/x86_64-linux-gnu/libm.so /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+Return value: 1
+Source file was:
+
+		#define	_ISOC9X_SOURCE	1
+		#define _ISOC99_SOURCE	1
+		#define	__USE_ISOC99	1
+		#define __USE_ISOC9X	1
+		#include <math.h>
+		int main (void)
+		{	double	fval ;
+			int k, ival ;
+
+			fval = -8.0 * 0x10000000 ;
+			for (k = 0 ; k < 100 ; k++)
+			{	ival = (lrint (fval)) >> 24 ;
+				if (ival != -128)
+					return 1 ;
+			
+				fval *= 1.2499999 ;
+				} ;
+			
+				return 0 ;
+			}
+		

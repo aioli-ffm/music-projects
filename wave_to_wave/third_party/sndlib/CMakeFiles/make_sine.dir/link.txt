@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/make_sine.dir/examples/make_sine.c.o  -o make_sine -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build libsndfile.so.1.0.29 -lm -lm 

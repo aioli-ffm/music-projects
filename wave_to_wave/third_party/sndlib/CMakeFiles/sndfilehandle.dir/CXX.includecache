@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../src/sndfile.hh
+sndfile.h
+-
+string
+-
+new
+-
+
+/home/rodriguez/git-work/libsndfile/examples/sndfilehandle.cc
+cstdio
+-
+cstring
+-
+sndfile.hh
+-
+
+src/sndfile.h
+stdio.h
+-
+stdint.h
+-
+sys/types.h
+-
+

@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/sndfile-salvage.dir/programs/sndfile-salvage.c.o CMakeFiles/sndfile-salvage.dir/programs/common.c.o  -o sndfile-salvage -Wl,-rpath,/home/rodriguez/git-work/libsndfile/build: libsndfile.so.1.0.29 

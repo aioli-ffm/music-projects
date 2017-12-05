@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/rodriguez/git-work/libsndfile/examples/sndfile-to-text.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+ctype.h
+-
+float.h
+-
+sndfile.h
+-
+
+src/sndfile.h
+stdio.h
+-
+stdint.h
+-
+sys/types.h
+-
+

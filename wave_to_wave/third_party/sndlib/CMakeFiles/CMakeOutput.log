@@ -1,0 +1,1543 @@
+The system is: Linux - 3.16.0-4-amd64 - x86_64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /usr/bin/cc 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/3.10.0/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /usr/bin/c++ 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/3.10.0/CompilerIdCXX/a.out"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_63cb8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_63cb8.dir/build.make CMakeFiles/cmTC_63cb8.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_63cb8.dir/testCCompiler.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_63cb8.dir/testCCompiler.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_63cb8
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_63cb8.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_63cb8.dir/testCCompiler.c.o  -o cmTC_63cb8 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_6a449/fast"
+/usr/bin/make -f CMakeFiles/cmTC_6a449.dir/build.make CMakeFiles/cmTC_6a449.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CMakeCCompilerABI.c
+Linking C executable cmTC_6a449
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6a449.dir/link.txt --verbose=1
+/usr/bin/cc     -v -rdynamic CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o  -o cmTC_6a449 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/cc
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 4.9.2-10' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --with-arch-32=i586 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 4.9.2 (Debian 4.9.2-10) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_6a449' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/user/4137/ccqldnns.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_6a449 /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_6a449/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_6a449.dir/build.make CMakeFiles/cmTC_6a449.dir/build]
+  ignore line: [make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp']
+  ignore line: [Building C object CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/usr/bin/cc    -o CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CMakeCCompilerABI.c]
+  ignore line: [Linking C executable cmTC_6a449]
+  ignore line: [/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6a449.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/cc     -v -rdynamic CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o  -o cmTC_6a449 ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/cc]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 4.9.2-10' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --with-arch-32=i586 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 4.9.2 (Debian 4.9.2-10) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_6a449' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/user/4137/ccqldnns.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_6a449 /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/user/4137/ccqldnns.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [--sysroot=/] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_6a449] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..]
+    arg [CMakeFiles/cmTC_6a449.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> [/usr/lib]
+  implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/4.9;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+
+
+Detecting C [-std=c11] compiler features compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_80ca5/fast"
+/usr/bin/make -f CMakeFiles/cmTC_80ca5.dir/build.make CMakeFiles/cmTC_80ca5.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_80ca5.dir/feature_tests.c.o
+/usr/bin/cc   -std=c11 -o CMakeFiles/cmTC_80ca5.dir/feature_tests.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/feature_tests.c
+Linking C executable cmTC_80ca5
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_80ca5.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_80ca5.dir/feature_tests.c.o  -o cmTC_80ca5 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:1c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c99] compiler features compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_33647/fast"
+/usr/bin/make -f CMakeFiles/cmTC_33647.dir/build.make CMakeFiles/cmTC_33647.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_33647.dir/feature_tests.c.o
+/usr/bin/cc   -std=c99 -o CMakeFiles/cmTC_33647.dir/feature_tests.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/feature_tests.c
+Linking C executable cmTC_33647
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33647.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_33647.dir/feature_tests.c.o  -o cmTC_33647 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:0c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c90] compiler features compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_196f1/fast"
+/usr/bin/make -f CMakeFiles/cmTC_196f1.dir/build.make CMakeFiles/cmTC_196f1.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_196f1.dir/feature_tests.c.o
+/usr/bin/cc   -std=c90 -o CMakeFiles/cmTC_196f1.dir/feature_tests.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/feature_tests.c
+Linking C executable cmTC_196f1
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_196f1.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_196f1.dir/feature_tests.c.o  -o cmTC_196f1 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:0c_restrict
+    Feature record: C_FEATURE:0c_static_assert
+    Feature record: C_FEATURE:0c_variadic_macros
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_50e2b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_50e2b.dir/build.make CMakeFiles/cmTC_50e2b.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_50e2b.dir/testCXXCompiler.cxx.o
+/usr/bin/c++     -o CMakeFiles/cmTC_50e2b.dir/testCXXCompiler.cxx.o -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_50e2b
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_50e2b.dir/link.txt --verbose=1
+/usr/bin/c++       -rdynamic CMakeFiles/cmTC_50e2b.dir/testCXXCompiler.cxx.o  -o cmTC_50e2b 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_fffab/fast"
+/usr/bin/make -f CMakeFiles/cmTC_fffab.dir/build.make CMakeFiles/cmTC_fffab.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++     -o CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o -c /home/rodriguez/cmake-3.10.0/Modules/CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTC_fffab
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fffab.dir/link.txt --verbose=1
+/usr/bin/c++      -v -rdynamic CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_fffab 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 4.9.2-10' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --with-arch-32=i586 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 4.9.2 (Debian 4.9.2-10) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_fffab' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/user/4137/ccICVzfQ.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_fffab /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_fffab/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_fffab.dir/build.make CMakeFiles/cmTC_fffab.dir/build]
+  ignore line: [make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp']
+  ignore line: [Building CXX object CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/c++     -o CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o -c /home/rodriguez/cmake-3.10.0/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Linking CXX executable cmTC_fffab]
+  ignore line: [/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fffab.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/c++      -v -rdynamic CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_fffab ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 4.9.2-10' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --with-arch-32=i586 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 4.9.2 (Debian 4.9.2-10) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_fffab' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/user/4137/ccICVzfQ.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_fffab /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/user/4137/ccICVzfQ.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--sysroot=/] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_fffab] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..]
+    arg [CMakeFiles/cmTC_fffab.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> [/usr/lib]
+  implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/4.9;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+
+
+Detecting CXX [-std=c++14] compiler features compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_593ee/fast"
+/usr/bin/make -f CMakeFiles/cmTC_593ee.dir/build.make CMakeFiles/cmTC_593ee.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_593ee.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++14 -o CMakeFiles/cmTC_593ee.dir/feature_tests.cxx.o -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_593ee
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_593ee.dir/link.txt --verbose=1
+/usr/bin/c++       -rdynamic CMakeFiles/cmTC_593ee.dir/feature_tests.cxx.o  -o cmTC_593ee 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:1cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:1cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:1cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:1cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:1cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:1cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:1cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:1cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
+
+
+Detecting CXX [-std=c++11] compiler features compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_0e36a/fast"
+/usr/bin/make -f CMakeFiles/cmTC_0e36a.dir/build.make CMakeFiles/cmTC_0e36a.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_0e36a.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++11 -o CMakeFiles/cmTC_0e36a.dir/feature_tests.cxx.o -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_0e36a
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0e36a.dir/link.txt --verbose=1
+/usr/bin/c++       -rdynamic CMakeFiles/cmTC_0e36a.dir/feature_tests.cxx.o  -o cmTC_0e36a 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:0cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:0cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:0cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:0cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:0cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:0cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
+
+
+Detecting CXX [-std=c++98] compiler features compiled with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_fa3c0/fast"
+/usr/bin/make -f CMakeFiles/cmTC_fa3c0.dir/build.make CMakeFiles/cmTC_fa3c0.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fa3c0.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++98 -o CMakeFiles/cmTC_fa3c0.dir/feature_tests.cxx.o -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_fa3c0
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fa3c0.dir/link.txt --verbose=1
+/usr/bin/c++       -rdynamic CMakeFiles/cmTC_fa3c0.dir/feature_tests.cxx.o  -o cmTC_fa3c0 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:0cxx_alias_templates
+    Feature record: CXX_FEATURE:0cxx_alignas
+    Feature record: CXX_FEATURE:0cxx_alignof
+    Feature record: CXX_FEATURE:0cxx_attributes
+    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:0cxx_auto_type
+    Feature record: CXX_FEATURE:0cxx_binary_literals
+    Feature record: CXX_FEATURE:0cxx_constexpr
+    Feature record: CXX_FEATURE:0cxx_contextual_conversions
+    Feature record: CXX_FEATURE:0cxx_decltype
+    Feature record: CXX_FEATURE:0cxx_decltype_auto
+    Feature record: CXX_FEATURE:0cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:0cxx_default_function_template_args
+    Feature record: CXX_FEATURE:0cxx_defaulted_functions
+    Feature record: CXX_FEATURE:0cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:0cxx_delegating_constructors
+    Feature record: CXX_FEATURE:0cxx_deleted_functions
+    Feature record: CXX_FEATURE:0cxx_digit_separators
+    Feature record: CXX_FEATURE:0cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:0cxx_explicit_conversions
+    Feature record: CXX_FEATURE:0cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:0cxx_extern_templates
+    Feature record: CXX_FEATURE:0cxx_final
+    Feature record: CXX_FEATURE:0cxx_func_identifier
+    Feature record: CXX_FEATURE:0cxx_generalized_initializers
+    Feature record: CXX_FEATURE:0cxx_generic_lambdas
+    Feature record: CXX_FEATURE:0cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:0cxx_inline_namespaces
+    Feature record: CXX_FEATURE:0cxx_lambdas
+    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:0cxx_local_type_template_args
+    Feature record: CXX_FEATURE:0cxx_long_long_type
+    Feature record: CXX_FEATURE:0cxx_noexcept
+    Feature record: CXX_FEATURE:0cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:0cxx_nullptr
+    Feature record: CXX_FEATURE:0cxx_override
+    Feature record: CXX_FEATURE:0cxx_range_for
+    Feature record: CXX_FEATURE:0cxx_raw_string_literals
+    Feature record: CXX_FEATURE:0cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:0cxx_return_type_deduction
+    Feature record: CXX_FEATURE:0cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:0cxx_rvalue_references
+    Feature record: CXX_FEATURE:0cxx_sizeof_member
+    Feature record: CXX_FEATURE:0cxx_static_assert
+    Feature record: CXX_FEATURE:0cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:0cxx_thread_local
+    Feature record: CXX_FEATURE:0cxx_trailing_return_types
+    Feature record: CXX_FEATURE:0cxx_unicode_literals
+    Feature record: CXX_FEATURE:0cxx_uniform_initialization
+    Feature record: CXX_FEATURE:0cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:0cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:0cxx_variadic_macros
+    Feature record: CXX_FEATURE:0cxx_variadic_templates
+Determining if the include file sys/types.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_0b7c1/fast"
+/usr/bin/make -f CMakeFiles/cmTC_0b7c1.dir/build.make CMakeFiles/cmTC_0b7c1.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0b7c1.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_0b7c1.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_0b7c1
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0b7c1.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_0b7c1.dir/CheckIncludeFile.c.o  -o cmTC_0b7c1 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file stdint.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_b86b8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b86b8.dir/build.make CMakeFiles/cmTC_b86b8.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b86b8.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_b86b8.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_b86b8
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b86b8.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_b86b8.dir/CheckIncludeFile.c.o  -o cmTC_b86b8 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file stddef.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_4140a/fast"
+/usr/bin/make -f CMakeFiles/cmTC_4140a.dir/build.make CMakeFiles/cmTC_4140a.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4140a.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_4140a.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_4140a
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4140a.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_4140a.dir/CheckIncludeFile.c.o  -o cmTC_4140a 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of off_t passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_34234/fast"
+/usr/bin/make -f CMakeFiles/cmTC_34234.dir/build.make CMakeFiles/cmTC_34234.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_34234.dir/SIZEOF_OFF_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_34234.dir/SIZEOF_OFF_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_OFF_T.c
+Linking C executable cmTC_34234
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_34234.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_34234.dir/SIZEOF_OFF_T.c.o  -o cmTC_34234 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file byteswap.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_3f5fb/fast"
+/usr/bin/make -f CMakeFiles/cmTC_3f5fb.dir/build.make CMakeFiles/cmTC_3f5fb.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3f5fb.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_3f5fb.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_3f5fb
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3f5fb.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_3f5fb.dir/CheckIncludeFile.c.o  -o cmTC_3f5fb 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file dlfcn.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_47713/fast"
+/usr/bin/make -f CMakeFiles/cmTC_47713.dir/build.make CMakeFiles/cmTC_47713.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_47713.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_47713.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_47713
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_47713.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_47713.dir/CheckIncludeFile.c.o  -o cmTC_47713 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file endian.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_df758/fast"
+/usr/bin/make -f CMakeFiles/cmTC_df758.dir/build.make CMakeFiles/cmTC_df758.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_df758.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_df758.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_df758
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_df758.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_df758.dir/CheckIncludeFile.c.o  -o cmTC_df758 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file inttypes.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_33d97/fast"
+/usr/bin/make -f CMakeFiles/cmTC_33d97.dir/build.make CMakeFiles/cmTC_33d97.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_33d97.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_33d97.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_33d97
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33d97.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_33d97.dir/CheckIncludeFile.c.o  -o cmTC_33d97 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file locale.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1f97e/fast"
+/usr/bin/make -f CMakeFiles/cmTC_1f97e.dir/build.make CMakeFiles/cmTC_1f97e.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1f97e.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_1f97e.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_1f97e
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1f97e.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_1f97e.dir/CheckIncludeFile.c.o  -o cmTC_1f97e 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file memory.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_860ee/fast"
+/usr/bin/make -f CMakeFiles/cmTC_860ee.dir/build.make CMakeFiles/cmTC_860ee.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_860ee.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_860ee.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_860ee
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_860ee.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_860ee.dir/CheckIncludeFile.c.o  -o cmTC_860ee 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file stdlib.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_fbc47/fast"
+/usr/bin/make -f CMakeFiles/cmTC_fbc47.dir/build.make CMakeFiles/cmTC_fbc47.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_fbc47.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_fbc47.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_fbc47
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fbc47.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_fbc47.dir/CheckIncludeFile.c.o  -o cmTC_fbc47 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file string.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_2046b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_2046b.dir/build.make CMakeFiles/cmTC_2046b.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_2046b.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_2046b.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_2046b
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2046b.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_2046b.dir/CheckIncludeFile.c.o  -o cmTC_2046b 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file strings.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_b437c/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b437c.dir/build.make CMakeFiles/cmTC_b437c.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b437c.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_b437c.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_b437c
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b437c.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_b437c.dir/CheckIncludeFile.c.o  -o cmTC_b437c 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file sys/stat.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_91119/fast"
+/usr/bin/make -f CMakeFiles/cmTC_91119.dir/build.make CMakeFiles/cmTC_91119.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_91119.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_91119.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_91119
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_91119.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_91119.dir/CheckIncludeFile.c.o  -o cmTC_91119 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file sys/time.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_13855/fast"
+/usr/bin/make -f CMakeFiles/cmTC_13855.dir/build.make CMakeFiles/cmTC_13855.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_13855.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_13855.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_13855
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_13855.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_13855.dir/CheckIncludeFile.c.o  -o cmTC_13855 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file sys/wait.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_199bf/fast"
+/usr/bin/make -f CMakeFiles/cmTC_199bf.dir/build.make CMakeFiles/cmTC_199bf.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_199bf.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_199bf.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_199bf
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_199bf.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_199bf.dir/CheckIncludeFile.c.o  -o cmTC_199bf 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file unistd.h exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_41517/fast"
+/usr/bin/make -f CMakeFiles/cmTC_41517.dir/build.make CMakeFiles/cmTC_41517.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_41517.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_41517.dir/CheckIncludeFile.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_41517
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_41517.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_41517.dir/CheckIncludeFile.c.o  -o cmTC_41517 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of int64_t passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_bcac0/fast"
+/usr/bin/make -f CMakeFiles/cmTC_bcac0.dir/build.make CMakeFiles/cmTC_bcac0.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bcac0.dir/SIZEOF_INT64_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_bcac0.dir/SIZEOF_INT64_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_INT64_T.c
+Linking C executable cmTC_bcac0
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bcac0.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_bcac0.dir/SIZEOF_INT64_T.c.o  -o cmTC_bcac0 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of double passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_f03e3/fast"
+/usr/bin/make -f CMakeFiles/cmTC_f03e3.dir/build.make CMakeFiles/cmTC_f03e3.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f03e3.dir/SIZEOF_DOUBLE.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_f03e3.dir/SIZEOF_DOUBLE.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_DOUBLE.c
+Linking C executable cmTC_f03e3
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f03e3.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_f03e3.dir/SIZEOF_DOUBLE.c.o  -o cmTC_f03e3 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of float passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_3f2d7/fast"
+/usr/bin/make -f CMakeFiles/cmTC_3f2d7.dir/build.make CMakeFiles/cmTC_3f2d7.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3f2d7.dir/SIZEOF_FLOAT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_3f2d7.dir/SIZEOF_FLOAT.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_FLOAT.c
+Linking C executable cmTC_3f2d7
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3f2d7.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_3f2d7.dir/SIZEOF_FLOAT.c.o  -o cmTC_3f2d7 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of int passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_554de/fast"
+/usr/bin/make -f CMakeFiles/cmTC_554de.dir/build.make CMakeFiles/cmTC_554de.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_554de.dir/SIZEOF_INT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_554de.dir/SIZEOF_INT.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_INT.c
+Linking C executable cmTC_554de
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_554de.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_554de.dir/SIZEOF_INT.c.o  -o cmTC_554de 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of loff_t passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_cb7e1/fast"
+/usr/bin/make -f CMakeFiles/cmTC_cb7e1.dir/build.make CMakeFiles/cmTC_cb7e1.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cb7e1.dir/SIZEOF_LOFF_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_cb7e1.dir/SIZEOF_LOFF_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_LOFF_T.c
+Linking C executable cmTC_cb7e1
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cb7e1.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_cb7e1.dir/SIZEOF_LOFF_T.c.o  -o cmTC_cb7e1 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of long passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_9e2da/fast"
+/usr/bin/make -f CMakeFiles/cmTC_9e2da.dir/build.make CMakeFiles/cmTC_9e2da.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_9e2da.dir/SIZEOF_LONG.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_9e2da.dir/SIZEOF_LONG.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_LONG.c
+Linking C executable cmTC_9e2da
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9e2da.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_9e2da.dir/SIZEOF_LONG.c.o  -o cmTC_9e2da 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of long long passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_9f4af/fast"
+/usr/bin/make -f CMakeFiles/cmTC_9f4af.dir/build.make CMakeFiles/cmTC_9f4af.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_9f4af.dir/SIZEOF_LONG_LONG.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_9f4af.dir/SIZEOF_LONG_LONG.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_LONG_LONG.c
+Linking C executable cmTC_9f4af
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9f4af.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_9f4af.dir/SIZEOF_LONG_LONG.c.o  -o cmTC_9f4af 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of short passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_99adc/fast"
+/usr/bin/make -f CMakeFiles/cmTC_99adc.dir/build.make CMakeFiles/cmTC_99adc.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_99adc.dir/SIZEOF_SHORT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_99adc.dir/SIZEOF_SHORT.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_SHORT.c
+Linking C executable cmTC_99adc
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_99adc.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_99adc.dir/SIZEOF_SHORT.c.o  -o cmTC_99adc 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of size_t passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_03bdd/fast"
+/usr/bin/make -f CMakeFiles/cmTC_03bdd.dir/build.make CMakeFiles/cmTC_03bdd.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_03bdd.dir/SIZEOF_SIZE_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_03bdd.dir/SIZEOF_SIZE_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_SIZE_T.c
+Linking C executable cmTC_03bdd
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_03bdd.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_03bdd.dir/SIZEOF_SIZE_T.c.o  -o cmTC_03bdd 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of ssize_t passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_a013c/fast"
+/usr/bin/make -f CMakeFiles/cmTC_a013c.dir/build.make CMakeFiles/cmTC_a013c.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a013c.dir/SIZEOF_SSIZE_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_a013c.dir/SIZEOF_SSIZE_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_SSIZE_T.c
+Linking C executable cmTC_a013c
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a013c.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_a013c.dir/SIZEOF_SSIZE_T.c.o  -o cmTC_a013c 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_5fb4b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_5fb4b.dir/build.make CMakeFiles/cmTC_5fb4b.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_5fb4b.dir/SIZEOF_VOIDP.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_5fb4b.dir/SIZEOF_VOIDP.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_VOIDP.c
+Linking C executable cmTC_5fb4b
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5fb4b.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_5fb4b.dir/SIZEOF_VOIDP.c.o  -o cmTC_5fb4b 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of wchar_t passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_cae05/fast"
+/usr/bin/make -f CMakeFiles/cmTC_cae05.dir/build.make CMakeFiles/cmTC_cae05.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cae05.dir/SIZEOF_WCHAR_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_cae05.dir/SIZEOF_WCHAR_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_WCHAR_T.c
+Linking C executable cmTC_cae05
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cae05.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_cae05.dir/SIZEOF_WCHAR_T.c.o  -o cmTC_cae05 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining size of int64_t passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_bd422/fast"
+/usr/bin/make -f CMakeFiles/cmTC_bd422.dir/build.make CMakeFiles/cmTC_bd422.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bd422.dir/SIZEOF_SF_COUNT_T.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_bd422.dir/SIZEOF_SF_COUNT_T.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/SIZEOF_SF_COUNT_T.c
+Linking C executable cmTC_bd422
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bd422.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_bd422.dir/SIZEOF_SF_COUNT_T.c.o  -o cmTC_bd422 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function floor exists in the m passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_dc9f8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_dc9f8.dir/build.make CMakeFiles/cmTC_dc9f8.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_dc9f8.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=floor   -o CMakeFiles/cmTC_dc9f8.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘floor’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_dc9f8
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dc9f8.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=floor    -rdynamic CMakeFiles/cmTC_dc9f8.dir/CheckFunctionExists.c.o  -o cmTC_dc9f8 -lm 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function calloc exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_028fa/fast"
+/usr/bin/make -f CMakeFiles/cmTC_028fa.dir/build.make CMakeFiles/cmTC_028fa.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_028fa.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=calloc   -o CMakeFiles/cmTC_028fa.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘calloc’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_028fa
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_028fa.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=calloc    -rdynamic CMakeFiles/cmTC_028fa.dir/CheckFunctionExists.c.o  -o cmTC_028fa /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function free exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_e2169/fast"
+/usr/bin/make -f CMakeFiles/cmTC_e2169.dir/build.make CMakeFiles/cmTC_e2169.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e2169.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=free   -o CMakeFiles/cmTC_e2169.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘free’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_e2169
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e2169.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=free    -rdynamic CMakeFiles/cmTC_e2169.dir/CheckFunctionExists.c.o  -o cmTC_e2169 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function fstat exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_fb5f6/fast"
+/usr/bin/make -f CMakeFiles/cmTC_fb5f6.dir/build.make CMakeFiles/cmTC_fb5f6.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_fb5f6.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=fstat   -o CMakeFiles/cmTC_fb5f6.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_fb5f6
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fb5f6.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=fstat    -rdynamic CMakeFiles/cmTC_fb5f6.dir/CheckFunctionExists.c.o  -o cmTC_fb5f6 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function fstat64 exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_589ee/fast"
+/usr/bin/make -f CMakeFiles/cmTC_589ee.dir/build.make CMakeFiles/cmTC_589ee.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_589ee.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=fstat64   -o CMakeFiles/cmTC_589ee.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_589ee
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_589ee.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=fstat64    -rdynamic CMakeFiles/cmTC_589ee.dir/CheckFunctionExists.c.o  -o cmTC_589ee /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function fsync exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_904c0/fast"
+/usr/bin/make -f CMakeFiles/cmTC_904c0.dir/build.make CMakeFiles/cmTC_904c0.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_904c0.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=fsync   -o CMakeFiles/cmTC_904c0.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_904c0
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_904c0.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=fsync    -rdynamic CMakeFiles/cmTC_904c0.dir/CheckFunctionExists.c.o  -o cmTC_904c0 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function ftruncate exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ef462/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ef462.dir/build.make CMakeFiles/cmTC_ef462.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ef462.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=ftruncate   -o CMakeFiles/cmTC_ef462.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ef462
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ef462.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=ftruncate    -rdynamic CMakeFiles/cmTC_ef462.dir/CheckFunctionExists.c.o  -o cmTC_ef462 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function getpagesize exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_5b26c/fast"
+/usr/bin/make -f CMakeFiles/cmTC_5b26c.dir/build.make CMakeFiles/cmTC_5b26c.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_5b26c.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=getpagesize   -o CMakeFiles/cmTC_5b26c.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_5b26c
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5b26c.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=getpagesize    -rdynamic CMakeFiles/cmTC_5b26c.dir/CheckFunctionExists.c.o  -o cmTC_5b26c /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gettimeofday exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_c39d0/fast"
+/usr/bin/make -f CMakeFiles/cmTC_c39d0.dir/build.make CMakeFiles/cmTC_c39d0.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c39d0.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gettimeofday   -o CMakeFiles/cmTC_c39d0.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c39d0
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c39d0.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gettimeofday    -rdynamic CMakeFiles/cmTC_c39d0.dir/CheckFunctionExists.c.o  -o cmTC_c39d0 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gmtime exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_c213b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_c213b.dir/build.make CMakeFiles/cmTC_c213b.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c213b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gmtime   -o CMakeFiles/cmTC_c213b.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c213b
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c213b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gmtime    -rdynamic CMakeFiles/cmTC_c213b.dir/CheckFunctionExists.c.o  -o cmTC_c213b /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gmtime_r exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_9bc4b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_9bc4b.dir/build.make CMakeFiles/cmTC_9bc4b.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_9bc4b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gmtime_r   -o CMakeFiles/cmTC_9bc4b.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_9bc4b
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9bc4b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gmtime_r    -rdynamic CMakeFiles/cmTC_9bc4b.dir/CheckFunctionExists.c.o  -o cmTC_9bc4b /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function localtime exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_753e4/fast"
+/usr/bin/make -f CMakeFiles/cmTC_753e4.dir/build.make CMakeFiles/cmTC_753e4.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_753e4.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=localtime   -o CMakeFiles/cmTC_753e4.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_753e4
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_753e4.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=localtime    -rdynamic CMakeFiles/cmTC_753e4.dir/CheckFunctionExists.c.o  -o cmTC_753e4 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function localtime_r exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_cc1cb/fast"
+/usr/bin/make -f CMakeFiles/cmTC_cc1cb.dir/build.make CMakeFiles/cmTC_cc1cb.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cc1cb.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=localtime_r   -o CMakeFiles/cmTC_cc1cb.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_cc1cb
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cc1cb.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=localtime_r    -rdynamic CMakeFiles/cmTC_cc1cb.dir/CheckFunctionExists.c.o  -o cmTC_cc1cb /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function lseek exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_c1e18/fast"
+/usr/bin/make -f CMakeFiles/cmTC_c1e18.dir/build.make CMakeFiles/cmTC_c1e18.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c1e18.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=lseek   -o CMakeFiles/cmTC_c1e18.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c1e18
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c1e18.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=lseek    -rdynamic CMakeFiles/cmTC_c1e18.dir/CheckFunctionExists.c.o  -o cmTC_c1e18 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function lseek64 exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_810b0/fast"
+/usr/bin/make -f CMakeFiles/cmTC_810b0.dir/build.make CMakeFiles/cmTC_810b0.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_810b0.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=lseek64   -o CMakeFiles/cmTC_810b0.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_810b0
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_810b0.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=lseek64    -rdynamic CMakeFiles/cmTC_810b0.dir/CheckFunctionExists.c.o  -o cmTC_810b0 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function malloc exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_93b3b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_93b3b.dir/build.make CMakeFiles/cmTC_93b3b.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_93b3b.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=malloc   -o CMakeFiles/cmTC_93b3b.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘malloc’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_93b3b
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_93b3b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=malloc    -rdynamic CMakeFiles/cmTC_93b3b.dir/CheckFunctionExists.c.o  -o cmTC_93b3b /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function mmap exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1d311/fast"
+/usr/bin/make -f CMakeFiles/cmTC_1d311.dir/build.make CMakeFiles/cmTC_1d311.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1d311.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=mmap   -o CMakeFiles/cmTC_1d311.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_1d311
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1d311.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=mmap    -rdynamic CMakeFiles/cmTC_1d311.dir/CheckFunctionExists.c.o  -o cmTC_1d311 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function open exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_6a2e5/fast"
+/usr/bin/make -f CMakeFiles/cmTC_6a2e5.dir/build.make CMakeFiles/cmTC_6a2e5.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6a2e5.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=open   -o CMakeFiles/cmTC_6a2e5.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_6a2e5
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6a2e5.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=open    -rdynamic CMakeFiles/cmTC_6a2e5.dir/CheckFunctionExists.c.o  -o cmTC_6a2e5 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pipe exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d0418/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d0418.dir/build.make CMakeFiles/cmTC_d0418.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d0418.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pipe   -o CMakeFiles/cmTC_d0418.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_d0418
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d0418.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pipe    -rdynamic CMakeFiles/cmTC_d0418.dir/CheckFunctionExists.c.o  -o cmTC_d0418 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function read exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_88732/fast"
+/usr/bin/make -f CMakeFiles/cmTC_88732.dir/build.make CMakeFiles/cmTC_88732.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_88732.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=read   -o CMakeFiles/cmTC_88732.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_88732
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_88732.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=read    -rdynamic CMakeFiles/cmTC_88732.dir/CheckFunctionExists.c.o  -o cmTC_88732 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function realloc exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ee3f8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ee3f8.dir/build.make CMakeFiles/cmTC_ee3f8.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ee3f8.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=realloc   -o CMakeFiles/cmTC_ee3f8.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘realloc’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_ee3f8
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ee3f8.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=realloc    -rdynamic CMakeFiles/cmTC_ee3f8.dir/CheckFunctionExists.c.o  -o cmTC_ee3f8 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function setlocale exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_7acbd/fast"
+/usr/bin/make -f CMakeFiles/cmTC_7acbd.dir/build.make CMakeFiles/cmTC_7acbd.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7acbd.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=setlocale   -o CMakeFiles/cmTC_7acbd.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_7acbd
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7acbd.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=setlocale    -rdynamic CMakeFiles/cmTC_7acbd.dir/CheckFunctionExists.c.o  -o cmTC_7acbd /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function snprintf exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_55f11/fast"
+/usr/bin/make -f CMakeFiles/cmTC_55f11.dir/build.make CMakeFiles/cmTC_55f11.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_55f11.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=snprintf   -o CMakeFiles/cmTC_55f11.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘snprintf’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_55f11
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_55f11.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=snprintf    -rdynamic CMakeFiles/cmTC_55f11.dir/CheckFunctionExists.c.o  -o cmTC_55f11 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function vsnprintf exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_50222/fast"
+/usr/bin/make -f CMakeFiles/cmTC_50222.dir/build.make CMakeFiles/cmTC_50222.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_50222.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=vsnprintf   -o CMakeFiles/cmTC_50222.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘vsnprintf’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_50222
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_50222.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=vsnprintf    -rdynamic CMakeFiles/cmTC_50222.dir/CheckFunctionExists.c.o  -o cmTC_50222 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function waitpid exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_a696d/fast"
+/usr/bin/make -f CMakeFiles/cmTC_a696d.dir/build.make CMakeFiles/cmTC_a696d.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a696d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=waitpid   -o CMakeFiles/cmTC_a696d.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_a696d
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a696d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=waitpid    -rdynamic CMakeFiles/cmTC_a696d.dir/CheckFunctionExists.c.o  -o cmTC_a696d /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function write exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_6f606/fast"
+/usr/bin/make -f CMakeFiles/cmTC_6f606.dir/build.make CMakeFiles/cmTC_6f606.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6f606.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=write   -o CMakeFiles/cmTC_6f606.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+Linking C executable cmTC_6f606
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6f606.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=write    -rdynamic CMakeFiles/cmTC_6f606.dir/CheckFunctionExists.c.o  -o cmTC_6f606 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function ceil exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_e3194/fast"
+/usr/bin/make -f CMakeFiles/cmTC_e3194.dir/build.make CMakeFiles/cmTC_e3194.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e3194.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=ceil   -o CMakeFiles/cmTC_e3194.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘ceil’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_e3194
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e3194.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=ceil    -rdynamic CMakeFiles/cmTC_e3194.dir/CheckFunctionExists.c.o  -o cmTC_e3194 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function floor exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_0cfb0/fast"
+/usr/bin/make -f CMakeFiles/cmTC_0cfb0.dir/build.make CMakeFiles/cmTC_0cfb0.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0cfb0.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=floor   -o CMakeFiles/cmTC_0cfb0.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘floor’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_0cfb0
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0cfb0.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=floor    -rdynamic CMakeFiles/cmTC_0cfb0.dir/CheckFunctionExists.c.o  -o cmTC_0cfb0 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function fmod exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_a2f77/fast"
+/usr/bin/make -f CMakeFiles/cmTC_a2f77.dir/build.make CMakeFiles/cmTC_a2f77.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a2f77.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=fmod   -o CMakeFiles/cmTC_a2f77.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘fmod’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_a2f77
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a2f77.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=fmod    -rdynamic CMakeFiles/cmTC_a2f77.dir/CheckFunctionExists.c.o  -o cmTC_a2f77 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function lrint exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ecc55/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ecc55.dir/build.make CMakeFiles/cmTC_ecc55.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ecc55.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=lrint   -o CMakeFiles/cmTC_ecc55.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘lrint’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_ecc55
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ecc55.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=lrint    -rdynamic CMakeFiles/cmTC_ecc55.dir/CheckFunctionExists.c.o  -o cmTC_ecc55 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function lrintf exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1c593/fast"
+/usr/bin/make -f CMakeFiles/cmTC_1c593.dir/build.make CMakeFiles/cmTC_1c593.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1c593.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=lrintf   -o CMakeFiles/cmTC_1c593.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘lrintf’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_1c593
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1c593.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=lrintf    -rdynamic CMakeFiles/cmTC_1c593.dir/CheckFunctionExists.c.o  -o cmTC_1c593 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the function lround exists passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ef70d/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ef70d.dir/build.make CMakeFiles/cmTC_ef70d.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ef70d.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=lround   -o CMakeFiles/cmTC_ef70d.dir/CheckFunctionExists.c.o   -c /home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘lround’
+/home/rodriguez/cmake-3.10.0/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^
+Linking C executable cmTC_ef70d
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ef70d.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=lround    -rdynamic CMakeFiles/cmTC_ef70d.dir/CheckFunctionExists.c.o  -o cmTC_ef70d /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the S_IRGRP exist passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_a3d41/fast"
+/usr/bin/make -f CMakeFiles/cmTC_a3d41.dir/build.make CMakeFiles/cmTC_a3d41.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a3d41.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_a3d41.dir/CheckSymbolExists.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_a3d41
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a3d41.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_a3d41.dir/CheckSymbolExists.c.o  -o cmTC_a3d41 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+File /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <sys/stat.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef S_IRGRP
+  return ((int*)(&S_IRGRP))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining size of unsigned short passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d9e01/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d9e01.dir/build.make CMakeFiles/cmTC_d9e01.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d9e01.dir/CMAKE_SIZEOF_UNSIGNED_SHORT.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_d9e01.dir/CMAKE_SIZEOF_UNSIGNED_SHORT.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CheckTypeSize/CMAKE_SIZEOF_UNSIGNED_SHORT.c
+Linking C executable cmTC_d9e01
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d9e01.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_d9e01.dir/CMAKE_SIZEOF_UNSIGNED_SHORT.c.o  -o cmTC_d9e01 /usr/lib/x86_64-linux-gnu/libm.so 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+
+Determining if the system is big endian passed with the following output:
+Change Dir: /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d764f/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d764f.dir/build.make CMakeFiles/cmTC_d764f.dir/build
+make[1]: Entering directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d764f.dir/TestEndianess.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_d764f.dir/TestEndianess.c.o   -c /home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp/TestEndianess.c
+Linking C executable cmTC_d764f
+/home/rodriguez/cmake-3.10.0/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d764f.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_d764f.dir/TestEndianess.c.o  -o cmTC_d764f 
+make[1]: Leaving directory '/home/rodriguez/git-work/libsndfile/CMakeBuild/CMakeFiles/CMakeTmp'
+
+TestEndianess.c:
+/* A 16 bit integer is required. */
+typedef unsigned short cmakeint16;
+
+/* On a little endian machine, these 16bit ints will give "THIS IS LITTLE ENDIAN."
+   On a big endian machine the characters will be exchanged pairwise. */
+const cmakeint16 info_little[] =  {0x4854, 0x5349, 0x4920, 0x2053, 0x494c, 0x5454, 0x454c, 0x4520, 0x444e, 0x4149, 0x2e4e, 0x0000};
+
+/* on a big endian machine, these 16bit ints will give "THIS IS BIG ENDIAN."
+   On a little endian machine the characters will be exchanged pairwise. */
+const cmakeint16 info_big[] =     {0x5448, 0x4953, 0x2049, 0x5320, 0x4249, 0x4720, 0x454e, 0x4449, 0x414e, 0x2e2e, 0x0000};
+
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
+#endif
+{
+  int require = 0;
+  require += info_little[argc];
+  require += info_big[argc];
+  (void)argv;
+  return require;
+}
+
+
