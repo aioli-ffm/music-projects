@@ -66,7 +66,9 @@ void CheckRealComplexRatio(const size_t real_size, const size_t complex_size,
 
 
 // Given a container or its beginning and end iterables, checks wether all values contained in the
-// iterable are equal and raises an exception if not.
+// iterable are equal and raises an exception if not. Usage example:
+// CheckAllEqual({a.size_, b.size_, result.size_},
+//                 "SpectralCorrelation: all sizes must be equal and are");
 template<class I>
 void CheckAllEqual(const I beg, const I end, const std::string &message){
   I it = beg;

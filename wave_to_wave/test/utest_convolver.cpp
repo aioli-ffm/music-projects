@@ -36,13 +36,13 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
     // the convolution between s and p1
     FloatSignal testConv(kSizeS+kSizeP1-1);
     testConv[4] = 123;
-    testConv.print("testconv");
     float kTestConv[]{1, 4, 10, 16, 22, 28, 34, 40, 46, 52, 47, 30};
     // the cross-correlation between s and p1
     float kTestXcorr[]{3, 8, 14, 20, 26, 32, 38, 44, 50, 56, 29, 10};
     // make and test convolution
     xx.executeConv();
     FloatSignal conv = xx.extractResult();
+    conv.print("nowtest");
     for(size_t i=0; i<(kSizeS+kSizeP1-1); ++i){
       REQUIRE(Approx(conv[i]) == kTestConv[i]);
     }
@@ -54,4 +54,17 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
     }
   }
 
+
+  SECTION("sandbox"){
+    FloatSignal o([](long int x){return x+1;}, 6);
+    FloatSignal m([](long int x){return 1;}, 3);
+
+    Test x(o, m);
+
+    o.print("oo");
+    m.print("mm");
+
+    x.makeXcorr().print("xcorr");
+
+  }
 }

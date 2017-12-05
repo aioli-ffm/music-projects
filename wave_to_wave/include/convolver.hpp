@@ -176,7 +176,7 @@ private:
   // it will perform a convolution (4a), and a cross-correlation (4b) otherwise.
   // Note the parallelization with OpenMP, which increases performance in supporting CPUs.
   void __execute(const bool cross_correlate){
-    auto operation = (cross_correlate)? SpectralCorrelation : SpectralConvolution;
+    auto operation = (cross_correlate)? ComplexConjMul : ComplexMul;
     // do ffts
     #ifdef WITH_OPENMP_ABOVE
     #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
@@ -329,6 +329,176 @@ public:
     backward_plans_.clear();
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Test {
+private:
+  const size_t kMinChunksize = 2048; // seems to be the fastest
+  // grab input lengths
+  size_t signal_size_;
+  size_t patch_size_;
+  size_t result_size_;
+  // make padded copies of the inputs and get chunk measurements
+  FloatSignal padded_patch_;
+  size_t result_chunksize_;
+  size_t result_chunksize_complex_;
+  size_t result_stride_;
+  ComplexSignal padded_patch_complex_;
+  // padded copy of the signal
+  FloatSignal padded_signal_;
+  // the deconstructed signal
+  std::vector<FloatSignal*> s_chunks_;
+  std::vector<ComplexSignal*> s_chunks_complex_;
+  // the corresponding chunks holding convs/xcorrs
+  std::vector<FloatSignal*> result_chunks_;
+  std::vector<ComplexSignal*> result_chunks_complex_;
+  // the corresponding plans (plus the plan of the patch)
+  std::vector<FftForwardPlan*> forward_plans_;
+  std::vector<FftBackwardPlan*> backward_plans_;
+
+
+public:
+  // GOALS: THERE IS AN EXTERNAL DICTM WITH KEY=POWER OF TWO,
+  // VALUES=[VEC OF SIG CHUNKS (FLOAT AND COMPLEX), VEC OF RESULT CHUNKS (FLOAT AND COMPLEX), VEC OF PLANS]
+  // THE CLASS SHOULD BE ABLE, FOR A GIVEN PATCH, TO FIND THE MATCHING ENTRY, AND CONSUME... STILL NOT CLEAR...
+  Test(FloatSignal &signal, FloatSignal &patch, const std::string wisdomPath="")
+    : signal_size_(signal.getSize()),
+      patch_size_(patch.getSize()),
+      result_size_(signal_size_+patch_size_-1),
+      //
+      padded_patch_(patch.getData(), patch_size_, 0,
+                    std::max(kMinChunksize, 2*Pow2Ceil(patch_size_)-patch_size_)),
+      result_chunksize_(padded_patch_.getSize()),
+      result_chunksize_complex_(result_chunksize_/2+1), // THIS IS THE DICT KEY
+      result_stride_(result_chunksize_-patch_size_+1), // THIS CAN BE PROBLEMATIC FOR THE VALUES, BUT MAYBE ISNT
+      padded_patch_complex_(result_chunksize_complex_),
+      //
+      padded_signal_(signal.getData(),signal_size_,patch_size_-1, // THIS SHOULD BE CONSUMED FROM DICT!
+                     result_chunksize_-(result_size_%result_stride_)){
+      // end of initializer list, now check that len(signal)>=len(patch)
+    CheckLessEqual(patch_size_, signal_size_,
+                         "OverlapSaveConvolver: len(signal) can't be smaller than len(patch)!");
+    // and load the wisdom if required. If unsuccessful, no exception thrown, just print a warning.
+    if(!wisdomPath.empty()){ImportFftwWisdom(wisdomPath, false);}
+    // chunk the signal into strides of same size as padded patch
+    // and make complex counterparts too, as well as the corresponding xcorr signals
+    for(size_t i=0; i<=padded_signal_.getSize()-result_chunksize_; i+=result_stride_){
+      s_chunks_.push_back(new FloatSignal(&padded_signal_[i], result_chunksize_)); // THIS SHOULD GO TO DICT IFF NOT THERE YET
+      s_chunks_complex_.push_back(new ComplexSignal(result_chunksize_complex_));   // THIS SHOULD GO TO DICT IFF NOT THERE YET
+      result_chunks_.push_back(new FloatSignal(result_chunksize_));               // THIS SHOULD GO TO DICT IFF NOT THERE YET
+      result_chunks_complex_.push_back(new ComplexSignal(result_chunksize_complex_)); // THIS SHOULD GO TO DICT IFF NOT THERE YET
+    }
+    // make one forward plan per signal chunk, and one for the patch
+    // Also backward plans for the xcorr chunks
+    forward_plans_.push_back(new FftForwardPlan(padded_patch_, padded_patch_complex_));
+    for (size_t i =0; i<s_chunks_.size();i++){
+      forward_plans_.push_back(new FftForwardPlan(*s_chunks_.at(i), *s_chunks_complex_.at(i)));
+      backward_plans_.push_back(new FftBackwardPlan(*result_chunks_complex_.at(i),
+                                                     *result_chunks_.at(i)));
+    }
+  }
+
+    FloatSignal makeXcorr(){
+    // do ffts
+    #ifdef WITH_OPENMP_ABOVE
+    #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
+    #endif
+    for (size_t i =0; i<forward_plans_.size();i++){
+      forward_plans_.at(i)->execute();
+    }
+    // multiply spectra
+    #ifdef WITH_OPENMP_ABOVE
+    #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
+    #endif
+    for (size_t i =0; i<result_chunks_.size();i++){
+      ComplexConjMul(*s_chunks_complex_.at(i), this->padded_patch_complex_,
+                *result_chunks_complex_.at(i));
+    }
+    // do iffts
+    #ifdef WITH_OPENMP_ABOVE
+    #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
+    #endif
+    for (size_t i =0; i<result_chunks_.size();i++){
+      backward_plans_.at(i)->execute();
+      *result_chunks_.at(i) *= (1.0f/result_chunksize_);
+    }
+
+    return extractResult();
+  }
+
+  FloatSignal extractResult(){
+    // set the offset for the corresponding operation (0 for xcorr).
+    // instantiate new signal to be filled with the desired info
+    FloatSignal result(result_size_);
+    float* result_arr = result.getData(); // not const because of memcpy
+    // fill!
+    static size_t kNumChunks = result_chunks_.size();
+    for (size_t i=0; i<kNumChunks;i++){
+      float* xc_arr = result_chunks_.at(i)->getData();
+      const size_t kBegin = i*result_stride_;
+      // if the last chunk goes above result_size_, reduce copy size. else copy_size=result_stride_
+      size_t copy_size = result_stride_;
+      copy_size -= (kBegin+result_stride_>result_size_)? kBegin+result_stride_-result_size_ : 0;
+      memcpy(result_arr+kBegin, xc_arr, sizeof(float)*copy_size);
+    }
+    return result;
+  }
+
+    // getting info from the convolver
+  void printChunks(const std::string name="convolver"){
+    for (size_t i =0; i<result_chunks_.size();i++){
+      std::cout << name << "_chunk_" << i << std::endl;
+      result_chunks_.at(i)->print(name+"_chunk_"+std::to_string(i));
+    }
+  }
+
+  ~Test(){
+    // clear vectors holding signals
+    for (size_t i =0; i<s_chunks_.size();i++){
+      delete (s_chunks_.at(i));
+      delete (s_chunks_complex_.at(i));
+      delete (result_chunks_.at(i));
+      delete (result_chunks_complex_.at(i));
+    }
+    s_chunks_.clear();
+    s_chunks_complex_.clear();
+    result_chunks_.clear();
+    result_chunks_complex_.clear();
+    // clear vector holding forward FFT plans
+    for (size_t i =0; i<forward_plans_.size();i++){
+      delete (forward_plans_.at(i));
+    }
+    forward_plans_.clear();
+    // clear vector holding backward FFT plans
+    for (size_t i =0; i<backward_plans_.size();i++){
+      delete (backward_plans_.at(i));
+    }
+    backward_plans_.clear();
+  }
+};
+
+
+
+
+
+
+
+
 
 
 

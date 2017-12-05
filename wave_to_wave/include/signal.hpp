@@ -1,9 +1,6 @@
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
-#define WITH_OPENMP_ABOVE 1
-
-
 // STL INCLUDES
 #include <string.h>
 #include <iostream>
@@ -63,9 +60,6 @@ public:
   // with values between function(0) and function(size-1).
   explicit AudioSignal(std::function<T (const long int)> const&f, size_t size)
     : AudioSignal(size){
-    #ifdef WITH_OPENMP_ABOVE
-    #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
-    #endif
     for(size_t i=0; i<size; ++i){
       data_[i] = f(i);
     }
@@ -152,6 +146,8 @@ public:
 
 // Wrapper class for AudioSignal<complex64> plus some extra functionality
 class ComplexSignal : public AudioSignal<std::complex<float> >{
+  friend void ComplexMul(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result);
+  friend void ComplexConjMul(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result);
 public:
   explicit ComplexSignal(size_t size)
     : AudioSignal(size){}
@@ -172,34 +168,21 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This free function takes three complex signals a,b,c of the same size and computes the complex
-// element-wise multiplication:   a+ib * c+id = ac+iad+ibc-bd = ac-bd + i(ad+bc)   The computation
-// loop isn't sent to OMP because this function itself is already expected to be called by multiple
-// threads, and it would actually slow down the process.
-// It expects all 3 signals to have equal size, throws an exception otherwise
-void SpectralConvolution(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
-  const size_t kSize_a = a.getSize();
-  const size_t kSize_b = b.getSize();
-  const size_t kSize_result = result.getSize();
-  CheckAllEqual({kSize_a, kSize_b, kSize_result},
-                std::string("SpectralConvolution: all sizes must be equal and are"));
-  for(size_t i=0; i<kSize_a; ++i){
+// Performs element-weise multiplication c[i]=a[i]*b[i] of complex signals, which are expected
+// to have the same length (outcome is undefined otherwise).
+// Performance: should SIMDize since signals are 64bit aligned (didn't chech). The loop isn't send
+// to OMP to avoid thread overpopulation (since the overlap-add convolver already parallelizes).
+void ComplexMul(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
+  for(size_t i=0, size=a.size_; i<size; ++i){
     result[i] = a[i]*b[i];
   }
 }
 
-// Like SpectralConvolution, but compu
-void SpectralCorrelation(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
-  const size_t kSize_a = a.getSize();
-  const size_t kSize_b = b.getSize();
-  const size_t kSize_result = result.getSize();
-  CheckAllEqual({kSize_a, kSize_b, kSize_result},
-                  "SpectralCorrelation: all sizes must be equal and are");
-  for(size_t i=0; i<kSize_a; ++i){
+// Like ComplexMul, but c[i] = a[i]*conj(b[i])
+void ComplexConjMul(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
+  for(size_t i=0, size=a.size_; i<size; ++i){
     result[i] = a[i] * std::conj(b[i]);
   }
 }
-
-
 
 #endif

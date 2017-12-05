@@ -109,6 +109,12 @@ int main(int argc,  char** argv){
 }
 
 // TODO:
+// design small lib of complexsignal friend functions:
+// in-place:
+// complexmul(const a, const b, c), complexmulconj(const a, const b, c), ...
+// factories?
+// complexmul(const a, const b), complexmulconj(const a, const b), ...
+
 // tidy up fft plan class tree (seems verbose).
 // make a decision regarding spectralconv and xcorr. friend funcs?
 // once design and implementation is "stable", utest convolver file (clean MAIN)
