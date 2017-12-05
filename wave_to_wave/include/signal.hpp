@@ -56,7 +56,7 @@ public:
     std::copy(data, data+size, data_+pad_bef);
   }
   // GENERATIVE CONSTRUCTOR
-  // given a (size_t->T) function, instantiates the signal and fills it
+  // given a (long int -> T) function, instantiates the signal and fills it
   // with values between function(0) and function(size-1).
   explicit AudioSignal(std::function<T (const long int)> const&f, size_t size)
     : AudioSignal(size){
@@ -84,7 +84,8 @@ public:
   const T* end() const{return &data_[size_];}
 
   // Element-wise addition of two signals of the same type. Parameter t is the offset of the
-  // "other" with respect to "this" (t=13 means that other[0] will be applied to this[13]),
+  // "other" with respect to "this" (t=13 means that other[0] will be applied to this[13]).
+  // Note that all the "other" values that are out of the bounds of "this" will be ignored.
   void addSignal(AudioSignal<T> &other, const int t=0){
     T* begin_this = begin();
     T* begin_other = other.begin();
@@ -146,8 +147,11 @@ public:
 
 // Wrapper class for AudioSignal<complex64> plus some extra functionality
 class ComplexSignal : public AudioSignal<std::complex<float> >{
+
+  // see implementation for explanation of this friend functions
   friend void ComplexMul(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result);
   friend void ComplexConjMul(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result);
+
 public:
   explicit ComplexSignal(size_t size)
     : AudioSignal(size){}
@@ -168,10 +172,10 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Performs element-weise multiplication c[i]=a[i]*b[i] of complex signals, which are expected
-// to have the same length (outcome is undefined otherwise).
-// Performance: should SIMDize since signals are 64bit aligned (didn't chech). The loop isn't send
-// to OMP to avoid thread overpopulation (since the overlap-add convolver already parallelizes).
+// This friend function performs element-weise multiplication of a,b into c (c[i]=a[i]*b[i]) where
+  // a,b,c are of type ComplexSignal and have the same length (outcome is undefined otherwise).
+  // Performance: should SIMDize since signals are 64bit aligned (didn't check). The loop isn't send
+  // to OMP to avoid thread overpopulation (since the overlap-add convolver already parallelizes).
 void ComplexMul(const ComplexSignal &a, const ComplexSignal &b, ComplexSignal &result){
   for(size_t i=0, size=a.size_; i<size; ++i){
     result[i] = a[i]*b[i];
