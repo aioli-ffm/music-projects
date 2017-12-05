@@ -389,9 +389,6 @@ private:
 
 
 public:
-  // GOALS: THERE IS AN EXTERNAL DICTM WITH KEY=POWER OF TWO,
-  // VALUES=[VEC OF SIG CHUNKS (FLOAT AND COMPLEX), VEC OF RESULT CHUNKS (FLOAT AND COMPLEX), VEC OF PLANS]
-  // THE CLASS SHOULD BE ABLE, FOR A GIVEN PATCH, TO FIND THE MATCHING ENTRY, AND CONSUME... STILL NOT CLEAR...
   Test(FloatSignal &signal, FloatSignal &patch, const std::string wisdomPath="")
     : signal_size_(signal.getSize()),
       patch_size_(patch.getSize()),
