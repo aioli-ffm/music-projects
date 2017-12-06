@@ -14,6 +14,7 @@
 
 TEST_CASE("Testing the AudioSignal default constructor", "[AudioSignal]"){
   Synth s;
+  // s.test();
   REQUIRE(1 == 1);
 }
 

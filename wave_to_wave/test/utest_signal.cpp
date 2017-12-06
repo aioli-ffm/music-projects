@@ -17,22 +17,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+TEST_CASE("Testing plot", "[AudioSignal]"){
+  auto sin_gen = [](const long int x)->float{0.001*std::sin(0.1f*(float)x);};
+  FloatSignal fs(sin_gen, 100);
+  fs.plot();
+}
+
 
 TEST_CASE("Testing the AudioSignal default constructor", "[AudioSignal]"){
   AudioSignal<int> as;
   REQUIRE(as.getSize() == 0);
   REQUIRE(as.getData() == nullptr);
-}
-
-
-TEST_CASE("Testing plots", "[AudioSignal, FloatSignal, ComplexSignal]"){
-  int n = 100;
-  for(int i=0; i<n; ++i){
-    ComplexSignal as(44100*60);
-    if(i%100==0){
-      std::cout << "quack " << i << std::endl;
-    }
-  }
 }
 
 TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){

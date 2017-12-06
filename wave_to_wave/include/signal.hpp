@@ -20,6 +20,7 @@
 // STL INCLUDES
 #include <string.h>
 #include <iostream>
+#include <fstream>
 #include <complex>
 #include <cstdlib>
 #include<sndfile.h>
@@ -102,6 +103,15 @@ public:
   const T* begin() const{return &data_[0];}
   T* end(){return &data_[size_];}
   const T* end() const{return &data_[size_];}
+
+  // make ASCII file with signal
+  void toAscii(const std::string filename){
+    std::ofstream stream(filename);
+    for (int i=0; i <size_; ++i){stream << i << " " << data_[i] << std::endl;}
+    stream.close();
+  }
+
+  /// SIGNAL ARITHMETIC ////////////////////////////////////////////////////////////////////////////
 
   // Element-wise addition of two signals of the same type. Parameter t is the offset of the
   // "other" with respect to "this" (t=13 means that other[0] will be applied to this[13]).
@@ -196,6 +206,22 @@ public:
       sf_close(outfile);
       std::cout  << "toWav: succesfully saved to "<< path_out << std::endl;
     }
+  }
+  // plot
+  void plot(const char* name="FloatSignal"){
+    // open persistent gnuplot window
+    FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
+    // basic settings
+    fprintf(gnuplot_pipe, "set title '%s'\n", name);
+    fprintf(gnuplot_pipe, "set style line 1 lc rgb '#33ff33' lt 1 lw 2 pt 7 ps 1.5\n");
+    // fill it with data
+    fprintf(gnuplot_pipe, "plot '-' with lines ls 1\n");
+    for(size_t i=0; i<size_; ++i){
+      fprintf(gnuplot_pipe, "%zu %f\n", i, data_[i]);
+    }
+    fprintf(gnuplot_pipe, "e\n");
+    // refresh can probably be omitted
+    fprintf(gnuplot_pipe, "refresh\n");
   }
 };
 
