@@ -110,6 +110,7 @@ int main(int argc,  char** argv){
 
 // TODO:
 
+// put plotting deps in free funcs, not in signals: plot2D(x.beg(), y.end(), x.beg()) and plot3d...
 // tidy up fft plan class tree (seems verbose).
 // once design and implementation is "stable", utest convolver file (clean MAIN)
 // put the parse into a separate file? clear parser questions.

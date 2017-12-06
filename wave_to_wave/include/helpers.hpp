@@ -15,13 +15,23 @@
 
 size_t Pow2Ceil(size_t x){return (x<=0)? 0 : pow(2, ceil(log2(x)));}
 
+size_t Factorial(long int x){
+  size_t result = 1;
+  for(; x>1; --x){result *= x;}
+  return result;
+}
 
+size_t DoubleFactorial(long int x){
+  size_t result = 1;
+  for(; x>=2; x-=2){result *= x;}
+  return result;
+}
 
-
-// GAMMA based in specfunc/gamma.c GSLv2.4 (Author G. Jungman)
+// GAMMA constants based in specfunc/gamma.c GSLv2.4 (Author G. Jungman)
 #define E_NUMBER        2.71828182845904523536028747135
 #define GSL_DBL_EPSILON        2.2204460492503131e-16
 #define LogRootTwoPi_  0.9189385332046727418
+#define InverseOfTwoTimesSqrtOfTwoPi 0.1994711402007163389699730299671909342379
 // coefficients for gamma=7, kmax=8  Lanczos method
 static double lanczos_7_c[9] = {
   0.99999999999980993227684700473478,
@@ -35,17 +45,52 @@ static double lanczos_7_c[9] = {
   1.50563273514931155834e-7
 };
 // based in specfunc/gamma.c GSLv2.4 (Author G. Jungman)
+// I'm aware of std::tgamma, but accessing the guts of Gamma allows chi2 optim.
 static double Gamma(double x){
-  double term1, term2;
   double lanczos = lanczos_7_c[0];
   x -= 1.0;
-  for(int k=1; k<=8; k++) { lanczos += lanczos_7_c[k]/(x+k); }
-  term1 = (x+0.5)*log((x+7.5)/E_NUMBER);
-  term2 = LogRootTwoPi_ + log(lanczos);
-  double result = term1 + (term2 - 7.0);
-  return std::exp(result);
+  for(int k=1; k<=8; k++){lanczos += lanczos_7_c[k]/(x+k);}
+  double term1 = (x+0.5)*log((x+7.5)/E_NUMBER);
+  double log_gamma = term1 + LogRootTwoPi_ + log(lanczos) - 7.0;
+  return std::exp(log_gamma);
 }
-// END GAMMA
+
+// factorial implementation for integers (faster)
+static double Gamma(size_t x){
+  return Factorial(x-1);
+}
+
+// END GAMMA BASED ON GSL
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Given v=0.5*k, chi2(x,k) = [x**(v-1) * exp(-v)] / [2**v * Gamma(v)] (wikipedia).
+// Combining with the above approximation of Gamma, it can be reduced to the
+// following formula (given L:=lanczos term, k:=degrees of freedom):
+// Chi2(x, k) = 1/(2*sqrt(2*pi)*L) *(0.5x)**(v-1) *exp(6.5+0.5x) *(x+6.5)**(0.5-x)
+static double Chi2(double x, double df){
+  // avoid multiple calculations:
+  double x_dec = x-1;
+  double x_half = 0.5*x;
+  double v = 0.5*df;
+  // as in Gamma, compute Lanczos term:
+  double lanczos = lanczos_7_c[0];
+  for(int k=1; k<=8; k++){lanczos += lanczos_7_c[k]/(x_dec+k);}
+  // multiply succesively the 4 terms to obtain the chi2 value:
+  double result = InverseOfTwoTimesSqrtOfTwoPi/lanczos;
+  result *= pow(x_half, v-1);
+  result *= exp(x_half+6.5);
+  result *= pow(x+6.5, 0.5-x);
+  return result;
+}
+
+// The function Gamma(k/2) has faster, closed form expressions for integer k.
+// This overload of Chi2 abuses this, yielding, for integer k:
+// Chi2(x,k) = [x**(0.5k-1) * exp(-0.5x)] / [sqrt(2k) * DoubleFactorial(k-2)]
+static double Chi2(double x, size_t df){
+  double result = pow(x, 0.5*df-1) * exp(-0.5*df);
+  result /= sqrt(2*df);
+  return result/DoubleFactorial(df-2);
+}
 
 
 

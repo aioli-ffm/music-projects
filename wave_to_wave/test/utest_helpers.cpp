@@ -8,14 +8,19 @@
 #include<complex>
 #include<numeric>
 #include<algorithm>
+#include<cmath>
 // LIB INCLUDES
 #include<sndfile.h>
 // LOCAL INCLUDES
 #include "../include/helpers.hpp"
 #include "../include/signal.hpp"
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_sf.h>
+
+const bool kPlot = true;
+
+////////////////////////////////////////////////////////////////////////////////
+/// TESTING THE IMPLEMENTED MATH
+////////////////////////////////////////////////////////////////////////////////
 
 TEST_CASE("Pow2Ceil", "[helpers]"){
   size_t outputs[18]{0,1,2,4,4,8,8,8,8,16,16,16,16,16,16,16,16,32};
@@ -24,17 +29,45 @@ TEST_CASE("Pow2Ceil", "[helpers]"){
   }
 }
 
+TEST_CASE("Factorial", "[helpers]"){
+  size_t outputs[11]{1,1,2,6,24,120,720,5040,40320,362880,3628800};
+  for(size_t i=0; i<11; ++i){
+    REQUIRE(Factorial(i) == outputs[i]);
+  }
+}
+
+TEST_CASE("DoubleFactorial", "[helpers]"){
+  size_t outputs[13]{1,1,2,3,8,15,48,105,384,945,3840,10395,46080};
+  for(size_t i=0; i<13; ++i){
+    REQUIRE(DoubleFactorial(i) == outputs[i]);
+  }
+}
 
 TEST_CASE("Gamma", "[helpers]"){
   size_t outputs[10]{1,2,6,24,120,720,5040,40320,362880,3628800};
-  FloatSignal gamma([](const size_t x)->float{
-      return (float)Gamma(0.1f+0.001*x);}, 1000*5);
-  gamma.plot("gamma",1000, 0.25);
   for(size_t i=0; i<10; ++i){
-    std::cout << i << " >> " << Gamma(i+1) << std::endl;
-    REQUIRE(Approx(Gamma(i+2)) == outputs[i]);
+    REQUIRE(Approx(Gamma((double(i+2)))) == outputs[i]);
+    REQUIRE(Approx(Gamma((size_t)(i+2))) == outputs[i]);
+  }
+  if(kPlot){
+    FloatSignal gamma_sig([](const size_t x)->float{
+        return (float)Gamma(0.1f+0.001*x);}, 1000*5);
+    gamma_sig.plot("gamma",1000, 0.25);
   }
 }
+
+
+TEST_CASE("Chi2", "[helpers]"){
+  //for(float k : {0.01f,0.1f,1.0f,5.0f, 10.0f}){
+  for(size_t k : {1,2,3,5,7,9}){
+    FloatSignal chi2_sig([=](const size_t x)->float{
+        return (float)Chi2(0.0001+0.001*x, k);}, 1000*10);
+    std::ostringstream name;
+    name << "chi2(x, " << k << ")";
+    chi2_sig.plot(name.str().c_str(), 1000, 0.2);
+  }
+}
+
 
 TEST_CASE("IterableToString accepts collections and iterators", "[typecheck]"){
 
