@@ -207,17 +207,24 @@ public:
       std::cout  << "toWav: succesfully saved to "<< path_out << std::endl;
     }
   }
-  // plot
-  void plot(const char* name="FloatSignal"){
+  // plot fprintf(gnuplot_pipe, "");
+  void plot(const char* name="FloatSignal", const size_t samplerate=1){
     // open persistent gnuplot window
     FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
     // basic settings
-    fprintf(gnuplot_pipe, "set title '%s'\n", name);
-    fprintf(gnuplot_pipe, "set style line 1 lc rgb '#33ff33' lt 1 lw 2 pt 7 ps 1.5\n");
+    fprintf(gnuplot_pipe, "unset key\n"); // remove legend
+    fprintf(gnuplot_pipe, "set lmargin at screen 0.06\n"); // margins and aspect ratio
+    fprintf(gnuplot_pipe, "set rmargin at screen 0.995\n");
+    fprintf(gnuplot_pipe, "set term wxt size 1000, 180\n");
+    fprintf(gnuplot_pipe, "set size ratio 0.1\n");
+    fprintf(gnuplot_pipe, "set style line 1 lc rgb '#0011ff' lt 1 lw 1\n"); // linestyle and tics
+    fprintf(gnuplot_pipe, "set ytics font ',5'\n");
+    fprintf(gnuplot_pipe, "set xtics font ',5' rotate by 90 offset 0, -1.5\n");
+    fprintf(gnuplot_pipe, "set title '%s'\n", name); // frame main title
     // fill it with data
     fprintf(gnuplot_pipe, "plot '-' with lines ls 1\n");
     for(size_t i=0; i<size_; ++i){
-      fprintf(gnuplot_pipe, "%zu %f\n", i, data_[i]);
+      fprintf(gnuplot_pipe, "%f %f\n", ((float)i)/samplerate, data_[i]);
     }
     fprintf(gnuplot_pipe, "e\n");
     // refresh can probably be omitted

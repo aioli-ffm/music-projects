@@ -18,9 +18,10 @@
 
 
 TEST_CASE("Testing plot", "[AudioSignal]"){
-  auto sin_gen = [](const long int x)->float{0.001*std::sin(0.1f*(float)x);};
-  FloatSignal fs(sin_gen, 100);
-  fs.plot();
+  auto sin_gen = [](const long int x)->float{0.001*std::sin(0.001f*(float)x);};
+  FloatSignal fs(sin_gen, 44100*6);
+  fs *= 1000;
+  fs.plot("MyPlot", 44100);
 }
 
 
