@@ -171,7 +171,7 @@ public:
     : AudioSignal(data, size){}
   explicit FloatSignal(float* data, size_t size, size_t pad_bef, size_t pad_aft)
     : AudioSignal(data, size, pad_bef, pad_aft){}
-  explicit FloatSignal(std::function<float (long int)> const&f, size_t size)
+  explicit FloatSignal(std::function<float (const long int)> const&f, size_t size)
     : AudioSignal(f, size){}
   // from wav
   explicit FloatSignal(const std::string wav_path)
@@ -207,7 +207,6 @@ public:
       std::cout  << "toWav: succesfully saved to "<< path_out << std::endl;
     }
   }
-  // plot fprintf(gnuplot_pipe, "");
   void plot(const char* name="FloatSignal", const size_t samplerate=1){
     // open persistent gnuplot window
     FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
@@ -220,6 +219,9 @@ public:
     fprintf(gnuplot_pipe, "set style line 1 lc rgb '#0011ff' lt 1 lw 1\n"); // linestyle and tics
     fprintf(gnuplot_pipe, "set ytics font ',5'\n");
     fprintf(gnuplot_pipe, "set xtics font ',5' rotate by 90 offset 0, -1.5\n");
+    // fprintf(gnuplot_pipe, "set y2label 'amplitude'\n"); // labels, names
+    // fprintf(gnuplot_pipe, "set xlabel 'time'\n");
+    fprintf(gnuplot_pipe, "set arrow to %f,0 filled\n", ((float)size_)/samplerate);
     fprintf(gnuplot_pipe, "set title '%s'\n", name); // frame main title
     // fill it with data
     fprintf(gnuplot_pipe, "plot '-' with lines ls 1\n");
@@ -246,7 +248,7 @@ public:
     : AudioSignal(data, size){}
   explicit ComplexSignal(std::complex<float>* data, size_t size, size_t pad_bef, size_t pad_aft)
     : AudioSignal(data, size, pad_bef, pad_aft){}
-  explicit ComplexSignal(std::function< std::complex<float> (long int) > const&f, size_t size)
+  explicit ComplexSignal(std::function< std::complex<float> (const long int) > const&f, size_t size)
     : AudioSignal(f, size){}
   // in-class extra functionality
   void conjugate(){
@@ -254,6 +256,35 @@ public:
     for(size_t i=1, kFlatSize=2*size_; i<kFlatSize; i+=2){
       data_flat[i] *= -1;
     }
+  }
+  void plot(const char* name="ComplexSignal", const size_t samplerate=1){
+    // open persistent gnuplot window
+    FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
+    // basic settings
+    fprintf(gnuplot_pipe, "unset key\n"); // remove legend
+    fprintf(gnuplot_pipe, "set lmargin at screen 0.17\n"); // margins and aspect ratio
+    fprintf(gnuplot_pipe, "set rmargin at screen 0.85\n");
+    fprintf(gnuplot_pipe, "set term wxt size 1000, 500\n"); // term qt for static
+    fprintf(gnuplot_pipe, "set size ratio 0.3\n");
+    fprintf(gnuplot_pipe, "set style line 1 lc rgb '#0011ff' lt 1 lw 1\n"); // linestyle and tics
+    fprintf(gnuplot_pipe, "set ytics font ',5'\n");
+    fprintf(gnuplot_pipe, "set ztics font ',5'\n");
+    fprintf(gnuplot_pipe, "set xtics font ',5' rotate by 90 offset 0, -1.5\n");
+    // fprintf(gnuplot_pipe, "set y2label 'amplitude'\n"); // labels, names
+    // fprintf(gnuplot_pipe, "set xlabel 'time'\n");
+    // fprintf(gnuplot_pipe, "set label 'freq' at %f,0,0\n", 1.01*((float)size_)/samplerate);
+    fprintf(gnuplot_pipe, "set arrow to %f,0,0 filled\n", ((float)size_)/samplerate);
+    fprintf(gnuplot_pipe, "set title '%s'\n", name); // frame main title
+
+    // fill it with data
+    float* data_flat = &reinterpret_cast<float(&)[2]>(data_[0])[0];
+    fprintf(gnuplot_pipe, "splot '-' with lines ls 1\n");
+    for(size_t i=0, max=size_*2, sr=samplerate*2; i<max; i+=2){
+      fprintf(gnuplot_pipe, "%f %f %f\n", ((float)i)/sr, data_flat[i], data_flat[i+1]);
+    }
+    fprintf(gnuplot_pipe, "e\n");
+    // refresh can probably be omitted
+    fprintf(gnuplot_pipe, "refresh\n");
   }
 };
 

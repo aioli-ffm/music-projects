@@ -6,6 +6,7 @@
 #include<list>
 #include<complex>
 #include<numeric>
+#include<algorithm>
 // LOCAL INCLUDES
 #include "../include/helpers.hpp"
 #include "../include/signal.hpp"
@@ -18,10 +19,16 @@
 
 
 TEST_CASE("Testing plot", "[AudioSignal]"){
-  auto sin_gen = [](const long int x)->float{0.001*std::sin(0.001f*(float)x);};
-  FloatSignal fs(sin_gen, 44100*6);
-  fs *= 1000;
-  fs.plot("MyPlot", 44100);
+  auto sin_gen2 = [](const long int x)->float{return 2.34f*std::sin(0.001f*x);};
+  auto spiral_gen = [](const long int x)->std::complex<float>{return 2.34f*exp(std::complex<float>(0, 0.001f*x));};
+  FloatSignal fss(sin_gen2, 44100);
+  ComplexSignal css(spiral_gen, 44100);
+  fss.plot("a plot of 2.34*sin(x) between 0s and 1s", 44100);
+  css.plot("a plot of 2.34*e**(ix) between 0s and 1s", 44100);
+
+
+  FloatSignal pop("pop.wav");
+  pop.plot("pop song", 22050);
 }
 
 
