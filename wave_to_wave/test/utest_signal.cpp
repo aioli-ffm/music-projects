@@ -16,12 +16,24 @@
 /// TESTING THE FLOATSIGNAL CLASS
 ////////////////////////////////////////////////////////////////////////////////
 
+
+
 TEST_CASE("Testing the AudioSignal default constructor", "[AudioSignal]"){
   AudioSignal<int> as;
   REQUIRE(as.getSize() == 0);
   REQUIRE(as.getData() == nullptr);
 }
 
+
+TEST_CASE("Testing plots", "[AudioSignal, FloatSignal, ComplexSignal]"){
+  int n = 100;
+  for(int i=0; i<n; ++i){
+    ComplexSignal as(44100*60);
+    if(i%100==0){
+      std::cout << "quack " << i << std::endl;
+    }
+  }
+}
 
 TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
   // make and fill a float array for testing purposes (gen.constr. is preferred)
@@ -209,11 +221,13 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
   ComplexSignal cs1(kTestSize);
   ComplexSignal cs2(arr, kTestSize);
   ComplexSignal cs3(arr, kTestSize, 10, 10);
+  ComplexSignal cs4(cs2.getData(), cs2.getSize());
 
   SECTION("ComplexSignal constructors, initialization, padding and operator[]"){
     for(size_t i=0; i<kTestSize; ++i){
       REQUIRE(cs1[i] == kComplexZero);  // check that cs1 is initialized with 0s
       REQUIRE(cs2[i] == arr[i]); // check all values arr and cs2 are same
+      REQUIRE(cs2[i] == cs4[i]); // check all values cs2 and cs4 are same
       REQUIRE(cs3[i+10] == arr[i]); // check all values arr and cs3 are same
     }
     // check padding:
@@ -254,11 +268,13 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
     // getSize
     REQUIRE(cs1.getSize() == kTestSize);
     REQUIRE(cs2.getSize() == kTestSize);
+    REQUIRE(cs2.getSize() == cs4.getSize());
     REQUIRE(cs3.getSize() == kTestSize+20);
     // getData
     REQUIRE(cs1.getData() != arr); // constructor makes a copy of arr
     REQUIRE(cs2.getData() != cs1.getData()); // constructor makes a copy of arr
     REQUIRE(*(cs2.getData()+1) == cs2[1]);
+    REQUIRE(cs2.getData() != cs4.getData());
   }
 
 
