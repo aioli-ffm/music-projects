@@ -1,11 +1,40 @@
 #include "catch.hpp"
 
-#include "../include/helpers.hpp"
-
+// STL INCLUDES
+#include<iostream>
 #include<string>
 #include<vector>
 #include<list>
+#include<complex>
+#include<numeric>
+#include<algorithm>
+// LIB INCLUDES
+#include<sndfile.h>
+// LOCAL INCLUDES
+#include "../include/helpers.hpp"
+#include "../include/signal.hpp"
 
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_sf.h>
+
+TEST_CASE("Pow2Ceil", "[helpers]"){
+  size_t outputs[18]{0,1,2,4,4,8,8,8,8,16,16,16,16,16,16,16,16,32};
+  for(size_t i=0; i<18; ++i){
+    REQUIRE(Pow2Ceil(i) == outputs[i]);
+  }
+}
+
+
+TEST_CASE("Gamma", "[helpers]"){
+  size_t outputs[10]{1,2,6,24,120,720,5040,40320,362880,3628800};
+  FloatSignal gamma([](const size_t x)->float{
+      return (float)Gamma(0.1f+0.001*x);}, 1000*5);
+  gamma.plot("gamma",1000, 0.25);
+  for(size_t i=0; i<10; ++i){
+    std::cout << i << " >> " << Gamma(i+1) << std::endl;
+    REQUIRE(Approx(Gamma(i+2)) == outputs[i]);
+  }
+}
 
 TEST_CASE("IterableToString accepts collections and iterators", "[typecheck]"){
 
@@ -34,72 +63,4 @@ TEST_CASE("IterableToString accepts collections and iterators", "[typecheck]"){
     REQUIRE( IterableToString(v.begin(), v.end()) == kVstr);
 
   }
-  // SECTION( "resizing smaller changes size but not capacity" ) {
-  //     v.resize( 0 );
-
-  //     REQUIRE( v.size() == 0 );
-  //     REQUIRE( v.capacity() >= 5 );
-  // }
-  // SECTION( "reserving bigger changes capacity but not size" ) {
-  //     v.reserve( 10 );
-
-  //     REQUIRE( v.size() == 5 );
-  //     REQUIRE( v.capacity() >= 10 );
-  // }
-  // SECTION( "reserving smaller does not change size or capacity" ) {
-  //     v.reserve( 0 );
-
-  //     REQUIRE( v.size() == 5 );
-  //     REQUIRE( v.capacity() >= 5 );
-  // }
-}
-
-
-
-TEST_CASE("CheckAllEqual accepts collections and iterators", "[typecheck]"){
-
-  // vector<size_t> v1({});
-// vector<double> v2({123.4, 123.4, 123.4});
-// vector<bool> v3({false, false, false});
-// vector<size_t> v4({1});
-// vector<string> v5({"hello", "hello", "bye"});
-// CheckAllEqual({3,3,3,3,3,3,3,3});
-// CheckAllEqual(v1);
-// CheckAllEqual(v2.begin(), v2.end());
-// CheckAllEqual(v3);
-// CheckAllEqual(v4);
-// CheckAllEqual(v5.begin(), prev(v5.end()));
-// CheckAllEqual(v5);
-
-
-  std::vector<size_t> v{1,2,3,4,5};
-  std::list<std::string> l{"hello",  "world"};
-
-  REQUIRE(v[1]*10 == 20);
-
-  SECTION( "basic test" ) {
-    v.push_back(6);
-    const std::string kVstr = "{1, 2, 3, 4, 5, 6}";
-    REQUIRE( IterableToString(v) == kVstr);
-    REQUIRE( IterableToString(v.begin(), v.end()) == kVstr);
-
-  }
-  // SECTION( "resizing smaller changes size but not capacity" ) {
-  //     v.resize( 0 );
-
-  //     REQUIRE( v.size() == 0 );
-  //     REQUIRE( v.capacity() >= 5 );
-  // }
-  // SECTION( "reserving bigger changes capacity but not size" ) {
-  //     v.reserve( 10 );
-
-  //     REQUIRE( v.size() == 5 );
-  //     REQUIRE( v.capacity() >= 10 );
-  // }
-  // SECTION( "reserving smaller does not change size or capacity" ) {
-  //     v.reserve( 0 );
-
-  //     REQUIRE( v.size() == 5 );
-  //     REQUIRE( v.capacity() >= 5 );
-  // }
 }

@@ -207,15 +207,16 @@ public:
       std::cout  << "toWav: succesfully saved to "<< path_out << std::endl;
     }
   }
-  void plot(const char* name="FloatSignal", const size_t samplerate=1){
+  void plot(const char* name="FloatSignal", const size_t samplerate=1,
+            const float aspect_ratio=0.1f){
     // open persistent gnuplot window
     FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
     // basic settings
     fprintf(gnuplot_pipe, "unset key\n"); // remove legend
     fprintf(gnuplot_pipe, "set lmargin at screen 0.06\n"); // margins and aspect ratio
     fprintf(gnuplot_pipe, "set rmargin at screen 0.995\n");
-    fprintf(gnuplot_pipe, "set term wxt size 1000, 180\n");
-    fprintf(gnuplot_pipe, "set size ratio 0.1\n");
+    fprintf(gnuplot_pipe, "set term wxt size 1000, %f\n", aspect_ratio*1800);
+    fprintf(gnuplot_pipe, "set size ratio %f\n", aspect_ratio);
     fprintf(gnuplot_pipe, "set style line 1 lc rgb '#0011ff' lt 1 lw 1\n"); // linestyle and tics
     fprintf(gnuplot_pipe, "set ytics font ',5'\n");
     fprintf(gnuplot_pipe, "set xtics font ',5' rotate by 90 offset 0, -1.5\n");

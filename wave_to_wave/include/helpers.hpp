@@ -13,9 +13,39 @@
 /// MATH
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-size_t Pow2Ceil(size_t x){return pow(2, ceil(log2(x)));}
+size_t Pow2Ceil(size_t x){return (x<=0)? 0 : pow(2, ceil(log2(x)));}
 
 
+
+
+// GAMMA based in specfunc/gamma.c GSLv2.4 (Author G. Jungman)
+#define E_NUMBER        2.71828182845904523536028747135
+#define GSL_DBL_EPSILON        2.2204460492503131e-16
+#define LogRootTwoPi_  0.9189385332046727418
+// coefficients for gamma=7, kmax=8  Lanczos method
+static double lanczos_7_c[9] = {
+  0.99999999999980993227684700473478,
+  676.520368121885098567009190444019,
+ -1259.13921672240287047156078755283,
+  771.3234287776530788486528258894,
+ -176.61502916214059906584551354,
+  12.507343278686904814458936853,
+ -0.13857109526572011689554707,
+  9.984369578019570859563e-6,
+  1.50563273514931155834e-7
+};
+// based in specfunc/gamma.c GSLv2.4 (Author G. Jungman)
+static double Gamma(double x){
+  double term1, term2;
+  double lanczos = lanczos_7_c[0];
+  x -= 1.0;
+  for(int k=1; k<=8; k++) { lanczos += lanczos_7_c[k]/(x+k); }
+  term1 = (x+0.5)*log((x+7.5)/E_NUMBER);
+  term2 = LogRootTwoPi_ + log(lanczos);
+  double result = term1 + (term2 - 7.0);
+  return std::exp(result);
+}
+// END GAMMA
 
 
 

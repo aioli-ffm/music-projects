@@ -7,11 +7,12 @@
 #include<complex>
 #include<numeric>
 #include<algorithm>
+// LIB INCLUDES
+#include<sndfile.h>
 // LOCAL INCLUDES
 #include "../include/helpers.hpp"
 #include "../include/signal.hpp"
 
-#include<sndfile.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// TESTING THE FLOATSIGNAL CLASS
