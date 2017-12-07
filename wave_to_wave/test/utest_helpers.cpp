@@ -16,7 +16,7 @@
 #include "../include/signal.hpp"
 
 
-const bool kPlot = true;
+const bool kPlot = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// TESTING THE IMPLEMENTED MATH
@@ -43,12 +43,18 @@ TEST_CASE("DoubleFactorial", "[helpers]"){
   }
 }
 
-TEST_CASE("Gamma", "[helpers]"){
+TEST_CASE("Gamma double and size_t input", "[helpers]"){
+  // first compare the plain factorial version with the lanczos for ints
   size_t outputs[10]{1,2,6,24,120,720,5040,40320,362880,3628800};
   for(size_t i=0; i<10; ++i){
     REQUIRE(Approx(Gamma((double(i+2)))) == outputs[i]);
     REQUIRE(Approx(Gamma((size_t)(i+2))) == outputs[i]);
   }
+  // then compare the lanczos with the STL gamma
+  for(double i=1; i<20; i+=0.1){
+    REQUIRE(Approx(Gamma(i)) == std::tgamma(i));
+  }
+  // optional: plot
   if(kPlot){
     FloatSignal gamma_sig([](const size_t x)->float{
         return (float)Gamma(0.1f+0.001*x);}, 1000*5);
@@ -57,15 +63,36 @@ TEST_CASE("Gamma", "[helpers]"){
 }
 
 
-TEST_CASE("Chi2", "[helpers]"){
-  //for(float k : {0.01f,0.1f,1.0f,5.0f, 10.0f}){
-  for(size_t k : {1,2,3,5,7,9}){
+TEST_CASE("Chi2 double and size_t degrees of freedom", "[helpers]"){
+  const size_t kMaxRange = 20;
+  for(float k : {1.5f, 1.7f, 1.9f, 2.0f,3.0f, 4.0f, 6.0f, 9.0f}){
+    // for(size_t k : {1,2,3,4,6,9}){
+    // for(double x=0.01; x<5; x+=0.1){
+    //   REQUIRE(Approx(Chi2(x, (double)k)) == Chi2(x, k));
+    // }
     FloatSignal chi2_sig([=](const size_t x)->float{
-        return (float)Chi2(0.0001+0.001*x, k);}, 1000*10);
+        return (float)Chi2(0.00000+0.001*x, k);}, 1000*kMaxRange);
     std::ostringstream name;
     name << "chi2(x, " << k << ")";
     chi2_sig.plot(name.str().c_str(), 1000, 0.2);
   }
+  // // speed measurements:
+  // double x1, x2;
+  // size_t dim1 = 3;
+  // double dim2 = 3.5;
+  // for(size_t i=0; i<100*1000*1000; ++i){
+  //   x1 = Gamma(dim1);
+  //   if(i%10000==0){
+  //     std::cout << "Gamma " << i << std::endl;
+  //   }
+  // }
+  // for(size_t i=0; i<100*1000*1000; ++i){
+  //   x2 = std::tgamma(dim1);
+  //   if(i%10000==0){
+  //     std::cout << "gamma stl " << i << std::endl;
+  //   }
+  // }
+  // x1 += x2;
 }
 
 

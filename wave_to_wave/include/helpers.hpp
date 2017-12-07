@@ -6,6 +6,7 @@
 #include <string>
 #include <stdexcept>
 #include <math.h>
+#include <cmath>
 
 
 
@@ -31,7 +32,8 @@ size_t DoubleFactorial(long int x){
 #define E_NUMBER        2.71828182845904523536028747135
 #define GSL_DBL_EPSILON        2.2204460492503131e-16
 #define LogRootTwoPi_  0.9189385332046727418
-#define InverseOfTwoTimesSqrtOfTwoPi 0.1994711402007163389699730299671909342379
+#define InverseOfSqrtOfTwoPi 0.3989422804014326779399460599343
+#define Exp7_5DivBy2   904.02120722803160345190074138940272601
 // coefficients for gamma=7, kmax=8  Lanczos method
 static double lanczos_7_c[9] = {
   0.99999999999980993227684700473478,
@@ -47,8 +49,8 @@ static double lanczos_7_c[9] = {
 // based in specfunc/gamma.c GSLv2.4 (Author G. Jungman)
 // I'm aware of std::tgamma, but accessing the guts of Gamma allows chi2 optim.
 static double Gamma(double x){
-  double lanczos = lanczos_7_c[0];
   x -= 1.0;
+  double lanczos = lanczos_7_c[0];
   for(int k=1; k<=8; k++){lanczos += lanczos_7_c[k]/(x+k);}
   double term1 = (x+0.5)*log((x+7.5)/E_NUMBER);
   double log_gamma = term1 + LogRootTwoPi_ + log(lanczos) - 7.0;
@@ -63,36 +65,37 @@ static double Gamma(size_t x){
 // END GAMMA BASED ON GSL
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Given v=0.5*k, chi2(x,k) = [x**(v-1) * exp(-v)] / [2**v * Gamma(v)] (wikipedia).
-// Combining with the above approximation of Gamma, it can be reduced to the
-// following formula (given L:=lanczos term, k:=degrees of freedom):
-// Chi2(x, k) = 1/(2*sqrt(2*pi)*L) *(0.5x)**(v-1) *exp(6.5+0.5x) *(x+6.5)**(0.5-x)
+
+// Chi2 function: for int k, Gamma(k/2) = sqrt(pi)*DoubleFactorial(k-2)/pow(2, 0.5*(k-1))
+// This overload of Chi2 abuses this, yielding, for integer k and v:=0.5k:
+// Chi2(x,k) = 1/sqrt(2pi) * exp(-0.5x) * pow(x, v-1) / DoubleFactorial(k-2)
+// NOTE: this fn is very fast but seems to yield 20% off values for df=2. The rest is precise.
+static double Chi2(double x, size_t df){
+  return exp(-0.5*x) * InverseOfSqrtOfTwoPi * pow(x, 0.5*df-1) / DoubleFactorial(df-2);
+}
+
+// // this ist the most precise version, but also the slowest.
+// static double Chi2(double x, double df){
+//   double df_half = 0.5*df;
+//   double x_half = 0.5*x;
+//   return 0.5 * pow(x_half, df_half-1) / exp(x_half) / std::tgamma(df_half);
+// }
+
+// the hopes are here! should be fast and precise, but somehow not working... check that.
 static double Chi2(double x, double df){
-  // avoid multiple calculations:
-  double x_dec = x-1;
   double x_half = 0.5*x;
   double v = 0.5*df;
-  // as in Gamma, compute Lanczos term:
+  double y = v-1;
+  double y_75 = y+7.5;
+  // get lanczos
   double lanczos = lanczos_7_c[0];
-  for(int k=1; k<=8; k++){lanczos += lanczos_7_c[k]/(x_dec+k);}
-  // multiply succesively the 4 terms to obtain the chi2 value:
-  double result = InverseOfTwoTimesSqrtOfTwoPi/lanczos;
-  result *= pow(x_half, v-1);
-  result *= exp(x_half+6.5);
-  result *= pow(x+6.5, 0.5-x);
+  for(int k=1; k<=8; k++){lanczos += lanczos_7_c[k]/(y+df);}
+  //
+  double result = Exp7_5DivBy2 / lanczos;
+  result *= pow(x*E_NUMBER/(2*y_75), y);
+  result /= sqrt(y_75*exp(x));
   return result;
 }
-
-// The function Gamma(k/2) has faster, closed form expressions for integer k.
-// This overload of Chi2 abuses this, yielding, for integer k:
-// Chi2(x,k) = [x**(0.5k-1) * exp(-0.5x)] / [sqrt(2k) * DoubleFactorial(k-2)]
-static double Chi2(double x, size_t df){
-  double result = pow(x, 0.5*df-1) * exp(-0.5*df);
-  result /= sqrt(2*df);
-  return result/DoubleFactorial(df-2);
-}
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// TYPECHECK/ANTIBUGGING
