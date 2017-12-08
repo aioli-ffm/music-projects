@@ -22,6 +22,16 @@ const bool kPlot = false;
 /// TESTING THE IMPLEMENTED MATH
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// Implementation of Chi2 using built-in gamma. Slower than the one implemented
+// in helpers.hpp using lanczos approx, but used for testing
+static double Chi2Test(double x, double df){
+  double df_half = 0.5*df;
+  double x_half = 0.5*x;
+  return 0.5 * pow(x_half, df_half-1) / exp(x_half) / std::tgamma(df_half);
+}
+
+
 TEST_CASE("Pow2Ceil", "[helpers]"){
   size_t outputs[18]{0,1,2,4,4,8,8,8,8,16,16,16,16,16,16,16,16,32};
   for(size_t i=0; i<18; ++i){
@@ -37,8 +47,8 @@ TEST_CASE("Factorial", "[helpers]"){
 }
 
 TEST_CASE("DoubleFactorial", "[helpers]"){
-  size_t outputs[13]{1,1,2,3,8,15,48,105,384,945,3840,10395,46080};
-  for(size_t i=0; i<13; ++i){
+  size_t outputs[14]{1,1,1,2,3,8,15,48,105,384,945,3840,10395,46080};
+  for(size_t i=-1; i<13; ++i){
     REQUIRE(DoubleFactorial(i) == outputs[i]);
   }
 }
@@ -63,37 +73,23 @@ TEST_CASE("Gamma double and size_t input", "[helpers]"){
 }
 
 
-TEST_CASE("Chi2 double and size_t degrees of freedom", "[helpers]"){
+TEST_CASE("Chi2(double, double)", "[helpers]"){
   const size_t kMaxRange = 20;
+  const size_t kResolution = 100;
+  const size_t kNumPoints = kMaxRange*kResolution;
+  const double kEps = 2.2204460492503131e-16;
+  // Testing Chi2(double, double) against Chi2Test(double, double)
   for(float k : {1.5f, 1.7f, 1.9f, 2.0f,3.0f, 4.0f, 6.0f, 9.0f}){
-    // for(size_t k : {1,2,3,4,6,9}){
-    // for(double x=0.01; x<5; x+=0.1){
-    //   REQUIRE(Approx(Chi2(x, (double)k)) == Chi2(x, k));
-    // }
     FloatSignal chi2_sig([=](const size_t x)->float{
-        return (float)Chi2(0.00000+0.001*x, k);}, 1000*kMaxRange);
-    std::ostringstream name;
-    name << "chi2(x, " << k << ")";
-    chi2_sig.plot(name.str().c_str(), 1000, 0.2);
+        return (float)Chi2(kEps+1.0*x/kResolution, k);}, kNumPoints);
+    FloatSignal chi2test_sig([=](const size_t x)->float{
+        return (float)Chi2Test(kEps+1.0*x/kResolution, k);}, kNumPoints);
+    for(size_t i=0; i<kNumPoints; ++i){
+      REQUIRE(chi2_sig[i] == chi2test_sig[i]);
+    }
   }
-  // // speed measurements:
-  // double x1, x2;
-  // size_t dim1 = 3;
-  // double dim2 = 3.5;
-  // for(size_t i=0; i<100*1000*1000; ++i){
-  //   x1 = Gamma(dim1);
-  //   if(i%10000==0){
-  //     std::cout << "Gamma " << i << std::endl;
-  //   }
-  // }
-  // for(size_t i=0; i<100*1000*1000; ++i){
-  //   x2 = std::tgamma(dim1);
-  //   if(i%10000==0){
-  //     std::cout << "gamma stl " << i << std::endl;
-  //   }
-  // }
-  // x1 += x2;
 }
+
 
 
 TEST_CASE("IterableToString accepts collections and iterators", "[typecheck]"){
@@ -124,3 +120,29 @@ TEST_CASE("IterableToString accepts collections and iterators", "[typecheck]"){
 
   }
 }
+
+
+
+
+
+
+
+
+
+
+  // // speed measurements:
+  // for(size_t i=0; i<1000*20; ++i){
+  //   FloatSignal chi2_sig([=](const size_t x)->float{
+  //       return (float)Chi2(1.0/kResolution*x, 1.234);}, kNumPoints);
+  //   if(i%1000==0){
+  //     std::cout << "Chi float" << i << std::endl;
+  //   }
+  // }
+  // size_t kk = 3;
+  // for(size_t i=0; i<1000*20; ++i){
+  //   FloatSignal chi2_sig([=](const size_t x)->float{
+  //       return (float)Chi2(1.0/kResolution*x, kk);}, kNumPoints);
+  //   if(i%1000==0){
+  //     std::cout << "Chi int" << i << std::endl;
+  //   }
+  // }

@@ -63,54 +63,23 @@ int main(int argc,  char** argv){
 
 
 
-
-
-  // create a test signal
-  const size_t kSizeS = 44100*60/10;
-  float* s_arr = new float[kSizeS]; for(size_t i=0; i<kSizeS; ++i){s_arr[i] = i+1;}
-  FloatSignal s(s_arr, kSizeS);
-  // s.plot("signal");
-
-  // create several test patches:
-  const size_t kSizeP1 =  44100*1/10;
-  float* p1_arr = new float[kSizeP1]; for(size_t i=0; i<kSizeP1; ++i){p1_arr[i]=i+1;}
-  FloatSignal p1(p1_arr, kSizeP1);
-  // const size_t kSizeP2 = 3; // 44100*3/1;
-  // float* p2_arr = new float[kSizeP2]; for(size_t i=0; i<kSizeP2; ++i){p2_arr[i]=i+1;}
-  // FloatSignal p2(p2_arr, kSizeP2);
-  // const size_t kSizeP3 = 4; // 44100*3/1;
-  // float* p3_arr = new float[kSizeP3]; for(size_t i=0; i<kSizeP3; ++i){p3_arr[i]=i+1;}
-  // FloatSignal p3(p3_arr, kSizeP3);
-
-  // p.plot("patch");
-
-  // Try some simple convolution
-  OverlapSaveConvolver x1(s, p1, kImportWisdom);
-  // OverlapSaveConvolver x2(s, p2);
-  // OverlapSaveConvolver x3(s, p3);
-
-
-  for(size_t i=0; i<kIterations; ++i){
-    std::cout << "iter " << i << std::endl;
-    x1.executeXcorr();
-  }
-  // x1.printChunks("xcorr");
-  // x1.extractResult().print("xcorr");
-
-
-  // clean memory and exit
-  delete[] s_arr;
-  delete[] p1_arr;
-  // delete[] p2_arr;
-  // delete[] p3_arr;
-
-
   return 0;
 }
 
 // TODO:
 
-// debug fast chi2 double fn.
+// optimize chi2synth:
+//  1. truncate env_ratio to 0.001 and store chi2 on a lazy dict
+//  2. generate and store one single hi-res sin(x) cycle.
+//  3. the synth should not inherit from floatsignal, it is a synthdef. instead,
+//     add a FloatSignal synth(freq, envratio){...} method that reads on the lazy tables
+
+// http://csoundjournal.com/issue17/gogins_composing_in_cpp.html
+// sudo apt install libcsnd-dev libcsound64-dev
+// explanation CSOUND API: http://write.flossmanuals.net/csound/a-the-csound-api/
+// CSOUND 6 API: http://csound.com/docs/api/modules.html
+// explanation csound plugins: http://write.flossmanuals.net/csound/extending-csound/
+
 // put plotting deps in free funcs, not in signals: plot2D(x.beg(), y.end(), x.beg()) and plot3d...
 // tidy up fft plan class tree (seems verbose).
 // once design and implementation is "stable", utest convolver file (clean MAIN)

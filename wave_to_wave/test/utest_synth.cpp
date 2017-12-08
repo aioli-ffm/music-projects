@@ -13,8 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_CASE("Testing the AudioSignal default constructor", "[AudioSignal]"){
-  Synth s;
-  // s.test();
-  REQUIRE(1 == 1);
+  for(size_t i=0; i<10000; ++i){
+    Chi2Synth s(1000, 440, 1);
+    if(i%100==0){std::cout << "times: " << i <<std::endl;}
+  }
 }
 
