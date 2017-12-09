@@ -87,6 +87,36 @@ public:
 };
 
 
+struct FftTransformer {
+  // THE TWO SIGNALS AND THE FFT PLANS BETWEEN THEM (GETTERS AREN'T NEEDED)
+  FloatSignal& r;
+  ComplexSignal& c;
+  fftwf_plan forward_plan;
+  fftwf_plan backward_plan;
+  // THE CONSTRUCTOR GRABS THE REFERENCES TO THE SIGNALS, AND MAKES THE PLANS
+  FftTransformer(FloatSignal &real, ComplexSignal &complex)
+    : r(real), c(complex),
+      forward_plan(fftwf_plan_dft_r2c_1d(r.getSize(), r.getData(),
+                                         reinterpret_cast<fftwf_complex*>(&c.getData()[0]),
+                                         FFTW_ESTIMATE)),
+      backward_plan(fftwf_plan_dft_c2r_1d(r.getSize(),
+                                          reinterpret_cast<fftwf_complex*>(&c.getData()[0]),
+                                          r.getData(), FFTW_ESTIMATE)){
+    CheckRealComplexRatio(r.getSize(), c.getSize(), "FftTransformer");
+  }
+  // THE DESTRUCTOR TAKES CARE OF THE PLANS ONLY
+  ~FftTransformer(){
+    fftwf_destroy_plan(forward_plan);
+    fftwf_destroy_plan(backward_plan);
+  }
+  // CONVENIENCE METHODS FOR EXECUTING THE FFT AND IFFT
+  void forward(){fftwf_execute(forward_plan);}
+  // NOTE THAT EXECUTING THE BACKWARD PLAN ALTERS THE CONTENTS OF THE COMPLEX SIGNAL
+  // (http://www.fftw.org/fftw2_doc/fftw_2.html)
+  void backward(){fftwf_execute(backward_plan);}
+
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -127,7 +157,6 @@ void ImportFftwWisdom(const std::string path_in, const bool throw_exception_if_f
     else{std::cout << "WARNING: " << message;}
   }
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -508,6 +537,15 @@ public:
 };
 
 
+
+  // FloatSignal& r;
+  // ComplexSignal& c;
+  // fftwf_plan forward_plan;
+  // fftwf_plan backward_plan;
+  // // THE CONSTRUCTOR GRABS THE REFERENCES TO THE SIGNALS, AND MAKES THE PLANS
+  // FftTransformer(FloatSignal &real, ComplexSignal &complex)
+
+
 class Optimizer {
 private:
   FloatSignal& original_;
@@ -519,7 +557,7 @@ private:
   std::map<size_t, FftForwardPlan> forward_plans_; // key is a power of 2 being chunk_size
   std::map<size_t, FftBackwardPlan> backward_plans_; // key is a power of 2 being chunk_size
 public:
-  Optimizer(FloatSignal &original, size_t downsample_ratio)
+  Optimizer(FloatSignal &original, size_t downsample_ratio=1)
     : original_(original), residual_(original.getData(), original.getSize()){
     // how to handle downsampling?
     // further housekeeping here.

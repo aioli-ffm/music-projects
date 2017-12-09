@@ -238,8 +238,6 @@ public:
       }
     }
     fprintf(gnuplot_pipe, "e\n");
-    // refresh can probably be omitted
-    fprintf(gnuplot_pipe, "refresh\n");
   }
 };
 
@@ -300,8 +298,45 @@ public:
       }
     }
     fprintf(gnuplot_pipe, "e\n");
-    // refresh can probably be omitted
-    fprintf(gnuplot_pipe, "refresh\n");
+  }
+  void plotPolar(const char* name="ComplexSignal", const size_t samplerate=1,
+                 const size_t downsample_ratio=1){
+    const size_t nyquist = (samplerate<=1)? 1 : samplerate/2;
+    // open persistent gnuplot window
+    FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
+    // basic settings
+    fprintf(gnuplot_pipe, "set term wxt size 1000, 500\n");
+    fprintf(gnuplot_pipe, "set multiplot layout 2,1 title '%s' font ',12'\n", name);
+    fprintf(gnuplot_pipe, "set lmargin at screen 0.06\n"); // margins and aspect ratio
+    fprintf(gnuplot_pipe, "set rmargin at screen 0.95\n");
+    fprintf(gnuplot_pipe, "set style line 1 lc rgb '#0011ff' lt 1 lw 1\n"); // linestyle and tics
+    // // fprintf(gnuplot_pipe, "set y2label 'amplitude'\n"); // labels, names
+    fprintf(gnuplot_pipe, "set arrow to %zu,0 filled\n", nyquist);
+    fprintf(gnuplot_pipe, "set label 1 'frequency bin' at screen 0.98, 0.02 font ',12'\n");
+    fprintf(gnuplot_pipe, "set title '[magnitudes]'\n"); // frame main title
+    fprintf(gnuplot_pipe, "unset key\n"); // remove legend
+    // fill it with data
+    fprintf(gnuplot_pipe, "plot '-' with lines ls 1\n");
+    for(size_t i=0; i<size_; ++i){
+      if(i%downsample_ratio==0){
+        fprintf(gnuplot_pipe, "%f %f\n", ((float)i)/size_*nyquist, std::abs(data_[i]));
+      }
+    }
+    fprintf(gnuplot_pipe, "e\n");
+    //
+    //
+    fprintf(gnuplot_pipe, "set title '[phases]'\n"); // frame main title
+    fprintf(gnuplot_pipe, "unset key\n"); // remove legend
+    // fill it with data
+    fprintf(gnuplot_pipe, "plot '-' with lines ls 1\n");
+    for(size_t i=0; i<size_; ++i){
+      if(i%downsample_ratio==0){
+        fprintf(gnuplot_pipe, "%f %f\n", ((float)i)/size_*nyquist, std::arg(data_[i]));
+      }
+    }
+    fprintf(gnuplot_pipe, "e\n");
+    fprintf(gnuplot_pipe, "set xtics font ',5' rotate by 90 offset 0, -1.5\n");
+    fprintf(gnuplot_pipe, "set xlabel 'freq'\n");
   }
 };
 

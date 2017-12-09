@@ -71,8 +71,20 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
     }
   }
   SECTION("sandbox"){
-    FloatSignal o([](long int x){return x+1;}, 44100*10/20);
-    FloatSignal m([](long int x){return 1;}, 44100*1/20);
+    // FloatSignal o([](long int x){return x+1;}, 44100*10/20);
+    // FloatSignal m([](long int x){return 1;}, 44100*1/20);
+
+    FloatSignal f([](long int x){return sin(x);}, 2000);
+    ComplexSignal c(1001);
+    FftTransformer fc(f, c);
+    // f.plot("before");
+    fc.forward();
+    c *= 1.0/f.getSize();
+    // c.plot("c bef");
+    c.plotPolar("c polar", 44100);
+    // fc.backward();
+    // c.plot("c aft");
+    // f.plot("after");
 
     // CrossCorrelator x(o, m);
     // for(size_t i=0; i<10000; ++i){
