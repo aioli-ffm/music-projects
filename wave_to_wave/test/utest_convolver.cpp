@@ -70,18 +70,15 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
       REQUIRE(Approx(conv[i]) == dotProdAt(s, p1_reversed, i-kSizeP1+1));
     }
   }
-
-
   SECTION("sandbox"){
-    FloatSignal o([](long int x){return x+1;}, 6);
-    FloatSignal m([](long int x){return 1;}, 3);
+    FloatSignal o([](long int x){return x+1;}, 4410*60);
+    FloatSignal m([](long int x){return 1;}, 4410*3);
 
-    Test x(o, m);
-
-    o.print("oo");
-    m.print("mm");
-
-    x.makeXcorr().print("xcorr");
-
+    std::vector<Test*> vvv;
+    for(size_t i=0; i<1000; ++i){
+      vvv.push_back(new Test(o, m));
+      // x.makeXcorr();
+      // std::cout << i << std::endl;
+    }
   }
 }

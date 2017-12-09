@@ -15,6 +15,7 @@
 
 TEST_CASE("Testing the AudioSignal default constructor", "[AudioSignal]"){
 
+  REQUIRE(1==1);
   // Test();
   
   // size_t samplerate = 44100;
