@@ -16,12 +16,13 @@
 #include "../include/signal.hpp"
 
 
-const bool kPlot = false;
+
 
 ////////////////////////////////////////////////////////////////////////////////
-/// TESTING THE IMPLEMENTED MATH
+/// TESTER GLOBALS
 ////////////////////////////////////////////////////////////////////////////////
 
+const bool kPlot = false; // true if you wish the tests to generate plots
 
 // Implementation of Chi2 using built-in gamma. Slower than the one implemented
 // in helpers.hpp using lanczos approx, but used for testing
@@ -32,10 +33,27 @@ static double Chi2Test(double x, double df){
 }
 
 
-TEST_CASE("Pow2Ceil", "[helpers]"){
+////////////////////////////////////////////////////////////////////////////////
+/// TESTING THE IMPLEMENTED MATH
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("Testing freq<->midi conversion", "[helpers, math]"){
+  REQUIRE(Approx(FreqToMidi(440)) == 69);
+  REQUIRE(Approx(FreqToMidi(880)) == 81);
+  REQUIRE(Approx(MidiToFreq(81)) == 880);
+  REQUIRE(Approx(MidiToFreq(69)) == 440);
+}
+
+TEST_CASE("Pow2Ceil", "[helpers, math]"){
   size_t outputs[18]{0,1,2,4,4,8,8,8,8,16,16,16,16,16,16,16,16,32};
   for(size_t i=0; i<18; ++i){
     REQUIRE(Pow2Ceil(i) == outputs[i]);
+  }
+}
+
+TEST_CASE("LinInterp", "[helpers, math]"){
+  for(float i=0; i<=10; i+=0.5){
+    REQUIRE(LinInterp(0, 10, i/10) == i);
   }
 }
 

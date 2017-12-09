@@ -21,6 +21,7 @@
 // STL INCLUDES
 #include<string>
 #include<vector>
+#include<map>
 #include<list>
 #include<complex>
 #include<numeric>
@@ -33,38 +34,127 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// EFFICIENT CHI2 GENERATOR
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Prototype of the synth used for analysis
+// This clas is intended to avoid duplicate, expensive computations of the same Chi2 curve.
+// It features a hash table holding the already computed curves, and a single getter that returns
+// the curve if existing, or generates, saves and returns it otherwise.
+// Any interpolations, limitations in resolution, etc have to be managed by the consumer, or
+// extending the class
+class Chi2Server {
+private:
+  std::map<std::tuple<size_t, float, float>, FloatSignal*> chi2_map_; // (size, span, df)->signal
+public:
+
+  // The only consumer method of the server
+  FloatSignal* get(const size_t size, const float span, const float df){
+    std::tuple<size_t, float, float> key(size, span, df);
+    std::map<std::tuple<size_t, float, float>, FloatSignal*>::iterator it = chi2_map_.find(key);
+    if (it != chi2_map_.end()){ // if signal already exists, return it
+      return it->second;
+    } else {                    // if signal didn't exist...
+      // ... generate a new signal ...
+      FloatSignal* fs = new FloatSignal(size);
+      float* fs_data = fs->getData();
+      size_t i = 0;
+      for(double x=DOUBLE_EPSILON, delta=span/size; i<size; ++i, x+=delta){
+        fs_data[i] = Chi2(x, df);
+      }
+      // ... save it to the map and return it
+      chi2_map_.insert(std::make_pair(key, fs));
+      return chi2_map_.find(key)->second;
+    }
+  }
+  ~Chi2Server(){
+    for(const auto& it : chi2_map_){delete it.second;}
+  }
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// FAST "WAVELET" SYNTH
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const double kInterpSteepness = 1.5; // see ExpInterp
+
 class Chi2Synth : public FloatSignal {
 private:
-  const double kChi2Span{20.0};
+  Chi2Server& server_;
   double num_oscillations_;
   double sin_ratio_;
   double env_ratio_;
-  float gen(const double x){
-    return 0;//std::sin(x*sin_ratio_);//Chi2(x, env_ratio_)*sin(x*sin_ratio_);
-  }
+  double env_exp_ratio_;
+  size_t env_ratio_resolution_;
+  size_t chi_table_size_;
+  float chi_span_;
+
 public:
-  Chi2Synth(const size_t size, const double num_oscillations, const double env_ratio)
+  Chi2Synth(Chi2Server &server,
+            const size_t size,
+            const double num_oscillations,
+            const double env_ratio,
+            const double env_exp_ratio=1.5,
+            const size_t env_ratio_resolution=100, // num points allowed between env_ratio=0 and 1
+            const size_t chi_table_size=1000,
+            const float chi_span=30.0)
     : FloatSignal(size),
+      server_(server),
       num_oscillations_(num_oscillations),
-      sin_ratio_(num_oscillations*TWO_PI/kChi2Span),
-      env_ratio_((env_ratio*0.15+0.1)*kChi2Span){
+      sin_ratio_(num_oscillations_*TWO_PI/chi_span),
+      env_ratio_(std::round(env_ratio*env_ratio_resolution)/env_ratio_resolution), // truncate
+      env_exp_ratio_(env_exp_ratio),
+      env_ratio_resolution_(env_ratio_resolution),
+      chi_table_size_(chi_table_size),
+      chi_span_(chi_span) {
+    double df = ExpInterpZeroOne(env_ratio_, env_exp_ratio)*5+2;
+    size_t up_idx;
     size_t i=0;
-    for(double x=GSL_DBL_EPSILON, delta=kChi2Span/size; i<size; ++i, x+=delta){
-      data_[i] = gen(x);
+    double _;
+    for(double x=DOUBLE_EPSILON, delta=chi_span/size; i<size; ++i, x+=delta){
+      // get the signal (the df has been already truncated and interpolated)
+      FloatSignal* chi_sig = server_.get(chi_table_size, chi_span, df);
+      float* chi_data = chi_sig->getData();
+      // the size of the chi table usually doesn't match the size of this object. Therefore,
+      // its values have to be interpolated:
+      float chi_idx = x*chi_table_size/chi_span; // the "actual" chi index
+      up_idx = std::ceil(chi_idx);
+      data_[i] = sin(x*sin_ratio_) * LinInterp(chi_data[(size_t)chi_idx],chi_data[up_idx],
+                                               modf(chi_idx,&_)); // the df reference is unused
     }
   }
-  void test(const std::string outpath="/tmp/test.wav"){
-    FloatSignal seq(44100*10);
-    for(double i=0, freq=11; i<441000; i+=4410, freq+=1){
-      Chi2Synth blob(4410*2, freq*2, 1);
-      seq.addSignal(blob, i);
-    }
-    // seq.plot("hello", 44100, 0.2);
-    seq.toWav(outpath, 44100);
-  }
+
+  Chi2Synth(Chi2Server &server,
+            const size_t size,
+            const double freq,
+            const size_t sample_rate,
+            const double env_ratio,
+            const double env_exp_ratio=1.5,
+            const size_t env_ratio_resolution=500, // num points allowed between env_ratio=0 and 1
+            const size_t chi_table_size=1000,
+            const float chi_span=30.0)
+    : Chi2Synth(server, size, (freq*size)/sample_rate, env_ratio, env_exp_ratio,
+                env_ratio_resolution, chi_table_size, chi_span){}
 };
+
+
+
+
+void Test(const std::string outpath="/tmp/test.wav"){
+  size_t samplerate = 44100;
+  size_t secs =20;
+  Chi2Server serv;
+  FloatSignal seq(samplerate*secs);
+  size_t num_notes = 10;
+  for(double i=0, k=0; i<num_notes; ++i, k+=1.0/(num_notes-1)){
+    Chi2Synth blob(serv, seq.getSize()/num_notes, 880.0, samplerate, k);
+    seq.addSignal(blob, i*blob.getSize());
+  }
+  seq.plot("Linear evolution of sin(x)*Chi2(x, k) for k=2, ..., k=7", samplerate, 1, 0.4);
+  seq.toWav(outpath, samplerate);
+}
+
 
 // int main(int argc, char **argv)
 // {

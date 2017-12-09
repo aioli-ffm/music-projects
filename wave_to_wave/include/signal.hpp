@@ -214,7 +214,7 @@ public:
     }
   }
   void plot(const char* name="FloatSignal", const size_t samplerate=1,
-            const float aspect_ratio=0.1f){
+            const size_t downsample_ratio=1, const float aspect_ratio=0.1f){
     // open persistent gnuplot window
     FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
     // basic settings
@@ -233,7 +233,9 @@ public:
     // fill it with data
     fprintf(gnuplot_pipe, "plot '-' with lines ls 1\n");
     for(size_t i=0; i<size_; ++i){
-      fprintf(gnuplot_pipe, "%f %f\n", ((float)i)/samplerate, data_[i]);
+      if(i%downsample_ratio==0){
+        fprintf(gnuplot_pipe, "%f %f\n", ((float)i)/samplerate, data_[i]);
+      }
     }
     fprintf(gnuplot_pipe, "e\n");
     // refresh can probably be omitted
@@ -269,7 +271,8 @@ public:
       data_flat[i] *= -1;
     }
   }
-  void plot(const char* name="ComplexSignal", const size_t samplerate=1){
+  void plot(const char* name="ComplexSignal", const size_t samplerate=1,
+            const size_t downsample_ratio=1){
     // open persistent gnuplot window
     FILE* gnuplot_pipe = popen ("gnuplot -persistent", "w");
     // basic settings
@@ -292,7 +295,9 @@ public:
     float* data_flat = &reinterpret_cast<float(&)[2]>(data_[0])[0];
     fprintf(gnuplot_pipe, "splot '-' with lines ls 1\n");
     for(size_t i=0, max=size_*2, sr=samplerate*2; i<max; i+=2){
-      fprintf(gnuplot_pipe, "%f %f %f\n", ((float)i)/sr, data_flat[i], data_flat[i+1]);
+      if(i%downsample_ratio==0){
+        fprintf(gnuplot_pipe, "%f %f %f\n", ((float)i)/sr, data_flat[i], data_flat[i+1]);
+      }
     }
     fprintf(gnuplot_pipe, "e\n");
     // refresh can probably be omitted

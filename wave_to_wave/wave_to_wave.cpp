@@ -68,12 +68,6 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// optimize chi2synth:
-//  1. truncate env_ratio to 0.001 and store chi2 on a lazy dict
-//  2. generate and store one single hi-res sin(x) cycle.
-//  3. the synth should not inherit from floatsignal, it is a synthdef. instead,
-//     add a FloatSignal synth(freq, envratio){...} method that reads on the lazy tables
-
 // http://csoundjournal.com/issue17/gogins_composing_in_cpp.html
 // sudo apt install libcsnd-dev libcsound64-dev
 // explanation CSOUND API: http://write.flossmanuals.net/csound/a-the-csound-api/
@@ -87,3 +81,7 @@ int main(int argc,  char** argv){
 // check valgrind... check imports
 // write optimizer. support a lazy dict of {1024: FloatSignal(orig), 2046: orig}
 //                  copies of the original, to be compatible with every patch.
+
+
+// BUGS:
+// plotting results of synth seems to be bugged (plots peaks of 1e32) when chitable size <200

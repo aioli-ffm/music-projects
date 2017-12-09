@@ -6,13 +6,29 @@
 #include <string>
 #include <stdexcept>
 #include <math.h>
+#include <limits>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MATH
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-size_t Pow2Ceil(size_t x){return (x<=0)? 0 : pow(2, ceil(log2(x)));}
+static const double DOUBLE_EPSILON = std::numeric_limits<double>::epsilon();
+
+size_t Pow2Ceil(const size_t x){return (x<=0)? 0 : pow(2, ceil(log2(x)));}
+
+// for a given x between 0 and 1, returns a value between 0 and x, following an exponential curve
+// (like a linear interp. but "bent down"). The steepness of the curve is determined by k.
+double ExpInterpZeroOne(const double x, const double k){
+  return (exp(k*x)-1) / (exp(k)-1);
+}
+
+
+// Given two real numbers a, b, and a fraction x in [0, 1], returns the linear interpolation
+// between them. Example: LinInterp(5.0, 10.0, 0.5) returns 7.5
+float LinInterp (const float first, const float second, const float x) {
+  return first*(1.0f-x) + second*x;
+}
 
 size_t Factorial(long int x){
   size_t result = 1;
@@ -26,11 +42,18 @@ size_t DoubleFactorial(long int x){
   return result;
 }
 
+double FreqToMidi(const double freq){
+  return 69 + 12*log2(freq/440);
+}
+
+double MidiToFreq(const double midi){
+  return 440*pow(2, (midi-69)/12);
+}
+
 // GAMMA constants based in specfunc/gamma.c GSLv2.4 (Author G. Jungman)
 #define PI 3.1415926535897932384626
 #define TWO_PI 6.2831853071795864769252867665590057
 #define E_NUMBER        2.71828182845904523536028747135
-#define GSL_DBL_EPSILON        2.2204460492503131e-16
 #define LogRootTwoPi_  0.9189385332046727418
 #define InverseOfSqrtOfTwoPi 0.3989422804014326779399460599343
 #define Exp7DivBy2Sqrt2Pi  218.746666493637437990776069044569169419001468

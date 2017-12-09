@@ -32,7 +32,7 @@ TEST_CASE("Testing plot", "[AudioSignal]"){
   if(kPlot){
     fss.plot("a plot of 2.34*sin(x) between 0s and 1s", 44100);
     css.plot("a plot of 2.34*e**(ix) between 0s and 1s", 44100);
-    pop_short.plot("pop song", 22050);
+    pop_short.plot("pop song", 22050, 5);
   }
 }
 
