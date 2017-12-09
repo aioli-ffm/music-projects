@@ -30,6 +30,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <map>
 #include <initializer_list>
 #include <iterator>
 #include <algorithm>
@@ -39,6 +40,7 @@
 // LOCAL INCLUDES
 #include "helpers.hpp"
 #include "signal.hpp"
+#include "synth.hpp"
 
 
 
@@ -362,7 +364,7 @@ public:
 
 
 
-class Test {
+class CrossCorrelator {
 private:
   const size_t kMinChunksize = 2048; // seems to be the fastest
   // grab input lengths
@@ -389,7 +391,7 @@ private:
 
 
 public:
-  Test(FloatSignal &signal, FloatSignal &patch, const std::string wisdomPath="")
+  CrossCorrelator(FloatSignal &signal, FloatSignal &patch, const std::string wisdomPath="")
     : signal_size_(signal.getSize()),
       patch_size_(patch.getSize()),
       result_size_(signal_size_+patch_size_-1),
@@ -411,10 +413,10 @@ public:
     // chunk the signal into strides of same size as padded patch
     // and make complex counterparts too, as well as the corresponding xcorr signals
     for(size_t i=0; i<=padded_signal_.getSize()-result_chunksize_; i+=result_stride_){
-      s_chunks_.push_back(new FloatSignal(&padded_signal_[i], result_chunksize_)); // THIS SHOULD GO TO DICT IFF NOT THERE YET
-      s_chunks_complex_.push_back(new ComplexSignal(result_chunksize_complex_));   // THIS SHOULD GO TO DICT IFF NOT THERE YET
-      result_chunks_.push_back(new FloatSignal(result_chunksize_));               // THIS SHOULD GO TO DICT IFF NOT THERE YET
-      result_chunks_complex_.push_back(new ComplexSignal(result_chunksize_complex_)); // THIS SHOULD GO TO DICT IFF NOT THERE YET
+      s_chunks_.push_back(new FloatSignal(&padded_signal_[i], result_chunksize_));
+      s_chunks_complex_.push_back(new ComplexSignal(result_chunksize_complex_));
+      result_chunks_.push_back(new FloatSignal(result_chunksize_));
+      result_chunks_complex_.push_back(new ComplexSignal(result_chunksize_complex_));
     }
     // make one forward plan per signal chunk, and one for the patch
     // Also backward plans for the xcorr chunks
@@ -480,7 +482,7 @@ public:
     }
   }
 
-  ~Test(){
+  ~CrossCorrelator(){
     // clear vectors holding signals
     for (size_t i =0; i<s_chunks_.size();i++){
       delete (s_chunks_.at(i));
@@ -506,13 +508,46 @@ public:
 };
 
 
+class Optimizer {
+private:
+  FloatSignal& original_;
+  FloatSignal residual_;
+  Chi2Server chi2_server_;
+  std::vector<std::tuple<float, float, float> > sequence_;
+  std::map<size_t, std::vector<FloatSignal> > originals_; // key is a power of 2 being chunk_size
+  std::map<size_t, FloatSignal> materials_; // key is a power of 2 being chunk_size
+  std::map<size_t, FftForwardPlan> forward_plans_; // key is a power of 2 being chunk_size
+  std::map<size_t, FftBackwardPlan> backward_plans_; // key is a power of 2 being chunk_size
+public:
+  Optimizer(FloatSignal &original, size_t downsample_ratio)
+    : original_(original), residual_(original.getData(), original.getSize()){
+    // how to handle downsampling?
+    // further housekeeping here.
+  }
+
+  void step(const size_t size, const double freq, const double env_ratio){
+    // this method is to be called many times.
+
+    // It should generate the blobs on the fly (using the server attribute),
+    // copy them to the corresponding pow2 chunk (create one+plans if non existent),
+    // also use/populate the corresponding original(keep in mind enough pre-padding has to be added)
+    // execute the forward plans, multiplications and backward plans.
+    // After that the most recent xcorr should be reparted in the iffted chunks, to be further used
+
+    // then based on the current data in the iffted chunks, PLUS A GIVEN CRITERION (by default just
+    // find one abs maximum per chunk), apply the current blob to the residual and addto the seq.
+
+  }
+
+  void optimize(size_t num_iters){
+    // should call step num_iters and other main config. Should have a nice interface.
+  }
 
 
-
-
-
-
-
+  ~Optimizer(){
+    // this fn should take care of deleting all the map and vector contents.
+  }
+};
 
 
 

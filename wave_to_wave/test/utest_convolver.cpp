@@ -71,14 +71,18 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
     }
   }
   SECTION("sandbox"){
-    FloatSignal o([](long int x){return x+1;}, 4410*60);
-    FloatSignal m([](long int x){return 1;}, 4410*3);
+    FloatSignal o([](long int x){return x+1;}, 44100*10/20);
+    FloatSignal m([](long int x){return 1;}, 44100*1/20);
 
-    std::vector<Test*> vvv;
-    for(size_t i=0; i<1000; ++i){
-      vvv.push_back(new Test(o, m));
-      // x.makeXcorr();
-      // std::cout << i << std::endl;
-    }
+    // CrossCorrelator x(o, m);
+    // for(size_t i=0; i<10000; ++i){
+    //   x.makeXcorr();
+    //   if(i%1000==0){
+    //     std::cout << i << std::endl;
+    //   }
+    // }
+
+    // Optimizer opt(o, 20);
+
   }
 }

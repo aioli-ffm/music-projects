@@ -68,6 +68,8 @@ int main(int argc,  char** argv){
 
 // TODO:
 
+// at the end of convolver there is a sketch of the optimizer, finish it
+
 // http://csoundjournal.com/issue17/gogins_composing_in_cpp.html
 // sudo apt install libcsnd-dev libcsound64-dev
 // explanation CSOUND API: http://write.flossmanuals.net/csound/a-the-csound-api/
