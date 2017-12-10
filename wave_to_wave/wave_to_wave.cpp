@@ -68,7 +68,16 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// at the end of convolver there is a sketch of the optimizer, finish it
+// ConvolverPipeline:
+// 1. constructor should use the update methods to generate contents.
+// 2. finish documentation, regarding swapping of signal and that it shouldbe avoided
+// 3. test existing functionality, and finish the documentation of the interface on how to
+//    convolve in-place and so on.
+
+
+// once the pipeline is running and tested (also valgrind!), make the optimizer: it should hold
+// a lazy map with the pipelines, manage signal generating and optimizing criteria, and so on,
+// and should have a clean but flexible interface.
 
 // http://csoundjournal.com/issue17/gogins_composing_in_cpp.html
 // sudo apt install libcsnd-dev libcsound64-dev

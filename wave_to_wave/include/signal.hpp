@@ -269,6 +269,7 @@ public:
       data_flat[i] *= -1;
     }
   }
+
   void plot(const char* name="ComplexSignal", const size_t samplerate=1,
             const size_t downsample_ratio=1){
     // open persistent gnuplot window

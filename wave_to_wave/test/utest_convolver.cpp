@@ -70,21 +70,67 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
       REQUIRE(Approx(conv[i]) == dotProdAt(s, p1_reversed, i-kSizeP1+1));
     }
   }
-  SECTION("sandbox"){
-    // FloatSignal o([](long int x){return x+1;}, 44100*10/20);
-    // FloatSignal m([](long int x){return 1;}, 44100*1/20);
 
-    FloatSignal f([](long int x){return sin(x);}, 2000);
-    ComplexSignal c(1001);
-    FftTransformer fc(f, c);
-    // f.plot("before");
-    fc.forward();
-    c *= 1.0/f.getSize();
-    // c.plot("c bef");
-    c.plotPolar("c polar", 44100);
+}
+
+TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
+  FloatSignal signal([](long int x){return x+1;}, 10);
+  FloatSignal patch1([](long int x){return 1+x;}, 6);
+  FloatSignal patch2([](long int x){return 101+x;}, 4);
+  ConvolverPipeline x(signal, patch1);
+
+
+  SECTION("constructor"){
+    REQUIRE(x.getPaddedSize() == 16);
+    float patch1_padded[16]{6,5,4,3,2,1,0,0,0,0,0,0,0,0,0,0};
+    float* x_patch = x.getPatch()->r->begin();
+    for(size_t i=0; i<16; ++i){
+      REQUIRE(x_patch[i] == patch1_padded[i]);
+    }
+  }
+
+  SECTION("updatePatch"){
+    x.updatePatch(patch2);
+    float patch2_padded[16]{104,103,102,101,0,0,0,0,0,0,0,0,0,0,0,0};
+    float* x_patch = x.getPatch()->r->begin();
+    for(size_t i=0; i<16; ++i){
+      REQUIRE(x_patch[i] == patch2_padded[i]);
+    }
+  }
+
+}
+
+
+    // TODO: GET VECTOR AND CHECK CONTNENTS
+
+    // x.updatePatch(m2);
+
+    // FloatSignal m3([](long int x){return 100+x;}, 2);
+    // x.updatePatch(m3);
+
+
+    // FloatSignal f([](long int x){return x==0;}, 20);
+    // ComplexSignal c(11);
+    // ComplexSignal test(11);
+    // FftTransformer fc(&f, &c);
+    // f.print("before");
+    // fc.forward();
+    // c *= 1.0/f.getSize();
+    // // we want to add a (circular) delay of 3 samples to f.
+    // // c.plot("c bef");
+    // // c.plotPolar("before");
+    // float offset = 3.0*-TWO_PI/f.getSize();
+    // for(size_t i=0; i<c.getSize(); ++i){
+    //   float i_offset = offset*i;
+    //   test[i] = c[i];
+    //   c[i] *= std::complex<float>(cos(i_offset), sin(i_offset));
+    // }
+    // c += test;
+    // c.plotPolar("before");
     // fc.backward();
-    // c.plot("c aft");
-    // f.plot("after");
+    // c.plotPolar("after");
+    // //c.plot("c aft");
+    // f.print("after");
 
     // CrossCorrelator x(o, m);
     // for(size_t i=0; i<10000; ++i){
@@ -95,6 +141,3 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
     // }
 
     // Optimizer opt(o, 20);
-
-  }
-}

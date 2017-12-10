@@ -23,6 +23,7 @@
 // the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
 #define WITH_OPENMP_ABOVE 1
 
+
 // STL INCLUDES
 #include <string.h>
 #include <math.h>
@@ -43,6 +44,7 @@
 #include "synth.hpp"
 
 
+const static size_t kMinChunkSize = 1;//2048;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -86,36 +88,6 @@ public:
   }
 };
 
-
-struct FftTransformer {
-  // THE TWO SIGNALS AND THE FFT PLANS BETWEEN THEM (GETTERS AREN'T NEEDED)
-  FloatSignal& r;
-  ComplexSignal& c;
-  fftwf_plan forward_plan;
-  fftwf_plan backward_plan;
-  // THE CONSTRUCTOR GRABS THE REFERENCES TO THE SIGNALS, AND MAKES THE PLANS
-  FftTransformer(FloatSignal &real, ComplexSignal &complex)
-    : r(real), c(complex),
-      forward_plan(fftwf_plan_dft_r2c_1d(r.getSize(), r.getData(),
-                                         reinterpret_cast<fftwf_complex*>(&c.getData()[0]),
-                                         FFTW_ESTIMATE)),
-      backward_plan(fftwf_plan_dft_c2r_1d(r.getSize(),
-                                          reinterpret_cast<fftwf_complex*>(&c.getData()[0]),
-                                          r.getData(), FFTW_ESTIMATE)){
-    CheckRealComplexRatio(r.getSize(), c.getSize(), "FftTransformer");
-  }
-  // THE DESTRUCTOR TAKES CARE OF THE PLANS ONLY
-  ~FftTransformer(){
-    fftwf_destroy_plan(forward_plan);
-    fftwf_destroy_plan(backward_plan);
-  }
-  // CONVENIENCE METHODS FOR EXECUTING THE FFT AND IFFT
-  void forward(){fftwf_execute(forward_plan);}
-  // NOTE THAT EXECUTING THE BACKWARD PLAN ALTERS THE CONTENTS OF THE COMPLEX SIGNAL
-  // (http://www.fftw.org/fftw2_doc/fftw_2.html)
-  void backward(){fftwf_execute(backward_plan);}
-
-};
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,9 +362,6 @@ public:
 
 
 
-
-
-
 class CrossCorrelator {
 private:
   const size_t kMinChunksize = 2048; // seems to be the fastest
@@ -538,12 +507,152 @@ public:
 
 
 
-  // FloatSignal& r;
-  // ComplexSignal& c;
-  // fftwf_plan forward_plan;
-  // fftwf_plan backward_plan;
-  // // THE CONSTRUCTOR GRABS THE REFERENCES TO THE SIGNALS, AND MAKES THE PLANS
-  // FftTransformer(FloatSignal &real, ComplexSignal &complex)
+
+struct FftTransformer {
+  // THE TWO SIGNALS AND THE FFT PLANS BETWEEN THEM (GETTERS AREN'T NEEDED)
+  FloatSignal* r;
+  ComplexSignal* c;
+  fftwf_plan forward_plan;
+  fftwf_plan backward_plan;
+  // THE CONSTRUCTOR GRABS THE REFERENCES TO THE SIGNALS, AND MAKES THE PLANS
+  FftTransformer(FloatSignal* real, ComplexSignal* complex)
+    : r(real), c(complex),
+      forward_plan(fftwf_plan_dft_r2c_1d(r->getSize(), r->getData(),
+                                         reinterpret_cast<fftwf_complex*>(&c->getData()[0]),
+                                         FFTW_ESTIMATE)),
+      backward_plan(fftwf_plan_dft_c2r_1d(r->getSize(),
+                                          reinterpret_cast<fftwf_complex*>(&c->getData()[0]),
+                                          r->getData(), FFTW_ESTIMATE | FFTW_PRESERVE_INPUT)){
+    CheckRealComplexRatio(r->getSize(), c->getSize(), "FftTransformer");
+  }
+  // THE DESTRUCTOR TAKES CARE OF THE PLANS ONLY
+  ~FftTransformer(){
+    fftwf_destroy_plan(forward_plan);
+    fftwf_destroy_plan(backward_plan);
+  }
+  // CONVENIENCE METHODS FOR EXECUTING THE FFT AND IFFT
+  void forward(){fftwf_execute(forward_plan);}
+  void backward(){fftwf_execute(backward_plan);}
+};
+
+
+//// This class does most of the dirty job required by the cross-correlation via overlap-save
+// algorithm. Given a signal of length S and a patch of length P<=S (raises exception otherwise):
+//
+// 1. makes a copy of the patch, zero-padded at the end to PP := max(kMinChunkSize, 2*Pow2Ceil(P)).
+// 2. pre-pads the signal with PP/2 zeros, and cuts it into overlapping chunks of length PP,
+//    striding by V:=PP/2 steps. Note that the optimum would be V=PP-P+1, but this pipeline is
+//    intended to be reused by all patches with same PP, which wouldn't be possible for such a
+//    stride and would require re-instantiation of the whole pipeline (which is worse).
+// 3. For each chunk creates a complex counterpart of size PP/2+1 and puts both to an FftTransformer
+//    that takes care of the the FFT and IFFT plans and transformations.
+//
+//// The convenience of this procedure is manifold:
+// i.   The FFT for the signal chunks has to be performed only once (per padded_patch_size_).
+// ii.  The FFT, IFFT and spectralConv operations can be parallelized as they are independent.
+// iii. Since FFT is O(n logn), this slightly helps when patch is notably smaller than signal.
+// iv.  The FFT plans and signal copies have to be generated only once (per padded_patch_size_)
+//
+//// To leverage this advantages, the pipeline can be used as follows:
+// a. After instantiation, save it to a map<size_t, ConvolverPipeline> with the getPaddedSize()
+//    as key, and check that map upon reusage in the next iterations.
+// b. When reusing, just the patch has to be rewritten. For that, use the updatePatch() method
+// c. If used in an iterative optimizer among multiple pipelines, it may be needed to update
+//    the signal too. For that, use the updateSignal() method
+// d  The FFTs and IFFTs(non-destructive) can be performed at will by calling forward() and
+//    backward() on the FftTransformer structs returned by getPatch() and getSignalVec().
+// d. The correlation operation is expected to be done in-place (but doesn't have to). Can be done
+//    at will with the signals held in the FftTransformer structs.
+//// As a final remark, note that all the signal inputs are given by reference, and the generated
+// copies are managed by the destructor, so no action is needed to avoid memory leaking.
+class ConvolverPipeline {
+private:
+  size_t signal_size_;
+  size_t patch_size_;
+  size_t padded_patch_size_;
+  size_t padded_size_half_;
+  size_t padded_patch_size_complex_;
+  //
+  size_t signal_prepad_;
+  //
+  FftTransformer* patch_;
+  std::vector<FftTransformer*> signal_vec_;
+  //
+public:
+  ConvolverPipeline(FloatSignal &signal, FloatSignal &patch)
+    : signal_size_(signal.getSize()),
+      patch_size_(patch.getSize()),
+      padded_patch_size_(std::max(kMinChunkSize, 2*Pow2Ceil(patch_size_))),
+      padded_size_half_(padded_patch_size_/2),
+      padded_patch_size_complex_(padded_size_half_+1),
+      //
+      signal_prepad_(padded_size_half_){
+    // length of signal can't be smaller than length of patch
+    CheckLessEqual(patch_size_, signal_size_,
+                   "ConvolverPipeline: len(signal) can't be smaller than len(patch)!");
+    // copy and zero-pad patch: note that it is loaded in reverse order
+    FloatSignal* padded_patch = new FloatSignal(padded_patch_size_);
+    std::reverse_copy(patch.begin(), patch.end(), padded_patch->begin());
+    patch_ = new FftTransformer(padded_patch, new ComplexSignal(padded_patch_size_complex_));
+    // copy and append the first, pre-padded signal chunk:
+    float* it = signal.begin();
+    float* end_it = signal.end();
+    FloatSignal* sig = new FloatSignal(padded_patch_size_);
+    std::copy(it, std::min(end_it, it+padded_size_half_), sig->begin()+padded_size_half_);
+    signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
+    // loop through the signal, adding further chunks
+    for(; it<end_it; it+=padded_size_half_){
+      FloatSignal* sig = new FloatSignal(padded_patch_size_);
+      std::copy(it, std::min(end_it, it+padded_patch_size_), sig->begin());
+      signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
+    }
+  }
+
+  // GETTERS
+  const size_t getPaddedSize() const {return padded_patch_size_;}
+  const FftTransformer* getPatch() const {return patch_;}
+  const std::vector<FftTransformer*> getSignalVec() const {return signal_vec_;}
+
+  // given a FloatSignal with length <= getPaddedSize (throws exception otherwise), rewrites the
+  // patch (zero-padding the rest) and calculates the corresponding FFT after (for consistency).
+  void updatePatch(FloatSignal &new_patch){
+    size_t new_size = new_patch.getSize();
+    CheckLessEqual(new_size, padded_patch_size_,
+                   "updatePatch(): len(new_patch) can't be smaller than getPaddedSize()!");
+    float* old_patch = patch_->r->getData();
+    std::reverse_copy(new_patch.begin(), new_patch.end(), old_patch);
+    std::fill(old_patch+new_size, old_patch+padded_patch_size_, 0);
+  }
+
+  // void updateSignal(FloatSignal &new_signal){
+  //   size_t new_size = new_signal.getSize();
+  //   CheckAllEqual({new_size, signal_size_}, "updateSignal: length of signal can't change!");
+  //   for(const FftTransformer* x : signal_vec_){
+  //     float* sig_chunk = x->r->getData();
+  //   }
+
+  //   float* old_sig = patch_->r->getData();
+  //   std::reverse_copy(new_patch.begin(), new_patch.end(), old_patch);
+  //   std::fill(old_patch+new_size, old_patch+padded_patch_size_, 0);
+  //   patch_->r->print("new patch");
+  // }
+
+  ~ConvolverPipeline(){
+    if(patch_!=nullptr){
+      delete patch_->r;
+      delete patch_->c;
+      delete patch_;
+    }
+    // clear vectors holding signals
+    for(const FftTransformer* x : signal_vec_){
+      delete x->r;
+      delete x->c;
+      delete x;
+    }
+    signal_vec_.clear();
+  }
+};
+
 
 
 class Optimizer {
