@@ -150,8 +150,18 @@ public:
     }
   }
   // OVERLOADED OPERATORS
-  T &operator[](size_t idx){return data_[idx];}
-  T &operator[](size_t idx) const {return data_[idx];}
+  T& operator[](size_t idx){return data_[idx];}
+  T& operator[](size_t idx) const {return data_[idx];}
+  bool operator!=(AudioSignal<T> &other){
+    const size_t other_size = other.getSize();
+    if(size_ != other_size){return true;}
+    const T* other_data = other.getData();
+    for(size_t i=0; i<size_; ++i){
+      if(data_[i]!=other_data[i]){return true;}
+    };
+    return false; // if none of the above happened
+  }
+  bool operator==(AudioSignal<T> &other){return !(this->operator!=(other));}
   // signal-to-constant compound assignment operators
   void operator+=(const T x){for(size_t i=0; i<size_; ++i){data_[i] += x;}}
   void operator-=(const T x){for(size_t i=0; i<size_; ++i){data_[i] -= x;}}

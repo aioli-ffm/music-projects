@@ -35,8 +35,8 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
   // create signals
   const size_t kSizeS = 50;
   const size_t kSizeP1 = 3;
-  auto lin = [](const long int n)->float {return n+1;};
-  auto const1 = [](const long int n)->float {return 1;};
+  auto lin = [](long int n)->float {return n+1;};
+  auto const1 = [](long int n)->float {return 1;};
 
   SECTION("test dotProdAt"){
     FloatSignal s(lin, kSizeS);
@@ -70,74 +70,174 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
       REQUIRE(Approx(conv[i]) == dotProdAt(s, p1_reversed, i-kSizeP1+1));
     }
   }
-
 }
 
-TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
+TEST_CASE("Testing the CorrelatorPipeline", "[CorrelatorPipeline]"){
   FloatSignal signal([](long int x){return x+1;}, 10);
   FloatSignal patch1([](long int x){return 1+x;}, 6);
-  FloatSignal patch2([](long int x){return 101+x;}, 4);
-  ConvolverPipeline x(signal, patch1);
+  CorrelatorPipeline x(signal, patch1, 1);
+  std::vector<FftTransformer*> sig_vec = x.getSignalVec();
+  const size_t kExpectedPaddedSize = 16;
+  const size_t kExpectedVectorSize = 3;
+  const size_t kExpectedComplexSize = kExpectedPaddedSize/2+1;
+  float sig_chunk1[kExpectedPaddedSize]{0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8};
+  float sig_chunk2[kExpectedPaddedSize]{1,2,3,4,5,6,7,8,9,10,0,0,0,0,0,0};
+  float sig_chunk3[kExpectedPaddedSize]{9,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  ComplexSignal cs_zeros(kExpectedComplexSize);
 
+  // check that patch cannot be bigger than signal:
+  REQUIRE_THROWS_AS(CorrelatorPipeline(patch1, signal), std::runtime_error);
 
-  SECTION("constructor"){
-    REQUIRE(x.getPaddedSize() == 16);
-    float patch1_padded[16]{6,5,4,3,2,1,0,0,0,0,0,0,0,0,0,0};
+  SECTION("constructor, getPaddedSize, getPatch, getSignalVec"){
+    // check padded patch size
+    REQUIRE(x.getPaddedSize() == kExpectedPaddedSize);
+    // check padded patch contents
+    float patch1_padded[kExpectedPaddedSize]{6,5,4,3,2,1,0,0,0,0,0,0,0,0,0,0};
     float* x_patch = x.getPatch()->r->begin();
-    for(size_t i=0; i<16; ++i){
+    for(size_t i=0; i<kExpectedPaddedSize; ++i){
       REQUIRE(x_patch[i] == patch1_padded[i]);
     }
+    // check chunked signal contents
+    REQUIRE(sig_vec.size() == kExpectedVectorSize);
+    for(size_t i=0; i<kExpectedPaddedSize; ++i){
+      REQUIRE(sig_vec[0]->r->getData()[i] == sig_chunk1[i]);
+      REQUIRE(sig_vec[1]->r->getData()[i] == sig_chunk2[i]);
+      REQUIRE(sig_vec[2]->r->getData()[i] == sig_chunk3[i]);
+    }
+    // check that all complex signals are still zero:
+    REQUIRE((cs_zeros == *(x.getPatch()->c)) == true);
+    REQUIRE((cs_zeros == *(sig_vec[0]->c)) == true);
+    REQUIRE((cs_zeros == *(sig_vec[1]->c)) == true);
+    REQUIRE((cs_zeros == *(sig_vec[2]->c)) == true);
   }
 
-  SECTION("updatePatch"){
-    x.updatePatch(patch2);
-    float patch2_padded[16]{104,103,102,101,0,0,0,0,0,0,0,0,0,0,0,0};
+  SECTION("test updatePatch"){
+    // patch2 has different content and size, but same padded_size so it works
+    FloatSignal patch2([](long int x){return 11+x;}, 4);
+    REQUIRE_THROWS_AS(CorrelatorPipeline(patch1, signal), std::runtime_error);
+    x.updatePatch(patch2, false);
+    float patch2_padded[kExpectedPaddedSize]{14,13,12,11,0,0,0,0,0,0,0,0,0,0,0,0};
     float* x_patch = x.getPatch()->r->begin();
-    for(size_t i=0; i<16; ++i){
+    for(size_t i=0; i<kExpectedPaddedSize; ++i){
       REQUIRE(x_patch[i] == patch2_padded[i]);
     }
+    // test that c still zeros after the update
+    REQUIRE((cs_zeros == *(x.getPatch()->c)) == true);
+    // now update with fft_forward_after=true, and check that c has been set
+    x.updatePatch(patch2, true);
+    REQUIRE((cs_zeros == *(x.getPatch()->c)) == false);
+    // test that a patch that is too long gets rejected and nothing else happens:
+    FloatSignal patch_too_long([](long int x){return 11+x;}, 20);
+    REQUIRE_THROWS_AS(x.updatePatch(patch_too_long, true), std::runtime_error);
+    for(size_t i=0; i<kExpectedPaddedSize; ++i){
+      REQUIRE(x_patch[i] == patch2_padded[i]); // this still holds
+    }
+    REQUIRE((cs_zeros == *(x.getPatch()->c)) == false); // and this
   }
+
+
+  SECTION("test updateSignal"){
+    // first, check that different size throws an exception
+    FloatSignal signal2_diff([](long int x){return x*(x%2)+1;}, 20);
+    REQUIRE_THROWS_AS(x.updateSignal(signal2_diff, true), std::runtime_error);
+    // and that no changes were made
+    for(size_t i=0; i<kExpectedPaddedSize; ++i){
+      REQUIRE(sig_vec[0]->r->getData()[i] == sig_chunk1[i]);
+      REQUIRE(sig_vec[1]->r->getData()[i] == sig_chunk2[i]);
+      REQUIRE(sig_vec[2]->r->getData()[i] == sig_chunk3[i]);
+    }
+    REQUIRE((cs_zeros == *(sig_vec[0]->c)) == true);
+    REQUIRE((cs_zeros == *(sig_vec[1]->c)) == true);
+    REQUIRE((cs_zeros == *(sig_vec[2]->c)) == true);
+
+    // now for a valid new signal of same size, check that update is correct
+    FloatSignal signal2_same([](long int x){return x*(x%2)+1;}, 10);
+    x.updateSignal(signal2_same, false); // no forwarding!
+    float sig2_chunk1[kExpectedPaddedSize]{0,0,0,0,0,0,0,0,1,2,1,4,1,6,1,8};
+    float sig2_chunk2[kExpectedPaddedSize]{1,2,1,4,1,6,1,8,1,10,0,0,0,0,0,0};
+    float sig2_chunk3[kExpectedPaddedSize]{1,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    REQUIRE(sig_vec.size() == kExpectedVectorSize);
+    for(size_t i=0; i<kExpectedPaddedSize; ++i){
+      REQUIRE(sig_vec[0]->r->getData()[i] == sig2_chunk1[i]);
+      REQUIRE(sig_vec[1]->r->getData()[i] == sig2_chunk2[i]);
+      REQUIRE(sig_vec[2]->r->getData()[i] == sig2_chunk3[i]);
+    }
+    // at this point, no forward FFT has beeen performed:
+    REQUIRE((cs_zeros == *(sig_vec[0]->c)) == true);
+    REQUIRE((cs_zeros == *(sig_vec[1]->c)) == true);
+    REQUIRE((cs_zeros == *(sig_vec[2]->c)) == true);
+    // but if we repeat it with the fft_after flag as true, changes are made:
+    x.updateSignal(signal2_same, true);
+    REQUIRE((cs_zeros == *(sig_vec[0]->c)) == false);
+    REQUIRE((cs_zeros == *(sig_vec[1]->c)) == false);
+    REQUIRE((cs_zeros == *(sig_vec[2]->c)) == false);
+  }
+
+    SECTION("test forwardPatch, backwardPatch, forwardSignal and backwardSignal"){
+      // copy patch. FFT, normalize, then IFFT and compare result with copy
+      FloatSignal padded_patch_copy(x.getPatch()->r->begin(), kExpectedPaddedSize);
+      x.forwardPatch();
+      *(x.getPatch()->c) *= 1.0/kExpectedPaddedSize;
+      x.backwardPatch();
+      for(size_t i=0; i<kExpectedPaddedSize; ++i){
+        REQUIRE((x.getPatch()->r->getData()[i] - padded_patch_copy[i]) < 0.000001);
+      }
+      // same procedure with the signal chunks:
+      FloatSignal sig_copy1(x.getSignalVec()[0]->r->begin(), kExpectedPaddedSize);
+      FloatSignal sig_copy2(x.getSignalVec()[1]->r->begin(), kExpectedPaddedSize);
+      FloatSignal sig_copy3(x.getSignalVec()[2]->r->begin(), kExpectedPaddedSize);
+      x.forwardSignal();
+      for(size_t i=0; i<kExpectedVectorSize; ++i){
+        *(x.getSignalVec()[i]->c) *= 1.0/kExpectedPaddedSize;
+      }
+      x.backwardSignal();
+      for(size_t i=0; i<kExpectedPaddedSize; ++i){
+        REQUIRE((x.getSignalVec()[0]->r->getData()[i] - sig_copy1[i]) < 0.000001);
+        REQUIRE((x.getSignalVec()[1]->r->getData()[i] - sig_copy2[i]) < 0.000001);
+        REQUIRE((x.getSignalVec()[2]->r->getData()[i] - sig_copy3[i]) < 0.000001);
+      }
+    }
+
+
+    // THIS DOESNT WORKS FICKSME
+    SECTION("test multiplyPatchWithSigAndNormalize"){
+      FloatSignal a([](long int x){return x+1;}, 20);
+      FloatSignal b([](long int x){return x+1;}, 3);
+      CorrelatorPipeline xxx(a, b, 1);
+      xxx.getPatch()->r->print("before patch");
+      for(const auto& f : xxx.getSignalVec()){
+        f->r->print("before");
+      }
+      x.forwardPatch();
+      x.forwardSignal();
+      x.multiplyPatchWithSigAndNormalize();
+      x.backwardSignal();
+      for(const auto& f : xxx.getSignalVec()){
+        f->r->print("after");
+      }
+    }
+
+
+    // // SUCH FAST MUCH SPEEDNESS
+    // size_t downsampling = 50;
+    // FloatSignal aaa([](long int x){return x%2 == 0;}, 44100*60/downsampling);
+    // FloatSignal bbb([](long int x){return x%3 == 0;}, 44100*3/downsampling);
+    // CorrelatorPipeline xxx(aaa, bbb, 2048);
+    // for(size_t i=0; i<1000*1000*1000; ++i){
+    //   if(i%1000==0){std::cout << "i was " << i << std::endl;}
+    //   xxx.updatePatch(bbb);
+    //   xxx.forwardPatch();
+    //   xxx.multiplyPatchWithSigAndNormalize();
+    //   xxx.updateSignal(aaa);
+    // }
+
 
 }
 
 
-    // TODO: GET VECTOR AND CHECK CONTNENTS
-
-    // x.updatePatch(m2);
-
-    // FloatSignal m3([](long int x){return 100+x;}, 2);
-    // x.updatePatch(m3);
 
 
-    // FloatSignal f([](long int x){return x==0;}, 20);
-    // ComplexSignal c(11);
-    // ComplexSignal test(11);
-    // FftTransformer fc(&f, &c);
-    // f.print("before");
-    // fc.forward();
-    // c *= 1.0/f.getSize();
-    // // we want to add a (circular) delay of 3 samples to f.
-    // // c.plot("c bef");
-    // // c.plotPolar("before");
-    // float offset = 3.0*-TWO_PI/f.getSize();
-    // for(size_t i=0; i<c.getSize(); ++i){
-    //   float i_offset = offset*i;
-    //   test[i] = c[i];
-    //   c[i] *= std::complex<float>(cos(i_offset), sin(i_offset));
-    // }
-    // c += test;
-    // c.plotPolar("before");
-    // fc.backward();
-    // c.plotPolar("after");
-    // //c.plot("c aft");
-    // f.print("after");
 
-    // CrossCorrelator x(o, m);
-    // for(size_t i=0; i<10000; ++i){
-    //   x.makeXcorr();
-    //   if(i%1000==0){
-    //     std::cout << i << std::endl;
-    //   }
-    // }
 
-    // Optimizer opt(o, 20);
+    // TEST THROWN EXCEPTIONS FOR WRONG SIZES
+    // ALSO TEST THAT ON THE FFT MANAGER

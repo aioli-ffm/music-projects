@@ -22,8 +22,8 @@ const bool kPlot = false;
 
 
 TEST_CASE("Testing plot", "[AudioSignal]"){
-  auto sin_gen2 = [](const long int x)->float{return 2.34f*std::sin(0.001f*x);};
-  auto spiral_gen = [](const long int x)->std::complex<float>{return 2.34f*exp(std::complex<float>(0, 0.001f*x));};
+  auto sin_gen2 = [](long int x)->float{return 2.34f*std::sin(0.001f*x);};
+  auto spiral_gen = [](long int x)->std::complex<float>{return 2.34f*exp(std::complex<float>(0, 0.001f*x));};
   FloatSignal fss(sin_gen2, 44100);
   ComplexSignal css(spiral_gen, 44100);
 
@@ -72,25 +72,10 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
   }
 
   SECTION("FloatSignal generative constructor"){
-    auto lambda = [](const long int x)->float {return 1.23*(x-50);};
+    auto lambda = [](long int x)->float {return 1.23*(x-50);};
     FloatSignal fs(lambda, kTestSize);
     for(size_t i=0; i<kTestSize; ++i){
       REQUIRE(fs[i] == lambda(i));
-    }
-  }
-
-  SECTION("Interaction between FloatSignal and libsndfile"){
-    const std::string kWavPath = "/tmp/test.wav";
-    const size_t kWavSize = 10000;
-    // make a sin signal and save it to kWavPath (FORMAT_FLOAT to allow testing)
-    auto sin_gen = [](const long int x)->float{0.001*std::sin(0.1f*(float)x);};
-    FloatSignal fs(sin_gen, kWavSize);
-    fs.toWav(kWavPath, 44100, SF_FORMAT_FLOAT);
-    // load the wave from kWavPath and check that contents are still the same
-    FloatSignal loaded(kWavPath);
-    REQUIRE(loaded.getSize() == kWavSize);
-    for(size_t i=0; i<kWavSize; ++i){
-      REQUIRE(loaded[i] == sin_gen(i));
     }
   }
 
@@ -144,6 +129,23 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
   }
 
   SECTION("FloatSignal-to-FloatSignal operators"){
+    SECTION("== and !=, with itself and with another:"){
+      FloatSignal a([](long int x){return x+1;}, 10);
+      FloatSignal b([](long int x){return x+1;}, 10);
+      FloatSignal c([](long int x){return x+1;}, 20);
+      FloatSignal d([](long int x){return 1000;}, 10);
+      REQUIRE((a==a) == true);
+      REQUIRE((a==b) == true);
+      REQUIRE((a==c) == false);
+      REQUIRE((a==d) == false);
+      REQUIRE((a!=a) == false);
+      REQUIRE((a!=b) == false);
+      REQUIRE((a!=c) == true);
+      REQUIRE((a!=d) == true);
+
+    }
+
+
     SECTION("+= and -+, with itself and with another:"){
       FloatSignal other(arr, kTestSize);
       // this two should do nothing (since offset is out of bounds)
@@ -207,6 +209,22 @@ TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){
       }
     }
   }
+
+  SECTION("Interaction between FloatSignal and libsndfile"){
+    const std::string kWavPath = "/tmp/test.wav";
+    const size_t kWavSize = 10000;
+    // make a sin signal and save it to kWavPath (FORMAT_FLOAT to allow testing)
+    auto sin_gen = [](long int x)->float{0.001*std::sin(0.1f*(float)x);};
+    FloatSignal fs(sin_gen, kWavSize);
+    fs.toWav(kWavPath, 44100, SF_FORMAT_FLOAT);
+    // load the wave from kWavPath and check that contents are still the same
+    FloatSignal loaded(kWavPath);
+    REQUIRE(loaded.getSize() == kWavSize);
+    for(size_t i=0; i<kWavSize; ++i){
+      REQUIRE(loaded[i] == sin_gen(i));
+    }
+  }
+
 }
 
 
@@ -248,7 +266,7 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
   }
 
   SECTION("ComplexSignal generative constructor"){
-    auto lambda = [](const long int x) {return std::complex<float>(6*x,-7);};
+    auto lambda = [](long int x) {return std::complex<float>(6*x,-7);};
     ComplexSignal cs(lambda, kTestSize);
     for(size_t i=0; i<kTestSize; ++i){
       REQUIRE(cs[i] == lambda(i));
@@ -283,19 +301,6 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
     REQUIRE(cs2.getData() != cs1.getData()); // constructor makes a copy of arr
     REQUIRE(*(cs2.getData()+1) == cs2[1]);
     REQUIRE(cs2.getData() != cs4.getData());
-  }
-
-
-  SECTION("ComplexSignal conjugate method"){
-    ComplexSignal cs_conj(arr, kTestSize);
-    cs_conj.conjugate();
-    for(size_t i=0; i<kTestSize; ++i){
-      REQUIRE(cs_conj[i] == std::conj(cs2[i]));
-    }
-    cs_conj.conjugate();
-    for(size_t i=0; i<kTestSize; ++i){
-      REQUIRE(cs_conj[i] == cs2[i]);
-    }
   }
 
   SECTION("ComplexSignal-to-constant compound assignment operators"){
@@ -383,6 +388,18 @@ TEST_CASE("Testing the ComplexSignal class", "[AudioSignal, ComplexSignal]"){
       for(size_t i=0; i<kTestSize; ++i){
         REQUIRE(other[i] == arr[i]*arr[i]);
       }
+    }
+  }
+
+  SECTION("ComplexSignal conjugate method"){
+    ComplexSignal cs_conj(arr, kTestSize);
+    cs_conj.conjugate();
+    for(size_t i=0; i<kTestSize; ++i){
+      REQUIRE(cs_conj[i] == std::conj(cs2[i]));
+    }
+    cs_conj.conjugate();
+    for(size_t i=0; i<kTestSize; ++i){
+      REQUIRE(cs_conj[i] == cs2[i]);
     }
   }
 }
