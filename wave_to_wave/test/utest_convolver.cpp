@@ -72,10 +72,10 @@ TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
   }
 }
 
-TEST_CASE("Testing the CorrelatorPipeline", "[CorrelatorPipeline]"){
+TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
   FloatSignal signal([](long int x){return x+1;}, 10);
   FloatSignal patch1([](long int x){return 1+x;}, 6);
-  CorrelatorPipeline x(signal, patch1, 1);
+  ConvolverPipeline x(signal, patch1, true, true, 1);
   std::vector<FftTransformer*> sig_vec = x.getSignalVec();
   const size_t kExpectedPaddedSize = 16;
   const size_t kExpectedVectorSize = 3;
@@ -86,16 +86,16 @@ TEST_CASE("Testing the CorrelatorPipeline", "[CorrelatorPipeline]"){
   ComplexSignal cs_zeros(kExpectedComplexSize);
 
   // check that patch cannot be bigger than signal:
-  REQUIRE_THROWS_AS(CorrelatorPipeline(patch1, signal), std::runtime_error);
+  REQUIRE_THROWS_AS(ConvolverPipeline(patch1, signal), std::runtime_error);
 
   SECTION("constructor, getPaddedSize, getPatch, getSignalVec"){
     // check padded patch size
     REQUIRE(x.getPaddedSize() == kExpectedPaddedSize);
-    // check padded patch contents
+    // check that padded patch contents were normalized
     float patch1_padded[kExpectedPaddedSize]{6,5,4,3,2,1,0,0,0,0,0,0,0,0,0,0};
     float* x_patch = x.getPatch()->r->begin();
     for(size_t i=0; i<kExpectedPaddedSize; ++i){
-      REQUIRE(x_patch[i] == patch1_padded[i]);
+      REQUIRE(x_patch[i] == patch1_padded[i]/kExpectedPaddedSize);
     }
     // check chunked signal contents
     REQUIRE(sig_vec.size() == kExpectedVectorSize);
@@ -114,8 +114,7 @@ TEST_CASE("Testing the CorrelatorPipeline", "[CorrelatorPipeline]"){
   SECTION("test updatePatch"){
     // patch2 has different content and size, but same padded_size so it works
     FloatSignal patch2([](long int x){return 11+x;}, 4);
-    REQUIRE_THROWS_AS(CorrelatorPipeline(patch1, signal), std::runtime_error);
-    x.updatePatch(patch2, false);
+    x.updatePatch(patch2, true, false, false); // NO NORMALIZATION THIS TIME
     float patch2_padded[kExpectedPaddedSize]{14,13,12,11,0,0,0,0,0,0,0,0,0,0,0,0};
     float* x_patch = x.getPatch()->r->begin();
     for(size_t i=0; i<kExpectedPaddedSize; ++i){
@@ -124,7 +123,7 @@ TEST_CASE("Testing the CorrelatorPipeline", "[CorrelatorPipeline]"){
     // test that c still zeros after the update
     REQUIRE((cs_zeros == *(x.getPatch()->c)) == true);
     // now update with fft_forward_after=true, and check that c has been set
-    x.updatePatch(patch2, true);
+    x.updatePatch(patch2, true, false, true);
     REQUIRE((cs_zeros == *(x.getPatch()->c)) == false);
     // test that a patch that is too long gets rejected and nothing else happens:
     FloatSignal patch_too_long([](long int x){return 11+x;}, 20);
@@ -173,71 +172,79 @@ TEST_CASE("Testing the CorrelatorPipeline", "[CorrelatorPipeline]"){
     REQUIRE((cs_zeros == *(sig_vec[2]->c)) == false);
   }
 
-    SECTION("test forwardPatch, backwardPatch, forwardSignal and backwardSignal"){
+    SECTION("test forwardPatch,backwardPatch,forwardSignal and backwardSignal"){
       // copy patch. FFT, normalize, then IFFT and compare result with copy
-      FloatSignal padded_patch_copy(x.getPatch()->r->begin(), kExpectedPaddedSize);
+      FloatSignal padded_patch_cp(x.getPatch()->r->begin(),kExpectedPaddedSize);
       x.forwardPatch();
       *(x.getPatch()->c) *= 1.0/kExpectedPaddedSize;
       x.backwardPatch();
       for(size_t i=0; i<kExpectedPaddedSize; ++i){
-        REQUIRE((x.getPatch()->r->getData()[i] - padded_patch_copy[i]) < 0.000001);
+        REQUIRE((x.getPatch()->r->getData()[i]-padded_patch_cp[i]) < 0.000001);
       }
       // same procedure with the signal chunks:
-      FloatSignal sig_copy1(x.getSignalVec()[0]->r->begin(), kExpectedPaddedSize);
-      FloatSignal sig_copy2(x.getSignalVec()[1]->r->begin(), kExpectedPaddedSize);
-      FloatSignal sig_copy3(x.getSignalVec()[2]->r->begin(), kExpectedPaddedSize);
+      FloatSignal sig_cp1(x.getSignalVec()[0]->r->begin(), kExpectedPaddedSize);
+      FloatSignal sig_cp2(x.getSignalVec()[1]->r->begin(), kExpectedPaddedSize);
+      FloatSignal sig_cp3(x.getSignalVec()[2]->r->begin(), kExpectedPaddedSize);
       x.forwardSignal();
       for(size_t i=0; i<kExpectedVectorSize; ++i){
         *(x.getSignalVec()[i]->c) *= 1.0/kExpectedPaddedSize;
       }
       x.backwardSignal();
       for(size_t i=0; i<kExpectedPaddedSize; ++i){
-        REQUIRE((x.getSignalVec()[0]->r->getData()[i] - sig_copy1[i]) < 0.000001);
-        REQUIRE((x.getSignalVec()[1]->r->getData()[i] - sig_copy2[i]) < 0.000001);
-        REQUIRE((x.getSignalVec()[2]->r->getData()[i] - sig_copy3[i]) < 0.000001);
+        REQUIRE((x.getSignalVec()[0]->r->getData()[i] - sig_cp1[i]) < 0.000001);
+        REQUIRE((x.getSignalVec()[1]->r->getData()[i] - sig_cp2[i]) < 0.000001);
+        REQUIRE((x.getSignalVec()[2]->r->getData()[i] - sig_cp3[i]) < 0.000001);
       }
     }
 
 
-    // THIS DOESNT WORKS FICKSME
-    SECTION("test multiplyPatchWithSigAndNormalize"){
-      FloatSignal a([](long int x){return x+1;}, 20);
+    SECTION("test multiplyPatchWithSig"){
+      // declare signals and convolver
+      FloatSignal a([](long int x){return x+1;}, 10);
       FloatSignal b([](long int x){return x+1;}, 3);
-      CorrelatorPipeline xxx(a, b, 1);
-      xxx.getPatch()->r->print("before patch");
-      for(const auto& f : xxx.getSignalVec()){
-        f->r->print("before");
-      }
-      x.forwardPatch();
-      x.forwardSignal();
-      x.multiplyPatchWithSigAndNormalize();
-      x.backwardSignal();
-      for(const auto& f : xxx.getSignalVec()){
-        f->r->print("after");
+      ConvolverPipeline xxx(a, b, true, true, 1);
+      // cross-correlation pipeline
+      xxx.forwardPatch();
+      xxx.forwardSignal();
+      xxx.multiplyPatchWithSig();
+      xxx.backwardSignal();
+      // check results against dotprod
+      const size_t padded_half=xxx.getPaddedSize()/2;
+      auto vec = xxx.getSignalVec();
+      long int a_size = a.getSize();
+      long int b_size = b.getSize();
+      for(long int i=0; i < a_size+b_size-1; ++i){
+        long int vec_idx = (i+ padded_half)/padded_half - 1;
+        long int in_vec_idx = i%padded_half + padded_half;
+        REQUIRE(dotProdAt(a, b, i-(b_size-1)) ==
+                Approx(vec[vec_idx]->r->begin()[in_vec_idx]));
       }
     }
 
 
-    // // SUCH FAST MUCH SPEEDNESS
+
+
+      // for(size_t i=0; i<vec.size(); ++i){
+      //   for(long int j=min_idx; j<max_idx; ++j){
+      //     long int actual_idx = min_idx*i -min_idx + j - b.getSize() + 1;
+
+
+      //     //REQUIRE(Approx(f->r->begin()[i]) ?? dotProdAt(a, b, ???));
+      //   }
+      // }
+
+
     // size_t downsampling = 50;
     // FloatSignal aaa([](long int x){return x%2 == 0;}, 44100*60/downsampling);
     // FloatSignal bbb([](long int x){return x%3 == 0;}, 44100*3/downsampling);
-    // CorrelatorPipeline xxx(aaa, bbb, 2048);
+    // ConvolverPipeline xxx(aaa, bbb, 2048);
     // for(size_t i=0; i<1000*1000*1000; ++i){
     //   if(i%1000==0){std::cout << "i was " << i << std::endl;}
     //   xxx.updatePatch(bbb);
     //   xxx.forwardPatch();
-    //   xxx.multiplyPatchWithSigAndNormalize();
+    //   xxx.multiplyPatchWithSig();
     //   xxx.updateSignal(aaa);
     // }
 
 
 }
-
-
-
-
-
-
-    // TEST THROWN EXCEPTIONS FOR WRONG SIZES
-    // ALSO TEST THAT ON THE FFT MANAGER

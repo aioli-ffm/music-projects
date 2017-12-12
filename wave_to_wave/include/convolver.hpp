@@ -554,7 +554,7 @@ struct FftTransformer {
 // iv.  The FFT plans and signal copies have to be generated only once (per padded_patch_size_)
 //
 //// To leverage this advantages, the pipeline can be used as follows:
-// a. After instantiation, save it to a map<size_t, CorrelatorPipeline> with the getPaddedSize()
+// a. After instantiation, save it to a map<size_t, ConvolverPipeline> with the getPaddedSize()
 //    as key, and check that map upon reusage in the next iterations.
 // b. When reusing, just the patch has to be rewritten. For that, use the updatePatch() method
 // c. If used in an iterative optimizer among multiple pipelines, it may be needed to update
@@ -565,7 +565,7 @@ struct FftTransformer {
 //    at will with the signals held in the FftTransformer structs.
 //// As a final remark, note that all the signal inputs are given by reference, and the generated
 // copies are managed by the destructor, so no action is needed to avoid memory leaking.
-class CorrelatorPipeline {
+class ConvolverPipeline {
 private:
   const size_t kMinChunkSize_;
   size_t signal_size_;
@@ -574,29 +574,32 @@ private:
   size_t padded_size_half_;
   size_t padded_patch_size_complex_;
   //
-  size_t signal_prepad_;
-  //
   FftTransformer* patch_;
   std::vector<FftTransformer*> signal_vec_;
   //
 public:
-  CorrelatorPipeline(FloatSignal &signal, FloatSignal &patch, const size_t min_chunk_size=2048)
+  ConvolverPipeline(FloatSignal &signal, FloatSignal &patch, const bool patch_reversed=true,
+                    const bool normalize_patch=true,
+                    const size_t min_chunk_size=2048)
     : kMinChunkSize_(min_chunk_size),
       signal_size_(signal.getSize()),
       patch_size_(patch.getSize()),
       padded_patch_size_(std::max(kMinChunkSize_, 2*Pow2Ceil(patch_size_))),
       padded_size_half_(padded_patch_size_/2),
-      padded_patch_size_complex_(padded_size_half_+1),
-      //
-      signal_prepad_(padded_size_half_){
+      padded_patch_size_complex_(padded_size_half_+1){
     // length of signal can't be smaller than length of patch
     CheckLessEqual(patch_size_, signal_size_,
-                   "CorrelatorPipeline: len(signal) can't be smaller than len(patch)!");
+                   "ConvolverPipeline: len(signal) can't be smaller than len(patch)!");
     // copy and zero-pad patch: note that it is loaded in reverse order
     FloatSignal* padded_patch = new FloatSignal(padded_patch_size_);
     patch_ = new FftTransformer(padded_patch, new ComplexSignal(padded_patch_size_complex_));
-    std::reverse_copy(patch.begin(), patch.end(), padded_patch->begin());
-    // updatePatch(patch, true);
+    if(patch_reversed){
+      std::reverse_copy(patch.begin(), patch.end(), padded_patch->begin());
+    } else {
+      std::copy(patch.begin(), patch.end(), padded_patch->begin());
+    }
+    // if flag is true, padded patch is divided by its length (FFTW does not normalize itself)
+    if(normalize_patch){padded_patch->operator*=(1.0/padded_patch_size_);}
     // copy and append the first, pre-padded signal chunk:
     float* it = signal.begin();
     float* end_it = signal.end();
@@ -619,13 +622,21 @@ public:
   // given a FloatSignal with length <= getPaddedSize (throws exception otherwise), rewrites the
   // patch (zero-padding the rest). If fft_forward_after is true (default), forwardPatch() is
   // called after.
-  void updatePatch(FloatSignal &new_patch, const bool fft_forward_after=true){
+  void updatePatch(FloatSignal &new_patch, const bool reversed=true,
+                   const bool normalize_patch=true,
+                   const bool fft_forward_after=true){
     size_t new_size = new_patch.getSize();
     CheckLessEqual(new_size, padded_patch_size_,
                    "updatePatch(): len(new_patch) can't be smaller than getPaddedSize()!");
     float* old_patch = patch_->r->getData();
-    std::reverse_copy(new_patch.begin(), new_patch.end(), old_patch);
+    if(reversed){
+      std::reverse_copy(new_patch.begin(), new_patch.end(), old_patch);
+    } else {
+      std::copy(new_patch.begin(), new_patch.end(), old_patch);
+    }
     std::fill(old_patch+new_size, old_patch+padded_patch_size_, 0);
+    // if flag is true, padded patch is divided by its length (FFTW does not normalize itself)
+    if(normalize_patch){patch_->r->operator*=(1.0/padded_patch_size_);}
     //
     if(fft_forward_after){patch_->forward();}
   }
@@ -665,24 +676,19 @@ public:
     }
   }
 
-  // This method performs signal_vec->c[i] *= (patch->c / padded_patch_size) for all
-  // i in the signal vector. In other words, multiplies element-weise every signal chunk by
-  // the patch, which is a necessary step for the cross-correlation in the overlap-save algorithm.
-  void multiplyPatchWithSigAndNormalize(){
-    std::complex<float>* patch_data = patch_->c->getData();
-    const float kNormFactor = padded_patch_size_;
+  // This method performs destiny[i] = patch*signal_vec[i], for all i in the signal vector.
+  // In other words, multiplies element-weise every the patch and signal spectra, which is a
+  // necessary step for the convolution in the overlap-save algorithm.
+  void multiplyPatchWithSig(){
     #ifdef WITH_OPENMP_ABOVE
     #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
     #endif
     for(size_t i=0; i<signal_vec_.size(); i++){
-      std::complex<float>* sig_data = signal_vec_[i]->c->getData();
-      for(size_t i=0; i<padded_patch_size_complex_; ++i){
-        sig_data[i] *= patch_data[i]/kNormFactor;
-      }
+      signal_vec_[i]->c->operator*=(*(patch_->c));
     }
   }
 
-  ~CorrelatorPipeline(){
+  ~ConvolverPipeline(){
     if(patch_!=nullptr){
       delete patch_->r;
       delete patch_->c;
@@ -697,7 +703,6 @@ public:
     signal_vec_.clear();
   }
 };
-
 
 
 class Optimizer {
