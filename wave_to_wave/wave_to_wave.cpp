@@ -68,14 +68,6 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// ConvolverPipeline:
-// 1. Fix implementation of correlation (see utest_convolver end). PROBABLY IN-PLACE XCORR IS AN ERROR, AND AN EXTRA CONTAINER FOR IT SHOULD BE RESERVED.
-// 2. finish documentation, regarding swapping of signal and that it should be avoided
-// 3. test existing functionality, and finish the documentation of the interface on how to
-//    convolve in-place and so on.
-// 4. test using the dotprod functionality, and finally reimplement&test the old convolver class with the pipeline
-
-
 // once the pipeline is running and tested (also valgrind!), make the optimizer: it should hold
 // a lazy map with the pipelines, manage signal generating and optimizing criteria, and so on,
 // and should have a clean but flexible interface.

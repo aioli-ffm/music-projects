@@ -14,7 +14,7 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// TESTING THE CONVOLVER CLASS
+/// TESTING THE CONVOLVERPIPELINE CLASS
 ////////////////////////////////////////////////////////////////////////////////
 
 // This test function returns the dot product between two signals, assuming
@@ -31,10 +31,16 @@ float dotProdAt(FloatSignal &sig, FloatSignal &patch, const int offset){
 }
 
 
-TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
+TEST_CASE("test wisdom export/import", "[wisdom, fftw]"){
+  MakeAndExportFftwWisdom("/tmp/test.wisdom", 0, 5, FFTW_PATIENT);
+  ImportFftwWisdom("/tmp/test.wisdom");
+}
+
+
+TEST_CASE("Testing the OverlapSaveConvolver", "[OverlapSaveConvolver]"){
   FloatSignal signal([](long int x){return x+1;}, 10);
   FloatSignal patch1([](long int x){return 1+x;}, 6);
-  ConvolverPipeline x(signal, patch1, true, true, 1);
+  OverlapSaveConvolver x(signal, patch1, true, true, 1);
   std::vector<FftTransformer*> sig_vec = x.getSignalVec();
   const size_t kExpectedPaddedSize = 16;
   const size_t kExpectedVectorSize = 3;
@@ -45,7 +51,7 @@ TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
   ComplexSignal cs_zeros(kExpectedComplexSize);
 
   // check that patch cannot be bigger than signal:
-  REQUIRE_THROWS_AS(ConvolverPipeline(patch1, signal), std::runtime_error);
+  REQUIRE_THROWS_AS(OverlapSaveConvolver(patch1, signal), std::runtime_error);
 
   SECTION("constructor, getPaddedSize, getPatch, getSignalVec"){
     // check padded patch size
@@ -156,43 +162,32 @@ TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
       }
     }
 
-
-    SECTION("test multiplyPatchWithSig"){
+    SECTION("test spectralConv and extractConvolvedTo"){
       // declare signals and convolver
-      FloatSignal a([](long int x){return x+1;}, 17);
-      FloatSignal b([](long int x){return x+1;}, 3);
-      ConvolverPipeline xxx(a, b, true, true, 1);
-
-      for(const auto& x : xxx.getSignalVec()){
-        x->r->print("wtf");
+      for(size_t N=1; N<10; ++N){
+        FloatSignal a([](long int x){return x+1;}, (100*N)-(N%10));
+        FloatSignal b([](long int x){return x+1;}, N);
+        OverlapSaveConvolver xxx(a, b, true, true, 1);
+        // cross-correlation pipeline
+        xxx.forwardPatch();
+        xxx.forwardSignal();
+        xxx.spectralConv();
+        xxx.backwardSignal();
+        // check results against dotprod
+        size_t a_size = a.getSize();
+        size_t b_size = b.getSize();
+        size_t conv_size = a_size+b_size-1;
+        FloatSignal cc_placeholder(conv_size);
+        xxx.extractConvolvedTo(cc_placeholder);
+        for(long int i=0; i<conv_size; ++i){
+          REQUIRE(dotProdAt(a, b, i-(b_size-1)) == Approx(cc_placeholder[i]));
+        }
       }
 
-
-
-      // cross-correlation pipeline
-      xxx.forwardPatch();
-      xxx.forwardSignal();
-      xxx.multiplyPatchWithSig();
-      xxx.backwardSignal();
-      // check results against dotprod
-      const size_t padded_half=xxx.getPaddedSize()/2;
-      auto vec = xxx.getSignalVec();
-      long int a_size = a.getSize();
-      long int b_size = b.getSize();
-      for(long int i=0; i < a_size+b_size-1; ++i){
-        long int vec_idx = (i+ padded_half)/padded_half - 1;
-        long int in_vec_idx = i%padded_half + padded_half;
-        REQUIRE(dotProdAt(a, b, i-(b_size-1)) ==
-                Approx(vec[vec_idx]->r->begin()[in_vec_idx]));
-      }
-
-
-      // FloatSignal test(a.getSize()+b.getSize()-1);
-      // xxx.extractSignalTo(test);
-      // test.print("xcorr");
     }
 
 
+    // TODO TEST PLANS, TEST ERROR FOR WRONG SIZES IN EXTRACT CONV.
 
 
     // SECTION("test speed"){
@@ -200,7 +195,7 @@ TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
     //   size_t downsampling = 100;
     //   FloatSignal aaa([](long int x){return x%2 == 0;}, 44100*60/downsampling);
     //   FloatSignal bbb([](long int x){return x%3 == 0;}, 44100*3/downsampling);
-    //   ConvolverPipeline xxx(aaa, bbb, true, true, 2048);
+    //   OverlapSaveConvolver xxx(aaa, bbb, true, true, 2048);
     //   for(size_t i=0; i<N; ++i){
     //     if(i%1000==0){std::cout << "i was " << i << std::endl;}
     //     xxx.updatePatch(bbb);
