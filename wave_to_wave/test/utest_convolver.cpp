@@ -31,47 +31,6 @@ float dotProdAt(FloatSignal &sig, FloatSignal &patch, const int offset){
 }
 
 
-TEST_CASE("Testing the OverlapSaveConvolver class", "[OverlapSaveConvolver]"){
-  // create signals
-  const size_t kSizeS = 50;
-  const size_t kSizeP1 = 3;
-  auto lin = [](long int n)->float {return n+1;};
-  auto const1 = [](long int n)->float {return 1;};
-
-  SECTION("test dotProdAt"){
-    FloatSignal s(lin, kSizeS);
-    FloatSignal p1(const1,  kSizeP1);
-    REQUIRE(dotProdAt(s, p1, -1000) == 0);
-    REQUIRE(dotProdAt(s, p1, -3) == 0);
-    REQUIRE(dotProdAt(s, p1, -2) == 1);
-    REQUIRE(dotProdAt(s, p1, -1) == 1+2);
-    REQUIRE(dotProdAt(s, p1, 0) == 1+2+3);
-    REQUIRE(dotProdAt(s, p1, 1) == 2+3+4);
-    REQUIRE(dotProdAt(s, p1, 2) == 3+4+5);
-    REQUIRE(dotProdAt(s, p1, kSizeS-1) == kSizeS);
-    REQUIRE(dotProdAt(s, p1, kSizeS) == 0);
-    REQUIRE(dotProdAt(s, p1, 1000) == 0);
-  }
-
-  SECTION("Convolver constructor and init fields"){
-    FloatSignal s(lin, kSizeS);
-    FloatSignal p1(lin, kSizeP1);
-    FloatSignal p1_reversed(p1.getData(),p1.getSize());
-    std::reverse(p1_reversed.begin(), p1_reversed.end());
-    // instantiate convolver, and extract conv and xcorr
-    OverlapSaveConvolver x(s, p1);
-    x.executeConv();
-    FloatSignal conv = x.extractResult();
-    x.executeXcorr();
-    FloatSignal xcorr = x.extractResult();
-    // compare results with tests using dotProdAt
-    for(size_t i=0, n=kSizeS+kSizeP1-1; i<n; ++i){
-      REQUIRE(Approx(xcorr[i]) == dotProdAt(s, p1, i-kSizeP1+1));
-      REQUIRE(Approx(conv[i]) == dotProdAt(s, p1_reversed, i-kSizeP1+1));
-    }
-  }
-}
-
 TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
   FloatSignal signal([](long int x){return x+1;}, 10);
   FloatSignal patch1([](long int x){return 1+x;}, 6);
@@ -115,21 +74,21 @@ TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
     // patch2 has different content and size, but same padded_size so it works
     FloatSignal patch2([](long int x){return 11+x;}, 4);
     x.updatePatch(patch2, true, false, false); // NO NORMALIZATION THIS TIME
-    float patch2_padded[kExpectedPaddedSize]{14,13,12,11,0,0,0,0,0,0,0,0,0,0,0,0};
+    float patch2_pad[kExpectedPaddedSize]{14,13,12,11,0,0,0,0,0,0,0,0,0,0,0,0};
     float* x_patch = x.getPatch()->r->begin();
     for(size_t i=0; i<kExpectedPaddedSize; ++i){
-      REQUIRE(x_patch[i] == patch2_padded[i]);
+      REQUIRE(x_patch[i] == patch2_pad[i]);
     }
     // test that c still zeros after the update
     REQUIRE((cs_zeros == *(x.getPatch()->c)) == true);
     // now update with fft_forward_after=true, and check that c has been set
     x.updatePatch(patch2, true, false, true);
     REQUIRE((cs_zeros == *(x.getPatch()->c)) == false);
-    // test that a patch that is too long gets rejected and nothing else happens:
+    // test that a patch that is too long gets rejected and nothing else happens
     FloatSignal patch_too_long([](long int x){return 11+x;}, 20);
     REQUIRE_THROWS_AS(x.updatePatch(patch_too_long, true), std::runtime_error);
     for(size_t i=0; i<kExpectedPaddedSize; ++i){
-      REQUIRE(x_patch[i] == patch2_padded[i]); // this still holds
+      REQUIRE(x_patch[i] == patch2_pad[i]); // this still holds
     }
     REQUIRE((cs_zeros == *(x.getPatch()->c)) == false); // and this
   }
@@ -200,9 +159,16 @@ TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
 
     SECTION("test multiplyPatchWithSig"){
       // declare signals and convolver
-      FloatSignal a([](long int x){return x+1;}, 10);
+      FloatSignal a([](long int x){return x+1;}, 17);
       FloatSignal b([](long int x){return x+1;}, 3);
       ConvolverPipeline xxx(a, b, true, true, 1);
+
+      for(const auto& x : xxx.getSignalVec()){
+        x->r->print("wtf");
+      }
+
+
+
       // cross-correlation pipeline
       xxx.forwardPatch();
       xxx.forwardSignal();
@@ -219,31 +185,29 @@ TEST_CASE("Testing the ConvolverPipeline", "[ConvolverPipeline]"){
         REQUIRE(dotProdAt(a, b, i-(b_size-1)) ==
                 Approx(vec[vec_idx]->r->begin()[in_vec_idx]));
       }
+
+
+      // FloatSignal test(a.getSize()+b.getSize()-1);
+      // xxx.extractSignalTo(test);
+      // test.print("xcorr");
     }
 
 
 
 
-      // for(size_t i=0; i<vec.size(); ++i){
-      //   for(long int j=min_idx; j<max_idx; ++j){
-      //     long int actual_idx = min_idx*i -min_idx + j - b.getSize() + 1;
-
-
-      //     //REQUIRE(Approx(f->r->begin()[i]) ?? dotProdAt(a, b, ???));
-      //   }
-      // }
-
-
-    // size_t downsampling = 50;
-    // FloatSignal aaa([](long int x){return x%2 == 0;}, 44100*60/downsampling);
-    // FloatSignal bbb([](long int x){return x%3 == 0;}, 44100*3/downsampling);
-    // ConvolverPipeline xxx(aaa, bbb, 2048);
-    // for(size_t i=0; i<1000*1000*1000; ++i){
-    //   if(i%1000==0){std::cout << "i was " << i << std::endl;}
-    //   xxx.updatePatch(bbb);
-    //   xxx.forwardPatch();
-    //   xxx.multiplyPatchWithSig();
-    //   xxx.updateSignal(aaa);
+    // SECTION("test speed"){
+    //   const size_t N = 1000;
+    //   size_t downsampling = 100;
+    //   FloatSignal aaa([](long int x){return x%2 == 0;}, 44100*60/downsampling);
+    //   FloatSignal bbb([](long int x){return x%3 == 0;}, 44100*3/downsampling);
+    //   ConvolverPipeline xxx(aaa, bbb, true, true, 2048);
+    //   for(size_t i=0; i<N; ++i){
+    //     if(i%1000==0){std::cout << "i was " << i << std::endl;}
+    //     xxx.updatePatch(bbb);
+    //     xxx.forwardPatch();
+    //     xxx.multiplyPatchWithSig();
+    //     xxx.updateSignal(aaa);
+    //   }
     // }
 
 

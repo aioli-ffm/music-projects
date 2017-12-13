@@ -21,7 +21,7 @@
 // comment this line to deactivate OpenMP for loop parallelizations, or if you want to debug
 // memory management (valgrind reports OMP normal activity as error).
 // the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
-#define WITH_OPENMP_ABOVE 1
+// #define WITH_OPENMP_ABOVE 1
 
 
 // STL INCLUDES
@@ -570,6 +570,7 @@ private:
   const size_t kMinChunkSize_;
   size_t signal_size_;
   size_t patch_size_;
+  size_t conv_size_;
   size_t padded_patch_size_;
   size_t padded_size_half_;
   size_t padded_patch_size_complex_;
@@ -579,8 +580,7 @@ private:
   //
 public:
   ConvolverPipeline(FloatSignal &signal, FloatSignal &patch, const bool patch_reversed=true,
-                    const bool normalize_patch=true,
-                    const size_t min_chunk_size=2048)
+                    const bool normalize_patch=true, const size_t min_chunk_size=2048)
     : kMinChunkSize_(min_chunk_size),
       signal_size_(signal.getSize()),
       patch_size_(patch.getSize()),
@@ -593,13 +593,31 @@ public:
     // copy and zero-pad patch: note that it is loaded in reverse order
     FloatSignal* padded_patch = new FloatSignal(padded_patch_size_);
     patch_ = new FftTransformer(padded_patch, new ComplexSignal(padded_patch_size_complex_));
-    if(patch_reversed){
-      std::reverse_copy(patch.begin(), patch.end(), padded_patch->begin());
-    } else {
-      std::copy(patch.begin(), patch.end(), padded_patch->begin());
-    }
-    // if flag is true, padded patch is divided by its length (FFTW does not normalize itself)
+    if(patch_reversed){std::reverse_copy(patch.begin(), patch.end(), padded_patch->begin());}
+    else {std::copy(patch.begin(), patch.end(), padded_patch->begin());}
     if(normalize_patch){padded_patch->operator*=(1.0/padded_patch_size_);}
+    //
+
+
+    // float* sig_it = signal.begin();
+    // float* sig_end = signal.end();
+    // // copy and append the first, pre-padded signal chunk:
+    // FloatSignal* sig = new FloatSignal(padded_patch_size_);
+    // std::copy(sig_it, std::min(sig_end, sig_it+padded_size_half_), sig->begin()+padded_size_half_);
+    // signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
+    // // loop:
+    // sig_it += padded_size_half_;
+    // for(; sig_it<sig_end; sig_it+=padded_patch_size_){
+    //   FloatSignal* sig = new FloatSignal(padded_patch_size_);
+    //   std::copy(sig_it, std::min(sig_end, sig_it+padded_patch_size_), sig->begin());
+    //   signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
+    // }
+
+    // FloatSignal* sig = new FloatSignal(padded_patch_size_);
+    // std::copy(sig_it, sig_end, sig->begin());
+    // signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
+
+
     // copy and append the first, pre-padded signal chunk:
     float* it = signal.begin();
     float* end_it = signal.end();
@@ -612,6 +630,7 @@ public:
       std::copy(it, std::min(end_it, it+padded_patch_size_), sig->begin());
       signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
     }
+
   }
 
   // GETTERS
@@ -620,27 +639,27 @@ public:
   const std::vector<FftTransformer*>& getSignalVec() const {return signal_vec_;}
 
   // given a FloatSignal with length <= getPaddedSize (throws exception otherwise), rewrites the
-  // patch (zero-padding the rest). If fft_forward_after is true (default), forwardPatch() is
-  // called after.
+  // patch (zero-padding the rest). If normalize_patch is true, the contents will be divided by
+  // padded_patch_size (needed for the convolution). If fft_forward_after is true (default),
+  // forwardPatch() is called after rewriting.
   void updatePatch(FloatSignal &new_patch, const bool reversed=true,
                    const bool normalize_patch=true,
                    const bool fft_forward_after=true){
     size_t new_size = new_patch.getSize();
     CheckLessEqual(new_size, padded_patch_size_,
                    "updatePatch(): len(new_patch) can't be smaller than getPaddedSize()!");
+    patch_size_ = new_size;
+    // copy new to old and zero-pad rest
     float* old_patch = patch_->r->getData();
-    if(reversed){
-      std::reverse_copy(new_patch.begin(), new_patch.end(), old_patch);
-    } else {
-      std::copy(new_patch.begin(), new_patch.end(), old_patch);
-    }
+    if(reversed){std::reverse_copy(new_patch.begin(), new_patch.end(), old_patch);}
+    else {std::copy(new_patch.begin(), new_patch.end(), old_patch);}
     std::fill(old_patch+new_size, old_patch+padded_patch_size_, 0);
     // if flag is true, padded patch is divided by its length (FFTW does not normalize itself)
     if(normalize_patch){patch_->r->operator*=(1.0/padded_patch_size_);}
     //
     if(fft_forward_after){patch_->forward();}
   }
-  // NOTE THAT THE FORWARD FFTs ARE NOT EXECUTED, THIS JUST UPDATES THE FLOATS
+
   void updateSignal(FloatSignal &signal, const bool fft_forward_after=true){
     // check length
     size_t sig_size = signal.getSize();
@@ -656,9 +675,13 @@ public:
     }
     if(fft_forward_after){forwardSignal();}
   }
-  //
+  // calculates and writes the FFT of the patch->real into the patch->complex.
   void forwardPatch(){patch_->forward();}
+
+  // calculates and writes the IFFT of the patch->complex into the patch->real.
   void backwardPatch(){patch_->backward();}
+
+  // calculates and writes the FFT of every signal_vec[i]->real into the signal_vec[i]->complex.
   void forwardSignal(){
     #ifdef WITH_OPENMP_ABOVE
     #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
@@ -667,10 +690,12 @@ public:
       signal_vec_[i]->forward();
     }
   }
+
+  // calculates and writes the IFFT of every signal_vec[i]->complex into the signal_vec[i]->real.
   void backwardSignal(){
-    // #ifdef WITH_OPENMP_ABOVE
-    // #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
-    // #endif
+    #ifdef WITH_OPENMP_ABOVE
+    #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
+    #endif
     for(size_t i=0; i<signal_vec_.size(); i++){
       signal_vec_[i]->backward();
     }
@@ -687,6 +712,28 @@ public:
       signal_vec_[i]->c->operator*=(*(patch_->c));
     }
   }
+
+  // Writes cc_size=(signal_size_+patch_size_-1) elements to the passed FloatSignal, starting at
+  // min_i. It throws an exception if len(sig)<(cc_size+min_i).
+  void extractSignalTo(FloatSignal &sig, const size_t min_i=0){
+    const size_t kConvSize = min_i+signal_size_+patch_size_-1;
+    CheckLessEqual(sig.getSize(), kConvSize+min_i,
+                   "extractSignalTo: given sig length can't be smaller than sig+patch+min_i-1!");
+    // iterative variables
+    float* sig_data = sig.begin();
+    float* sig_loop_end = sig_data+kConvSize-padded_size_half_;
+    float* sig_i = sig_data;
+    float* fs_begin;
+    size_t x = 0;
+    // copy all chunks but the last
+    for(; sig_i<sig_loop_end; ++x, sig_i+=padded_size_half_){
+      fs_begin = signal_vec_[x]->r->begin()+padded_size_half_;
+      std::copy(fs_begin, fs_begin+padded_size_half_, sig_i);
+    }
+    // copy last chunk
+    fs_begin = signal_vec_[x]->r->begin()+padded_size_half_;
+    std::copy(fs_begin, std::min(fs_begin+padded_size_half_, sig_data+kConvSize), sig_i);
+}
 
   ~ConvolverPipeline(){
     if(patch_!=nullptr){
