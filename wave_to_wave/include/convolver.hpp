@@ -21,8 +21,10 @@
 // comment this line to deactivate OpenMP for loop parallelizations, or if you want to debug
 // memory management (valgrind reports OMP normal activity as error).
 // the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
-// #define WITH_OPENMP_ABOVE 1
+#define WITH_OPENMP_ABOVE 1
 
+
+#define MIN_CHUNK_SIZE 2048
 
 // STL INCLUDES
 #include <string.h>
@@ -36,13 +38,12 @@
 #include <iterator>
 #include <algorithm>
 #include <thread>
+#include <memory>
 // SYSTEM-INSTALLED LIBRARIES
 #include <fftw3.h>
 // LOCAL INCLUDES
 #include "helpers.hpp"
 #include "signal.hpp"
-#include "synth.hpp"
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -165,8 +166,9 @@ struct FftTransformer {
 // xxx.extractConvolvedTo(cc_placeholder);
 //
 //// Note that, to favour speed, the operations happen within float precision, which causes
-// relatively small imprecisions. Also note that all the signal inputs are given by reference,
-// and no specific action is needed to avoid memory leaking.
+// relatively small imprecisions: https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+// Also note that all the signal inputs are given by reference, and no specific action is needed
+// to avoid memory leaking.
 class OverlapSaveConvolver {
 private:
   const size_t kMinChunkSize_;
@@ -181,8 +183,9 @@ private:
   std::vector<FftTransformer*> signal_vec_;
   //
 public:
-  OverlapSaveConvolver(FloatSignal &signal, FloatSignal &patch, const bool patch_reversed=true,
-                    const bool normalize_patch=true, const size_t min_chunk_size=2048)
+  explicit OverlapSaveConvolver(FloatSignal &signal, FloatSignal &patch,
+                                const bool patch_reversed=true,  const bool normalize_patch=true,
+                                const size_t min_chunk_size=MIN_CHUNK_SIZE)
     : kMinChunkSize_(min_chunk_size),
       signal_size_(signal.getSize()),
       patch_size_(patch.getSize()),
@@ -334,30 +337,6 @@ public:
     signal_vec_.clear();
   }
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// This class is a specialized and optimized version of the OverlapSaveConvolver, and is expected
-// to give support to the WavToWavOptimizer with the following operations:
-// 1. constructor(FloatSignal &sig, ComplexSignal &patch). Basically the same as the convolver, but
-// automatically performs the forward FFTs after.
-// 2.
-class WavToWavOptimizer{
-private:
-    std::stringstream sequence_;
-  std::map<size_t, OverlapSaveConvolver*> pipelines_;
-public:
-  WavToWavOptimizer(){}
-  // the seq_entry is added to the sequence_ in a new line.
-  void optimizeWith(FloatSignal* patch, const std::string seq_entry){}
-  //
-  void exportReconstruction(const std::string wav_export_path){}
-  //
-  void exportSequence(const std::string txt_export_path){}
-};
-
-
 
 
 

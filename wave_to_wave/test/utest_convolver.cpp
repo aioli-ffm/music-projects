@@ -183,27 +183,8 @@ TEST_CASE("Testing the OverlapSaveConvolver", "[OverlapSaveConvolver]"){
           REQUIRE(dotProdAt(a, b, i-(b_size-1)) == Approx(cc_placeholder[i]));
         }
       }
-
     }
-
-
-    // TODO TEST PLANS, TEST ERROR FOR WRONG SIZES IN EXTRACT CONV.
-
-
-    // SECTION("test speed"){
-    //   const size_t N = 1000;
-    //   size_t downsampling = 100;
-    //   FloatSignal aaa([](long int x){return x%2 == 0;}, 44100*60/downsampling);
-    //   FloatSignal bbb([](long int x){return x%3 == 0;}, 44100*3/downsampling);
-    //   OverlapSaveConvolver xxx(aaa, bbb, true, true, 2048);
-    //   for(size_t i=0; i<N; ++i){
-    //     if(i%1000==0){std::cout << "i was " << i << std::endl;}
-    //     xxx.updatePatch(bbb);
-    //     xxx.forwardPatch();
-    //     xxx.multiplyPatchWithSig();
-    //     xxx.updateSignal(aaa);
-    //   }
-    // }
-
-
 }
+
+
+// TEST ERROR FOR WRONG SIZES IN EXTRACT CONV.

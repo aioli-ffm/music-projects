@@ -149,6 +149,27 @@ public:
       *begin_this *= *begin_other;
     }
   }
+
+  void addMultipliedSignal(AudioSignal<T> &other, const T mul_factor, int t=0){
+    T* begin_this = begin();
+    T* begin_other = other.begin();
+    const T* end_other = other.end();
+    const size_t lenn = _prepareSignalOpInPlace(begin_this, begin_other, end_other, t);
+     for(size_t i=0; i<lenn; ++i, ++begin_this, ++begin_other){
+      *begin_this += *begin_other * mul_factor;
+    }
+  }
+
+  void subtractMultipliedSignal(AudioSignal<T> &other, const T mul_factor, int t=0){
+    T* begin_this = begin();
+    T* begin_other = other.begin();
+    const T* end_other = other.end();
+    const size_t lenn = _prepareSignalOpInPlace(begin_this, begin_other, end_other, t);
+     for(size_t i=0; i<lenn; ++i, ++begin_this, ++begin_other){
+      *begin_this -= *begin_other * mul_factor;
+    }
+  }
+
   // OVERLOADED OPERATORS
   T& operator[](size_t idx){return data_[idx];}
   T& operator[](size_t idx) const {return data_[idx];}

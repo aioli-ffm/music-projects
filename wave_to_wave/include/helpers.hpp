@@ -7,13 +7,16 @@
 #include <stdexcept>
 #include <math.h>
 #include <limits>
-
+#include <algorithm>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MATH
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static const double DOUBLE_EPSILON = std::numeric_limits<double>::epsilon();
+
+template<typename T>
+static bool abs_compare(T a, T b){return (std::abs(a) < std::abs(b));}
 
 size_t Pow2Ceil(const size_t x){return (x<=0)? 0 : pow(2, ceil(log2(x)));}
 

@@ -68,9 +68,11 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// once the pipeline is running and tested (also valgrind!), make the optimizer: it should hold
-// a lazy map with the pipelines, manage signal generating and optimizing criteria, and so on,
-// and should have a clean but flexible interface.
+// CHECK WHY OPT TEST DOESNT CONVERGE IN 2K STEPS.
+// optimizer seems to work. Bind to synth, modularize opt criteria and test with audios and numbers.
+// check if it can be optimized further with the repeated pipeline.
+// once done, clean, utest comprehensively and comment code. ready to alpha stage.
+
 
 // http://csoundjournal.com/issue17/gogins_composing_in_cpp.html
 // sudo apt install libcsnd-dev libcsound64-dev
