@@ -77,11 +77,11 @@ public:
     // get (or create if didn't exist) the corresponding pipeline, and update the signal spectrum
     OverlapSaveConvolver* convolver = nullptr;
     auto it = pipelines_.find(kPaddedSize);
-    if (it != pipelines_.end()){
+    if (it != pipelines_.end()){ // THERE WAS A PRE-EXISTING PIPELINE, UPDATE IT
       convolver = it->second;
       convolver->updatePatch(patch, true, true, false); // reverse, normalize, fft_after
       convolver->updateSignal(*residual_->r);
-    } else{
+    } else{ // THERE WASN'T A PREEXISTING PIPELINE: MAKE A NEW ONE
       convolver = new OverlapSaveConvolver(*residual_->r, patch, true, true);
       pipelines_.insert(std::pair<size_t, OverlapSaveConvolver*>(kPaddedSize, convolver));
     }

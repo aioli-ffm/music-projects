@@ -24,7 +24,7 @@
 #define WITH_OPENMP_ABOVE 1
 
 
-#define MIN_CHUNK_SIZE 2048
+#define MIN_CHUNK_SIZE  1// 4096 // 2048
 
 // STL INCLUDES
 #include <string.h>
@@ -251,7 +251,10 @@ public:
     float* it = signal.begin();
     float* end_it = signal.end();
     FloatSignal* sig = signal_vec_[0]->r;
-    std::copy(it, std::min(end_it, it+padded_size_half_), sig->begin()+padded_size_half_);
+    float* sig_begin = sig->begin();
+    float* sig_halfway = sig_begin+padded_size_half_;
+    std::fill(sig_begin, sig_halfway, 0);
+    std::copy(it, std::min(end_it, it+padded_size_half_), sig_halfway);
     // loop through the signal, adding further chunks
     for(size_t i=1, end_i=signal_vec_.size(); i<end_i; ++i, it+=padded_size_half_){
       std::copy(it, std::min(end_it, it+padded_patch_size_), signal_vec_[i]->r->begin());
