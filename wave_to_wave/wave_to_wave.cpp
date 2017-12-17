@@ -67,11 +67,18 @@ int main(int argc,  char** argv){
 }
 
 // TODO:
+// optimization works. Finish implementation of generic optimizer (comment&tidy up), and inherit
+// the class to bind it with the chi2synth. Keep in mind that the env. of the synth is known
+// beforehand, so its energy shall not be calculated! Also, tweak the synth to output an exp if
+// ratio=0 and a truncated gaussian if ratio=1, those should be faster to calculate than chi2.
 
-// CHECK WHY OPT TEST DOESNT CONVERGE IN 2K STEPS.
-// optimizer seems to work. Bind to synth, modularize opt criteria and test with audios and numbers.
-// check if it can be optimized further with the repeated pipeline.
-// once done, clean, utest comprehensively and comment code. ready to alpha stage.
+// once the subclass is finished, empirical test with real audio files. Consider where to implement
+// "scatter" downsampling. Ideally, implement a test that uses pure wavelets for perfect
+// reconstruction of some arbitrary signals.
+
+// Also, implement a criterium that adds multiple patches per step, and modularize criteria Funcs.
+
+// After that,
 
 
 // http://csoundjournal.com/issue17/gogins_composing_in_cpp.html

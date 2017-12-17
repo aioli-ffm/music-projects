@@ -198,19 +198,14 @@ public:
     if(patch_reversed){std::reverse_copy(patch.begin(), patch.end(), padded_patch->begin());}
     else {std::copy(patch.begin(), patch.end(), padded_patch->begin());}
     if(normalize_patch){padded_patch->operator*=(1.0/padded_patch_size_);}
-    // SIGNAL CHUNKING
-    // copy and append the first, pre-padded signal chunk:
-    float* it = signal.begin();
-    float* end_it = signal.end();
-    FloatSignal* sig = new FloatSignal(padded_patch_size_);
-    std::copy(it, std::min(end_it, it+padded_size_half_), sig->begin()+padded_size_half_);
-    signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
-    // loop through the signal, adding further chunks
-    for(; it<end_it; it+=padded_size_half_){
-      FloatSignal* sig = new FloatSignal(padded_patch_size_);
-      std::copy(it, std::min(end_it, it+padded_patch_size_), sig->begin());
-      signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
+    // Initialize Signal: create the chunk structure and fill it with updateSignal
+    float* end_it = signal.end()+padded_size_half_;
+    for(float* it=signal.begin(); it<end_it; it+=padded_size_half_){
+      FloatSignal* fs = new FloatSignal(padded_patch_size_);
+      ComplexSignal* cs =new ComplexSignal(padded_patch_size_complex_);
+      signal_vec_.push_back(new FftTransformer(fs, cs));
     }
+    updateSignal(signal, false);
   }
 
   // GETTERS
@@ -252,14 +247,23 @@ public:
     float* sig_begin = sig->begin();
     std::fill(sig_begin, sig->end(), 0);
     std::copy(it, std::min(end_it, it+padded_size_half_), sig_begin+padded_size_half_);
-    // loop for the rest. OPTIMIZE THIS!
-    for(size_t i=1; it<end_it; it+=padded_size_half_, ++i){
-      FloatSignal* sig = signal_vec_[i]->r;
-      float* sig_begin = sig->begin();
-      std::fill(sig_begin, sig->end(), 0);
-      std::copy(it, std::min(end_it, it+padded_patch_size_), sig_begin);
+    // loop along the signal chunks that aren't zero-padded
+    end_it -= padded_patch_size_;
+    size_t i=1;
+    for(; it<end_it; it+=padded_size_half_, ++i){
+      sig = signal_vec_[i]->r;
+      sig_begin = sig->begin();
+      std::copy(it, it+padded_patch_size_, sig_begin);
     }
-
+    // the last chunks have to be zero-padded
+    end_it += padded_patch_size_;
+    for(; it<end_it; it+=padded_size_half_, ++i){
+      sig = signal_vec_[i]->r;
+      sig_begin = sig->begin();
+      std::fill(sig_begin, sig->end(), 0);
+      std::copy(it, end_it, sig_begin);
+    }
+    // optional
     if(fft_forward_after){forwardSignal();}
   }
 

@@ -44,7 +44,7 @@ private:
   const size_t kMinChunkSize_;
   FloatSignal& original_;
   size_t original_size_;
-  std::function<std::map<long int, float>(FloatSignal&)> opt_criterium_;
+  std::function<std::vector<std::pair<long int, float> >(FloatSignal&)> opt_criterium_;
   FftTransformer*  residual_;
   std::stringstream sequence_;
   std::map<size_t, OverlapSaveConvolver*> pipelines_;
@@ -52,7 +52,8 @@ private:
   // FftTransformer optimized_;
 public:
   explicit WavToWavOptimizer(FloatSignal &original,
-                             std::function<std::map<long int, float>(FloatSignal&)> opt_criterium,
+                             std::function<std::vector<std::pair<long int, float>
+                             >(FloatSignal&)> opt_criterium,
                              const size_t min_chunk_size=2048)
     : kMinChunkSize_(min_chunk_size),
       original_(original),
@@ -75,7 +76,9 @@ public:
     // adjust and update metadata before loading the pipeline
     const size_t kPatchSize = patch.getSize();
     const size_t kPaddedSize = std::max(kMinChunkSize_, 2*Pow2Ceil(kPatchSize));
-    const bool kRepeats = last_pipeline_==kPaddedSize;
+    const float kPatchEnergy = std::inner_product(patch.begin(), patch.end(), patch.begin(),0.0f);
+    const float kNormFactor = kPatchEnergy*kPaddedSize;
+    // const bool kRepeats = last_pipeline_==kPaddedSize;
     last_pipeline_ = kPaddedSize;
     // get (or create if didn't exist) the corresponding pipeline, and update the signal spectrum
     OverlapSaveConvolver* convolver = nullptr;
@@ -94,37 +97,24 @@ public:
     convolver->forwardSignal();
     convolver->spectralConv();
     convolver->backwardSignal();
-    // return the conv results as a newly cons
+    // extract NON-NORMALIZED conv results as a newly constructed signal
     FloatSignal result(original_size_+kPatchSize-1);
     convolver->extractConvolvedTo(result);
-
-
-    // result.print("convolution");
-    // convolver->getPatch()->r->print("patch");
-    // residual_->r->print("residual");
-
-
-
-    //
-    std::map<long int, float> changes = opt_criterium_(result);
+    // apply criterium to extract a list of <POSITION, XCORR_VALUE> changes
+    std::vector<std::pair<long int, float> > changes = opt_criterium_(result);
+    // subtract the changes returned by the criterium to the residual signal
     for (const auto& elt : changes){
       long int position = elt.first-kPatchSize+1;
-      float kPatchEnergy = std::inner_product(patch.begin(), patch.end(), patch.begin(), 0.0f);
-      // std::cout << " >>>>   " << position << "      " << elt.second << "      " << kPatchEnergy << "      " <<  convolver->getPaddedSize() << "      " << elt.second/kPatchEnergy/convolver->getPaddedSize() << std::endl;
-      residual_->r->subtractMultipliedSignal(patch, elt.second/kPatchEnergy/((float)convolver->getPaddedSize()), position);
+      residual_->r->subtractMultipliedSignal(patch, elt.second/kNormFactor, position);
     }
   }
 
 
-  void printResidual(size_t step){
-    std::cout << "\n\n residual at step: " << step << ":\n";
-    residual_->r->print("residual");
-  }
+  FftTransformer* getResidual(){return residual_;}
 
-  void printResidualEnergy(size_t step){
+  float getResidualEnergy(){
     FloatSignal* r = residual_->r;
-    float energy = std::inner_product(r->begin(), r->end(), r->begin(), 0.0f);
-    std::cout << "\n\n residual energy at step " << step << ":  \t" << energy << std::endl;
+    return std::inner_product(r->begin(), r->end(), r->begin(), 0.0f);
   }
   //
   void exportReconstruction(const std::string wav_export_path){
