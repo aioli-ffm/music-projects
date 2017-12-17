@@ -18,21 +18,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// OK, optimizer works for aaa of arbitrary length, and bbb<=16 (bigger
-// diverges.). Also, bbb can be any positive delta, BUT NOT NEGATIVE.
-// check those.
-
-
-
 TEST_CASE("test optimizer", "[optimizer]"){
-  const size_t N = 44100;
+  const size_t N = 4100;
   size_t downsampling = 1;
-  FloatSignal aaa([](long int x){return x+1;}, 44100);
+  FloatSignal aaa([](long int x){return x+1;}, 4100);
   //FloatSignal aaa("country.wav");
-  FloatSignal bbb([](long int x){return 123.456*(x==15);}, 16);
+  FloatSignal bbb([](long int x){return -10.12345*(x==0);}, 1230);
   auto opt_criterium = [](FloatSignal &fs){
     std::map<long int, float> result;
-    float* abs_max = std::max_element(fs.begin(), fs.end());//, abs_compare);
+    float* abs_max = std::max_element(fs.begin(), fs.end(), abs_compare<float>);
     result.insert(std::pair<long int, float>(std::distance(fs.begin(), abs_max),
                                              *abs_max));
     return result;
@@ -46,7 +40,7 @@ TEST_CASE("test optimizer", "[optimizer]"){
       // o.printResidual(i);
     }
   }
-  o.printResidual(44100);
+  // o.printResidual(44100);
   o.printResidualEnergy(44100);
 
 

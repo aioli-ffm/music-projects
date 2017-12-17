@@ -40,23 +40,26 @@
 // 2.
 class WavToWavOptimizer{
 private:
+  size_t last_pipeline_ = 0;
+  const size_t kMinChunkSize_;
   FloatSignal& original_;
   size_t original_size_;
   std::function<std::map<long int, float>(FloatSignal&)> opt_criterium_;
   FftTransformer*  residual_;
   std::stringstream sequence_;
   std::map<size_t, OverlapSaveConvolver*> pipelines_;
-  size_t last_pipeline_;
   //
   // FftTransformer optimized_;
 public:
   explicit WavToWavOptimizer(FloatSignal &original,
-                             std::function<std::map<long int, float>(FloatSignal&)> opt_criterium)
-    :original_(original),
-     original_size_(original.getSize()),
-     opt_criterium_(opt_criterium),
-     residual_(new FftTransformer(new FloatSignal(original.begin(), original_size_),
-                                  new ComplexSignal(original_size_/2+1))){
+                             std::function<std::map<long int, float>(FloatSignal&)> opt_criterium,
+                             const size_t min_chunk_size=2048)
+    : kMinChunkSize_(min_chunk_size),
+      original_(original),
+      original_size_(original.getSize()),
+      opt_criterium_(opt_criterium),
+      residual_(new FftTransformer(new FloatSignal(original.begin(), original_size_),
+                                   new ComplexSignal(original_size_/2+1))){
     residual_->forward();
   }
   ~WavToWavOptimizer(){
@@ -71,18 +74,18 @@ public:
   void step(FloatSignal& patch){
     // adjust and update metadata before loading the pipeline
     const size_t kPatchSize = patch.getSize();
-    const size_t kPaddedSize = 2*Pow2Ceil(kPatchSize);
+    const size_t kPaddedSize = std::max(kMinChunkSize_, 2*Pow2Ceil(kPatchSize));
     const bool kRepeats = last_pipeline_==kPaddedSize;
     last_pipeline_ = kPaddedSize;
     // get (or create if didn't exist) the corresponding pipeline, and update the signal spectrum
     OverlapSaveConvolver* convolver = nullptr;
     auto it = pipelines_.find(kPaddedSize);
-    if (it != pipelines_.end()){ // THERE WAS A PRE-EXISTING PIPELINE, UPDATE IT
+    if ( it != pipelines_.end()){ // THERE WAS A PRE-EXISTING PIPELINE, UPDATE IT
       convolver = it->second;
       convolver->updatePatch(patch, true, false, false); // reverse, normalize, fft_after
       convolver->updateSignal(*residual_->r, false);
     } else{ // THERE WASN'T A PREEXISTING PIPELINE: MAKE A NEW ONE
-      convolver = new OverlapSaveConvolver(*residual_->r, patch, true, false, kPatchSize);
+      convolver = new OverlapSaveConvolver(*residual_->r, patch, true, false, kPaddedSize);
       pipelines_.insert(std::pair<size_t, OverlapSaveConvolver*>(kPaddedSize, convolver));
     }
     // at this point we have a pipeline with all the FloatSignals up-to-date. Calculate FFT of
@@ -107,8 +110,8 @@ public:
     for (const auto& elt : changes){
       long int position = elt.first-kPatchSize+1;
       float kPatchEnergy = std::inner_product(patch.begin(), patch.end(), patch.begin(), 0.0f);
-      // std::cout << " >>>>   " << position << "      " << elt.second/kPatchEnergy/kPaddedSize << std::endl;
-      residual_->r->subtractMultipliedSignal(patch, elt.second/kPatchEnergy/kPaddedSize, position);
+      // std::cout << " >>>>   " << position << "      " << elt.second << "      " << kPatchEnergy << "      " <<  convolver->getPaddedSize() << "      " << elt.second/kPatchEnergy/convolver->getPaddedSize() << std::endl;
+      residual_->r->subtractMultipliedSignal(patch, elt.second/kPatchEnergy/((float)convolver->getPaddedSize()), position);
     }
   }
 

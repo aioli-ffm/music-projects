@@ -244,35 +244,22 @@ public:
     // check length
     size_t sig_size = signal.getSize();
     CheckAllEqual({sig_size, signal_size_}, "updateSignal: length of signal can't change!");
-    // copy the first, pre-padded signal chunk to the existing float signal
-
-
     // SIGNAL CHUNKING
     // copy and append the first, pre-padded signal chunk:
     float* it = signal.begin();
     float* end_it = signal.end();
-    float* sig_begin = signal_vec_[0]->r->begin();
-    float* sig_halfway = sig_begin+padded_size_half_;
-    std::fill(sig_begin, sig_halfway, 0);
-    std::copy(it, std::min(end_it, it+padded_size_half_), sig_halfway);
-    // // loop from the second to the butlast element, adding further chunks
-    // size_t vec_size = signal_vec_.size();
-    // for(size_t i=1, end_i=vec_size-1; i<end_i; ++i, it+=padded_size_half_){
-    //   std::copy(it, std::min(end_it, it+padded_patch_size_), signal_vec_[i]->r->begin());
-    // }
-    // loop from the second to the butlast element, adding further chunks
-    size_t vec_size = signal_vec_.size();
-    for(size_t i=1, end_i=vec_size-1; i<end_i; ++i, it+=padded_size_half_){
-      std::copy(it, it+padded_patch_size_, signal_vec_[i]->r->begin());
-    }
-    // the last element
-    if(vec_size>1){
-      FloatSignal* sig = signal_vec_.back()->r;
+    FloatSignal* sig = signal_vec_[0]->r;
+    float* sig_begin = sig->begin();
+    std::fill(sig_begin, sig->end(), 0);
+    std::copy(it, std::min(end_it, it+padded_size_half_), sig_begin+padded_size_half_);
+    // loop for the rest. OPTIMIZE THIS!
+    for(size_t i=1; it<end_it; it+=padded_size_half_, ++i){
+      FloatSignal* sig = signal_vec_[i]->r;
       float* sig_begin = sig->begin();
-      long int lastchunk_len = std::distance(it, end_it);
-      std::copy(it, end_it, sig_begin);
-      std::fill(sig_begin+lastchunk_len, sig->end(), 0);
+      std::fill(sig_begin, sig->end(), 0);
+      std::copy(it, std::min(end_it, it+padded_patch_size_), sig_begin);
     }
+
     if(fft_forward_after){forwardSignal();}
   }
 
