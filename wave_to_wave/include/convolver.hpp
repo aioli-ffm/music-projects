@@ -23,9 +23,6 @@
 // the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
 #define WITH_OPENMP_ABOVE 1
 
-
-#define MIN_CHUNK_SIZE  1// 4096 // 2048
-
 // STL INCLUDES
 #include <string.h>
 #include <math.h>
@@ -185,7 +182,7 @@ private:
 public:
   explicit OverlapSaveConvolver(FloatSignal &signal, FloatSignal &patch,
                                 const bool patch_reversed=true,  const bool normalize_patch=true,
-                                const size_t min_chunk_size=MIN_CHUNK_SIZE)
+                                const size_t min_chunk_size=2048)
     : kMinChunkSize_(min_chunk_size),
       signal_size_(signal.getSize()),
       patch_size_(patch.getSize()),
@@ -248,16 +245,33 @@ public:
     size_t sig_size = signal.getSize();
     CheckAllEqual({sig_size, signal_size_}, "updateSignal: length of signal can't change!");
     // copy the first, pre-padded signal chunk to the existing float signal
+
+
+    // SIGNAL CHUNKING
+    // copy and append the first, pre-padded signal chunk:
     float* it = signal.begin();
     float* end_it = signal.end();
-    FloatSignal* sig = signal_vec_[0]->r;
-    float* sig_begin = sig->begin();
+    float* sig_begin = signal_vec_[0]->r->begin();
     float* sig_halfway = sig_begin+padded_size_half_;
     std::fill(sig_begin, sig_halfway, 0);
     std::copy(it, std::min(end_it, it+padded_size_half_), sig_halfway);
-    // loop through the signal, adding further chunks
-    for(size_t i=1, end_i=signal_vec_.size(); i<end_i; ++i, it+=padded_size_half_){
-      std::copy(it, std::min(end_it, it+padded_patch_size_), signal_vec_[i]->r->begin());
+    // // loop from the second to the butlast element, adding further chunks
+    // size_t vec_size = signal_vec_.size();
+    // for(size_t i=1, end_i=vec_size-1; i<end_i; ++i, it+=padded_size_half_){
+    //   std::copy(it, std::min(end_it, it+padded_patch_size_), signal_vec_[i]->r->begin());
+    // }
+    // loop from the second to the butlast element, adding further chunks
+    size_t vec_size = signal_vec_.size();
+    for(size_t i=1, end_i=vec_size-1; i<end_i; ++i, it+=padded_size_half_){
+      std::copy(it, it+padded_patch_size_, signal_vec_[i]->r->begin());
+    }
+    // the last element
+    if(vec_size>1){
+      FloatSignal* sig = signal_vec_.back()->r;
+      float* sig_begin = sig->begin();
+      long int lastchunk_len = std::distance(it, end_it);
+      std::copy(it, end_it, sig_begin);
+      std::fill(sig_begin+lastchunk_len, sig->end(), 0);
     }
     if(fft_forward_after){forwardSignal();}
   }

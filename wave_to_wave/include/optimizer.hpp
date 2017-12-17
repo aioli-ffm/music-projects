@@ -79,10 +79,10 @@ public:
     auto it = pipelines_.find(kPaddedSize);
     if (it != pipelines_.end()){ // THERE WAS A PRE-EXISTING PIPELINE, UPDATE IT
       convolver = it->second;
-      convolver->updatePatch(patch, true, true, false); // reverse, normalize, fft_after
-      convolver->updateSignal(*residual_->r);
+      convolver->updatePatch(patch, true, false, false); // reverse, normalize, fft_after
+      convolver->updateSignal(*residual_->r, false);
     } else{ // THERE WASN'T A PREEXISTING PIPELINE: MAKE A NEW ONE
-      convolver = new OverlapSaveConvolver(*residual_->r, patch, true, true);
+      convolver = new OverlapSaveConvolver(*residual_->r, patch, true, false, kPatchSize);
       pipelines_.insert(std::pair<size_t, OverlapSaveConvolver*>(kPaddedSize, convolver));
     }
     // at this point we have a pipeline with all the FloatSignals up-to-date. Calculate FFT of
@@ -94,13 +94,21 @@ public:
     // return the conv results as a newly cons
     FloatSignal result(original_size_+kPatchSize-1);
     convolver->extractConvolvedTo(result);
+
+
+    // result.print("convolution");
+    // convolver->getPatch()->r->print("patch");
+    // residual_->r->print("residual");
+
+
+
     //
     std::map<long int, float> changes = opt_criterium_(result);
     for (const auto& elt : changes){
       long int position = elt.first-kPatchSize+1;
-      if(position>=0){
-        residual_->r->subtractMultipliedSignal(patch, elt.second, position);
-      }
+      float kPatchEnergy = std::inner_product(patch.begin(), patch.end(), patch.begin(), 0.0f);
+      // std::cout << " >>>>   " << position << "      " << elt.second/kPatchEnergy/kPaddedSize << std::endl;
+      residual_->r->subtractMultipliedSignal(patch, elt.second/kPatchEnergy/kPaddedSize, position);
     }
   }
 
