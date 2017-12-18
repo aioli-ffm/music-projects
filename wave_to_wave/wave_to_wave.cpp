@@ -67,6 +67,9 @@ int main(int argc,  char** argv){
 }
 
 // TODO:
+
+// solve problem of "PopulateMaxCriterium with dynamic prog" (see notes)
+
 // optimization works. Finish implementation of generic optimizer (comment&tidy up), and inherit
 // the class to bind it with the chi2synth. Keep in mind that the env. of the synth is known
 // beforehand, so its energy shall not be calculated! Also, tweak the synth to output an exp if

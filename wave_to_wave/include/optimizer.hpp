@@ -40,7 +40,7 @@
 // 2.
 class WavToWavOptimizer{
 private:
-  size_t last_pipeline_ = 0;
+  // size_t last_pipeline_ = 0;
   const size_t kMinChunkSize_;
   FloatSignal& original_;
   size_t original_size_;
@@ -72,14 +72,14 @@ public:
     delete residual_;
   }
 
-  void step(FloatSignal& patch){
+  std::vector<std::pair<long int, float> > step(FloatSignal& patch, const float patch_energy,
+                                                const std::string seq_notes){
     // adjust and update metadata before loading the pipeline
     const size_t kPatchSize = patch.getSize();
     const size_t kPaddedSize = std::max(kMinChunkSize_, 2*Pow2Ceil(kPatchSize));
-    const float kPatchEnergy = std::inner_product(patch.begin(), patch.end(), patch.begin(),0.0f);
-    const float kNormFactor = kPatchEnergy*kPaddedSize;
+    const float kNormFactor = patch_energy*kPaddedSize;
     // const bool kRepeats = last_pipeline_==kPaddedSize;
-    last_pipeline_ = kPaddedSize;
+    // last_pipeline_ = kPaddedSize;
     // get (or create if didn't exist) the corresponding pipeline, and update the signal spectrum
     OverlapSaveConvolver* convolver = nullptr;
     auto it = pipelines_.find(kPaddedSize);
@@ -104,11 +104,13 @@ public:
     std::vector<std::pair<long int, float> > changes = opt_criterium_(result);
     // subtract the changes returned by the criterium to the residual signal
     for (const auto& elt : changes){
-      long int position = elt.first-kPatchSize+1;
-      residual_->r->subtractMultipliedSignal(patch, elt.second/kNormFactor, position);
+      long int position = elt.first;//-kPatchSize+1;
+      float factor = elt.second/kNormFactor;
+      residual_->r->subtractMultipliedSignal(patch, factor, position);
+      sequence_ << position << " " << factor << " " << seq_notes << std::endl;
     }
+    return changes;
   }
-
 
   FftTransformer* getResidual(){return residual_;}
 
@@ -123,7 +125,17 @@ public:
     out.toWav(wav_export_path, 22050);
   }
   //
-  void exportSequence(const std::string txt_export_path){}
+  void exportTxtSequence(const std::string path_out){
+    std::ofstream out(path_out);
+    if (out.is_open()){
+      out << sequence_.rdbuf();
+      out.close();
+    }
+    else{
+      throw std::invalid_argument("exportTxtSequence: unable to open output stream "+path_out);
+    }
+  }
+
 };
 
 
