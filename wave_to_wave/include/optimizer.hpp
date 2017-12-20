@@ -106,6 +106,7 @@ public:
     for (const auto& elt : changes){
       long int position = elt.first;//-kPatchSize+1;
       float factor = elt.second/kNormFactor;
+      // std::cout << position << "  <<pos,  factor>> " << factor << std::endl;
       residual_->r->subtractMultipliedSignal(patch, factor, position);
       sequence_ << position << " " << factor << " " << seq_notes << std::endl;
     }
