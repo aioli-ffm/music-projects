@@ -68,6 +68,9 @@ int main(int argc,  char** argv){
 
 // TODO:
 
+// BUG: the linear interpolation in the synth class returns huge values when called with different
+// values for deg_freedom. It may be abug in the linearinterp fn or in the synth server...
+
 // solve problem of "PopulateMaxCriterium with dynamic prog" (see notes)
 
 // optimization works. Finish implementation of generic optimizer (comment&tidy up), and inherit

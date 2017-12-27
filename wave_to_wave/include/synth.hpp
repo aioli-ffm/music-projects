@@ -48,8 +48,8 @@ private:
 public:
 
   // The only consumer method of the server
-  FloatSignal* get(const size_t size, const float span, const float df){
-    std::tuple<size_t, float, float> key(size, span, df);
+  FloatSignal* get(const size_t size, const float span, const float deg_freedom){
+    std::tuple<size_t, float, float> key(size, span, deg_freedom);
     std::map<std::tuple<size_t, float, float>, FloatSignal*>::iterator it = chi2_map_.find(key);
     if (it != chi2_map_.end()){ // if signal already exists, return it
       return it->second;
@@ -59,7 +59,7 @@ public:
       float* fs_data = fs->getData();
       size_t i = 0;
       for(double x=DOUBLE_EPSILON, delta=span/size; i<size; ++i, x+=delta){
-        fs_data[i] = Chi2(x, df);
+        fs_data[i] = Chi2(x, deg_freedom);
       }
       // ... save it to the map and return it
       chi2_map_.insert(std::make_pair(key, fs));
@@ -109,20 +109,21 @@ public:
       chi_table_size_(chi_table_size),
       chi_span_(chi_span) {
     double df = ExpInterpZeroOne(env_ratio_, env_exp_ratio)*5+2;
-    size_t up_idx;
-    size_t i=0;
-    double _;
-    for(double x=DOUBLE_EPSILON, delta=chi_span/size; i<size; ++i, x+=delta){
-      // get the signal (the df has been already truncated and interpolated)
-      FloatSignal* chi_sig = server_.get(chi_table_size, chi_span, df);
-      float* chi_data = chi_sig->getData();
-      // the size of the chi table usually doesn't match the size of this object. Therefore,
-      // its values have to be interpolated:
-      float chi_idx = x*chi_table_size/chi_span; // the "actual" chi index
-      up_idx = std::ceil(chi_idx);
-      data_[i] = sin(x*sin_ratio_) * LinInterp(chi_data[(size_t)chi_idx],chi_data[up_idx],
-                                               modf(chi_idx,&_)); // the df reference is unused
+    FloatSignal* chi_sig = server_.get(chi_table_size, chi_span, 2*df);
+    float* chi_data = chi_sig->getData();
+    float chi_idx = 0;
+    float chi_idx_delta = ((float)chi_table_size)/size;
+    double _; // unused (for the modf built-in function)
+    // the size of the chi table usually doesn't match the size of this object. Therefore,
+    // its values have to be interpolated in the following loop:
+    for(size_t i=0; i<size; ++i, chi_idx+=chi_idx_delta){
+      size_t chidxint = chi_idx;
+      data_[i] = LinInterp(chi_data[chidxint],chi_data[chidxint+1], modf(chi_idx,&_)); // the df reference is unused
     }
+
+    std::cout  << ">>>>  " << *std::max_element(chi_data, chi_sig->end(), abs_compare<float>) << std::endl;
+    std::cout  << "      >>>>  " << *std::max_element(begin(),end(),abs_compare<float>)<< std::endl;
+
   }
 
   Chi2Synth(Chi2Server &server,
