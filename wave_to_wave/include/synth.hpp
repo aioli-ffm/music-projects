@@ -57,8 +57,9 @@ public:
       // ... generate a new signal ...
       FloatSignal* fs = new FloatSignal(size);
       float* fs_data = fs->getData();
-      size_t i = 0;
-      for(double x=DOUBLE_EPSILON, delta=span/size; i<size; ++i, x+=delta){
+      double delta = span/size;
+      double x = DOUBLE_EPSILON;
+      for(size_t i=0; i<size; ++i, x+=delta){
         fs_data[i] = Chi2(x, deg_freedom);
       }
       // ... save it to the map and return it
@@ -111,19 +112,18 @@ public:
     double df = ExpInterpZeroOne(env_ratio_, env_exp_ratio)*5+2;
     FloatSignal* chi_sig = server_.get(chi_table_size, chi_span, 2*df);
     float* chi_data = chi_sig->getData();
-    float chi_idx = 0;
-    float chi_idx_delta = ((float)chi_table_size)/size;
+    double chi_idx=0;
+    size_t chidxint = 0;
+    double chi_idx_delta = (-1.0+chi_table_size)/size;
+    double sin_delta = chi_span/size;
+    double x = 0;
     double _; // unused (for the modf built-in function)
     // the size of the chi table usually doesn't match the size of this object. Therefore,
     // its values have to be interpolated in the following loop:
-    for(size_t i=0; i<size; ++i, chi_idx+=chi_idx_delta){
-      size_t chidxint = chi_idx;
-      data_[i] = LinInterp(chi_data[chidxint],chi_data[chidxint+1], modf(chi_idx,&_)); // the df reference is unused
+    for(size_t i=0; i<size; ++i, chi_idx+=chi_idx_delta, x+=sin_delta){
+      chidxint = chi_idx;
+      data_[i] = sin(x*sin_ratio_) * LinInterp(chi_data[chidxint],chi_data[chidxint+1], modf(chi_idx,&_));
     }
-
-    std::cout  << ">>>>  " << *std::max_element(chi_data, chi_sig->end(), abs_compare<float>) << std::endl;
-    std::cout  << "      >>>>  " << *std::max_element(begin(),end(),abs_compare<float>)<< std::endl;
-
   }
 
   Chi2Synth(Chi2Server &server,
