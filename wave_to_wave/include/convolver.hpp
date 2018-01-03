@@ -309,7 +309,7 @@ public:
   // min_i. It throws an exception if len(sig)<(cc_size+min_i).
   void extractConvolvedTo(FloatSignal &sig, const size_t min_i=0){
     const size_t kConvSize = min_i+signal_size_+patch_size_-1;
-    CheckLessEqual(sig.getSize(), kConvSize+min_i,
+    CheckLessEqual(kConvSize+min_i, sig.getSize(),
                    "extractSignalTo: given sig length can't be smaller than sig+patch+min_i-1!");
     // iterative variables
     float* sig_data = sig.begin();

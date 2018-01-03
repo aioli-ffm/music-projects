@@ -68,10 +68,11 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// BUG: the linear interpolation in the synth class returns huge values when called with different
-// values for deg_freedom. It may be abug in the linearinterp fn or in the synth server...
 
-// solve problem of "PopulateMaxCriterium with dynamic prog" (see notes)
+// populate criterium seems to work OK. try to parallelize it, and put both criteria into another file.
+// add a "counter" to the optimizer, needed to keep track of the total number of elts.
+
+// try to achieve good reconstructions with the wavelets. Do some massive, real-audio tests
 
 // optimization works. Finish implementation of generic optimizer (comment&tidy up), and inherit
 // the class to bind it with the chi2synth. Keep in mind that the env. of the synth is known
@@ -81,8 +82,6 @@ int main(int argc,  char** argv){
 // once the subclass is finished, empirical test with real audio files. Consider where to implement
 // "scatter" downsampling. Ideally, implement a test that uses pure wavelets for perfect
 // reconstruction of some arbitrary signals.
-
-// Also, implement a criterium that adds multiple patches per step, and modularize criteria Funcs.
 
 // After that,
 
@@ -100,7 +99,3 @@ int main(int argc,  char** argv){
 // check valgrind... check imports
 // write optimizer. support a lazy dict of {1024: FloatSignal(orig), 2046: orig}
 //                  copies of the original, to be compatible with every patch.
-
-
-// BUGS:
-// plotting results of synth seems to be bugged (plots peaks of 1e32) when chitable size <200

@@ -5,6 +5,7 @@
 #include<vector>
 #include<list>
 #include<complex>
+#include <cstdlib>
 // SYSTEM-INSTALLED LIBRARIES
 #include <fftw3.h>
 // LOCAL INCLUDES
@@ -183,6 +184,61 @@ TEST_CASE("Testing the OverlapSaveConvolver", "[OverlapSaveConvolver]"){
           REQUIRE(dotProdAt(a, b, i-(b_size-1)) == Approx(cc_placeholder[i]));
         }
       }
+      // check accepted sizes by extractConvolvedTo: create signals
+      const size_t kSigSz = 100;
+      const size_t kPatchSz = 10;
+      FloatSignal sig11(kSigSz);
+      FloatSignal patch11(kPatchSz);
+      OverlapSaveConvolver convolver11(sig11, patch11, true, true, 1);
+      // create three containers with different sizes:
+      FloatSignal xcorr_correct(kSigSz+kPatchSz-1);
+      FloatSignal xcorr_small(kSigSz+kPatchSz-2);
+      FloatSignal xcorr_big(kSigSz+kPatchSz+10);
+      // test the containers: if they are big enough it won't crash
+      convolver11.extractConvolvedTo(xcorr_correct);
+      convolver11.extractConvolvedTo(xcorr_big, 5);
+      // if the containers aren't big enough the convolver crashes
+      REQUIRE_THROWS_AS(convolver11.extractConvolvedTo(xcorr_small),
+                        std::runtime_error);
+      REQUIRE_THROWS_AS(convolver11.extractConvolvedTo(xcorr_correct, 1),
+                        std::runtime_error);
+    }
+
+    SECTION("Test cross-correlation using noise"){
+      // basic settings
+      size_t noise_size = 1000;
+      size_t delayed_size = 2000;
+      size_t delay = 456;
+      // make noise signal and containers for the delayed and cross-correlated:
+      FloatSignal noise([](long int x){return static_cast<float>(rand()) /
+            static_cast<float>(RAND_MAX);}, noise_size);
+      FloatSignal delayed(delayed_size);
+      FloatSignal xcorr(noise_size+delayed_size-1);
+      // create delayed
+      noise *= 2;
+      noise -= 1;
+      delayed.addSignal(noise, delay);
+      // calculate cross-correlation
+      OverlapSaveConvolver xc(delayed, noise);
+      xc.forwardPatch();
+      xc.forwardSignal();
+      xc.spectralConv();
+      xc.backwardSignal();
+      xc.extractConvolvedTo(xcorr);
+      // calculate energy of noise signal and find absolute maximum of xcorr:
+      float* noise_beg = noise.begin();
+      float energy = std::inner_product(noise_beg, noise.end(), noise_beg, 0.0f);
+      float* absmax = std::max_element(xcorr.begin(), xcorr.end(),
+                                       abs_compare<float>);
+      // require that maximum is at the delay point and equals the energy:
+      REQUIRE(std::distance(xcorr.begin(), absmax) == noise_size+delay-1);
+      REQUIRE(*absmax == Approx(energy));
+      // require that the energy of the xcorr on the peak is > 99% of the total
+      REQUIRE(*absmax * (*absmax)/energy > 0.99);
+      // // test plots:
+      // noise.plot("noise");
+      // delayed.plot("delayed");
+      // xcorr.plot("xcorr");
     }
 }
 

@@ -44,21 +44,16 @@ private:
   const size_t kMinChunkSize_;
   FloatSignal& original_;
   size_t original_size_;
-  std::function<std::vector<std::pair<long int, float> >(FloatSignal&)> opt_criterium_;
   FftTransformer*  residual_;
   std::stringstream sequence_;
   std::map<size_t, OverlapSaveConvolver*> pipelines_;
   //
   // FftTransformer optimized_;
 public:
-  explicit WavToWavOptimizer(FloatSignal &original,
-                             std::function<std::vector<std::pair<long int, float>
-                             >(FloatSignal&)> opt_criterium,
-                             const size_t min_chunk_size=2048)
+  explicit WavToWavOptimizer(FloatSignal &original, const size_t min_chunk_size=2048)
     : kMinChunkSize_(min_chunk_size),
       original_(original),
       original_size_(original.getSize()),
-      opt_criterium_(opt_criterium),
       residual_(new FftTransformer(new FloatSignal(original.begin(), original_size_),
                                    new ComplexSignal(original_size_/2+1))){
     residual_->forward();
@@ -73,6 +68,8 @@ public:
   }
 
   std::vector<std::pair<long int, float> > step(FloatSignal& patch, const float patch_energy,
+                                                std::function<std::vector<std::pair<long int, float>
+                                                >(FloatSignal&)> opt_criterium,
                                                 const std::string seq_notes){
     // adjust and update metadata before loading the pipeline
     const size_t kPatchSize = patch.getSize();
@@ -101,10 +98,10 @@ public:
     FloatSignal result(original_size_+kPatchSize-1);
     convolver->extractConvolvedTo(result);
     // apply criterium to extract a list of <POSITION, XCORR_VALUE> changes
-    std::vector<std::pair<long int, float> > changes = opt_criterium_(result);
+    std::vector<std::pair<long int, float> > changes = opt_criterium(result);
     // subtract the changes returned by the criterium to the residual signal
     for (const auto& elt : changes){
-      long int position = elt.first;//-kPatchSize+1;
+      long int position = elt.first-kPatchSize+1;
       float factor = elt.second/kNormFactor;
       // std::cout << position << "  <<pos,  factor>> " << factor << std::endl;
       residual_->r->subtractMultipliedSignal(patch, factor, position);
