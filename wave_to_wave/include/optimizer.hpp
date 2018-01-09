@@ -20,6 +20,7 @@
 
 // STL INCLUDES
 #include <map>
+#include <string>
 // LOCAL INCLUDES
 #include "helpers.hpp"
 #include "signal.hpp"
@@ -45,7 +46,8 @@ private:
   FloatSignal& original_;
   size_t original_size_;
   FftTransformer*  residual_;
-  std::stringstream sequence_;
+  // std::stringstream sequence_;
+  std::vector<std::string> sequence_;
   std::map<size_t, OverlapSaveConvolver*> pipelines_;
   //
   // FftTransformer optimized_;
@@ -103,14 +105,17 @@ public:
     for (const auto& elt : changes){
       long int position = elt.first-kPatchSize+1;
       float factor = elt.second/kNormFactor;
-      // std::cout << position << "  <<pos,  factor>> " << factor << std::endl;
       residual_->r->subtractMultipliedSignal(patch, factor, position);
-      sequence_ << position << " " << factor << " " << seq_notes << std::endl;
+      sequence_.push_back(std::to_string(position)+" "+std::to_string(factor)+" "+seq_notes);
     }
     return changes;
   }
 
   FftTransformer* getResidual(){return residual_;}
+
+  size_t getSeqLength(){
+    return sequence_.size();
+  }
 
   float getResidualEnergy(){
     FloatSignal* r = residual_->r;
@@ -126,7 +131,10 @@ public:
   void exportTxtSequence(const std::string path_out){
     std::ofstream out(path_out);
     if (out.is_open()){
-      out << sequence_.rdbuf();
+      for(const std::string& s : sequence_){
+        out << s << std::endl;
+      }
+      // out << sequence_.rdbuf();
       out.close();
     }
     else{
