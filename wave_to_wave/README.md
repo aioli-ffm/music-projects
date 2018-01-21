@@ -39,10 +39,10 @@ make run-benchmarks
 ### HIGHER PRIORITY
 
 Development/Test:
-- [ ] Add delay to signal, and overload operators to allow signal-to-signal arithmetic. Build and run utests.
+- [x] Add delay to signal, and overload operators to allow signal-to-signal arithmetic. Build and run utests.
 - [ ] Add wav import-export functionality to signal class. Build and run utests.
-- [ ] Add basic synth doing real morlet-wavelets (chi2 envelope). It should generate signal objects. Build and run utests.
-- [ ] Make prototype of optimizer as a collection of convolvers plus a "result" signal. Benchmark and utest.
+- [x] Add basic synth doing real morlet-wavelets (chi2 envelope). It should generate signal objects. Build and run utests.
+- [x] Make prototype of optimizer as a collection of convolvers plus a "result" signal. Benchmark and utest.
 
 Cmake/Make related (thank you Christian!):
 - [x] `make build` to compile the whole program, with main in `wave_to_wave.cpp`

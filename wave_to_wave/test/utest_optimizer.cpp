@@ -11,25 +11,28 @@
 TEST_CASE("test Chi2Optimizer", "[Chi2Optimizer]"){
   RandGen rand;
   // test that with bigger patch crashes.
-  SECTION("optimize regular audio file"){
-    FloatSignal pop("pop.wav");
+  SECTION("test: optimize long audio file"){
+    const std::string kWavPath = "pop_test.wav";
+    std::cout<<"Optimizing " << kWavPath << " up to 95%:" <<std::endl;
+    FloatSignal pop(kWavPath);
     Chi2Optimizer opt(pop);
-    size_t samplerate = 22050;
-    for(size_t i=0; i<2000; ++i){
-      size_t size = rand.rampInt((size_t)100, samplerate, true); // unifReal, normal
+    const size_t kSamplerate = 22050;
+    const size_t kStride = 1;
+    for(size_t i=0; i<500; ++i){
+      size_t size = rand.rampInt((size_t)100, kSamplerate, true); // unifReal, normal
       double k_ratio = rand.rampReal(0.0, 1.0);
-      double freq = (40.0* samplerate)/ size;
-      size_t stride = 1;
+      double freq = (40.0* kSamplerate)/ size;
       auto criterium = [=](FloatSignal &fs){return
                                             PopulateMaxCriterium(fs,size,0.1);};
       //SingleMaxCriterium(fs);};
-      opt.chi2step(size, freq, samplerate, k_ratio, stride, criterium, "x");
+      opt.chi2step(size, freq, kSamplerate, k_ratio, kStride, criterium, "x");
       if(i%100==0){
-        std::cout << "i: " <<  i << ", energy: " << opt.getResidualEnergy()
-                  << std::endl;
+        std::cout<<"i: "<< i<<", energy: "<<opt.getResidualEnergy()<<std::endl;
       }
     }
-    opt.getReconstruction().toWav("pop_chi2.wav", 22050);
+    // require a 95% optimization
+    REQUIRE(opt.getResidualEnergy() < 0.05*Energy(pop.begin(), pop.end()));
+    opt.getReconstruction().toWav(kWavPath+"_chi2.wav", 22050);
   }
 }
 

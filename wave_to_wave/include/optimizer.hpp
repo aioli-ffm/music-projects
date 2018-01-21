@@ -79,11 +79,11 @@ std::vector<std::pair<long int, float> > PopulateMaxCriterium(FloatSignal &fs,
 /// OPTIMIZERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This class is the basic implementation of the wav2wav algorithm. Given a signal to be optimized,
-// it provides the "step" method, which, given a smaller signal, can be performed several times
-// to build a reconstruction.
-// It also provides getters for the reconstruction's current wave, sequence and energy, and methods
-// for exporting the wave and the sequence.
+// This class is the general implementation of the wav2wav algorithm. Given a signal to be
+// optimized, it provides the "step" method, which, given a smaller signal, can be performed
+// several times to build a reconstruction.
+// It also provides methods for retrieving/exporting the reconstruction's current wave,
+// sequence and energy.
 class WavToWavOptimizer{
 private:
   const std::string seq_separator_;
@@ -113,6 +113,7 @@ public:
     delete residual_->c;
     delete residual_;
   }
+
   // GETTERS
   std::string getSeqSeparator(){return seq_separator_;}
   FftTransformer* getResidual(){return residual_;}
@@ -121,15 +122,12 @@ public:
     FloatSignal* r = residual_->r;
     return std::inner_product(r->begin(), r->end(), r->begin(), 0.0f);
   }
-  // OPTIMIZATION RESULTS
-
-    // Since the residual=original-reconstruction, it holds: reconstruction = original-residual.
+  // Since the residual=original-reconstruction, it holds: reconstruction = original-residual.
   FloatSignal getReconstruction(){
     FloatSignal reconstruction(original_.begin(), original_size_);
     reconstruction -= *residual_->r;
     return reconstruction;
   }
-
   // Saves the current optimization sequence as an ASCII file with one
   void exportTxtSequence(const std::string path_out){
     std::ofstream out(path_out);
@@ -141,21 +139,26 @@ public:
       throw std::invalid_argument("exportTxtSequence: unable to open output stream "+path_out);
     }
   }
+
   // OPTIMIZATION STEP:
   // Given:
   //  * a patch signal (expected to be shorter than the one given at construction) and its energy
+  //  * a stride>=1 integer that, using the Signal.makeStride method will speed-up the analysis
+  //    reducing its precision and resolution (only 1 every 'stride' samples regarded).
   //  * a criterium function of signature: signal->vec(long int, float), that will receive the
-  //    NON-NORMALIZED cross-correlation between the original and the patch, and is expected to
-  //    return a vector of (position, intensity) tuples taken from that correlation
+  //    NON-NORMALIZED cross-correlation between the strided original and the patch, and is
+  // expected to return a vector of (position, intensity) tuples taken from that correlation
   //  * a string to be appended to the "position||intensity||" line that will be generated for each
   //    output of the criterium
-  // This function performs the cross-correlation between the original given at construction and
-  // the given patch, applies the given optimization criterium to it and, for every output of the
-  // criterium, subtracts the patch from the residual at the given position with the given intensity
-  // and adds the corresponding "position||intensity||extra_info" element to the opt. sequence
-  // vector.
-  // After that, the function returns the output vector of the criterium (can be ignored in most
-  // cases).
+  // This function:
+  //  1. makes strided copies of the patch and the current residual
+  //  2. performs the cross-correlation between the strided patch and current residual
+  //  3. applies the given optimization criterium to the cross-correlation
+  //  4. for every output of the criterium, subtracts the (non-strided) patch from the (non-strided)
+  //     residual at the given position
+  // with the given intensity and adds the corresponding "position||intensity||extra_info" element
+  // to the optimization sequence vector. After that, the function returns the output vector of
+  // the criterium performed for this step (can be ignored in most cases).
   std::vector<std::pair<long int, float> > step(FloatSignal& patch, const float patch_energy,
                                                 const size_t stride,
                                                 std::function<std::vector<std::pair<long int, float>

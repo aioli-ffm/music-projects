@@ -68,9 +68,7 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// NEW MODULE: sequence.hpp Include functionality to reconstruct/alter sequences.
-//             the optimizer should create a Sequence object
-
+// apply ML on the sequence level
 
 // expand the instrument... (takes long)
 
