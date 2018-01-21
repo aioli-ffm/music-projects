@@ -92,7 +92,7 @@ private:
   size_t original_size_;       // given at construction, unchanged
   FftTransformer*  residual_;  // copy of the original at construction, altered by step method
   std::vector<std::string> sequence_; // empty at construction, filled by step method
-  std::map<size_t, OverlapSaveConvolver*> pipelines_; // machinery for performing cross-correlation
+  std::map<std::pair<size_t, size_t>, OverlapSaveConvolver*> pipelines_; // machinery for performing cross-correlation
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   explicit WavToWavOptimizer(FloatSignal &original, const size_t min_chunk_size=2048,
@@ -161,33 +161,30 @@ public:
                                                 std::function<std::vector<std::pair<long int, float>
                                                              >(FloatSignal&)> opt_criterium,
                                                 const std::string extra_info){
-    // 1. make strided patch and residual: start at 0 every k
-    // 2. feed them as before, and optimize
-    // 3. multiply the positions by k at reconstruction
-    // const double kStrideInv = 1.0/stride;
-    // FloatSignal strided_patch([=](long int x){re} std::ceil(kStrideInv*patch.getSize()))
 
+    //
     FloatSignal* s_patch = (FloatSignal*)patch.makeStrided(stride);
     FloatSignal* s_residual = (FloatSignal*)residual_->r->makeStrided(stride);
-    delete s_patch;
-    delete s_residual;
+    const size_t kResidualStridedSize = s_residual->getSize();
 
     // adjust and update metadata before loading the pipeline
-    const size_t kPatchSize = patch.getSize();
+    const size_t kPatchSize = s_patch->getSize();
     const size_t kPaddedSize = std::max(kMinChunkSize_, 2*Pow2Ceil(kPatchSize));
     const float kNormFactor = patch_energy*kPaddedSize;
     // const bool kRepeats = last_pipeline_==kPaddedSize;
     // last_pipeline_ = kPaddedSize;
     // get (or create if didn't exist) the corresponding pipeline, and update the signal spectrum
     OverlapSaveConvolver* convolver = nullptr;
-    auto it = pipelines_.find(kPaddedSize);
+    std::pair<size_t, size_t> key = std::make_pair(kPaddedSize, kResidualStridedSize);
+    auto it = pipelines_.find(key);
     if ( it != pipelines_.end()){ // THERE WAS A PRE-EXISTING PIPELINE, UPDATE IT
       convolver = it->second;
-      convolver->updatePatch(patch, true, false, false); // reverse, normalize, fft_after
-      convolver->updateSignal(*residual_->r, false);
+      convolver->updatePatch(*s_patch, true, false, false); // reverse, normalize, fft_after
+      convolver->updateSignal(*s_residual, false);
     } else{ // THERE WASN'T A PREEXISTING PIPELINE: MAKE A NEW ONE
-      convolver = new OverlapSaveConvolver(*residual_->r, patch, true, false, kPaddedSize);
-      pipelines_.insert(std::pair<size_t, OverlapSaveConvolver*>(kPaddedSize, convolver));
+      convolver = new OverlapSaveConvolver(*s_residual, *s_patch, true, false, kPaddedSize);
+      // pipelines_.insert(std::pair<size_t, OverlapSaveConvolver*>(key, convolver));
+      pipelines_.insert(std::make_pair(key, convolver));
     }
     // at this point we have a pipeline with all the FloatSignals up-to-date. Calculate FFT of
     // both, perform spectral cross-correlation and calculate IFFT of correlation
@@ -196,8 +193,10 @@ public:
     convolver->spectralConv();
     convolver->backwardSignal();
     // extract NON-NORMALIZED conv results as a newly constructed signal
-    FloatSignal result(original_size_+kPatchSize-1);
+    FloatSignal result(kResidualStridedSize+kPatchSize-1);
     convolver->extractConvolvedTo(result);
+    delete s_patch;
+    delete s_residual;
     // apply criterium to extract a list of <POSITION, XCORR_VALUE> changes
     std::vector<std::pair<long int, float> > changes = opt_criterium(result);
     // prepare parallel optimization of all elements in changes
@@ -210,7 +209,7 @@ public:
     #endif
     for (size_t i=0; i<changes_size; ++i){
       auto elt = changes[i];
-      long int position = elt.first-kPatchSize+1;
+      long int position = (elt.first-kPatchSize+1)*stride;
       float factor = elt.second/kNormFactor;
       residual_->r->subtractMultipliedSignal(patch, factor, position);
       #pragma omp critical

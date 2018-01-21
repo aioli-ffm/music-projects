@@ -68,7 +68,9 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// Implement "strided" downsampling.
+// NEW MODULE: sequence.hpp Include functionality to reconstruct/alter sequences.
+//             the optimizer should create a Sequence object
+
 
 // expand the instrument... (takes long)
 

@@ -14,15 +14,15 @@ TEST_CASE("test Chi2Optimizer", "[Chi2Optimizer]"){
   SECTION("optimize regular audio file"){
     FloatSignal pop("pop.wav");
     Chi2Optimizer opt(pop);
-    for(size_t i=0; i<1000; ++i){
-      size_t size = rand.rampInt(40, 10000); // unifReal, normal
+    size_t samplerate = 22050;
+    for(size_t i=0; i<2000; ++i){
+      size_t size = rand.rampInt((size_t)100, samplerate, true); // unifReal, normal
       double k_ratio = rand.rampReal(0.0, 1.0);
-      size_t samplerate = 22050;
       double freq = (40.0* samplerate)/ size;
       size_t stride = 1;
       auto criterium = [=](FloatSignal &fs){return
                                             PopulateMaxCriterium(fs,size,0.1);};
-                                            // SingleMaxCriterium(fs);};
+      //SingleMaxCriterium(fs);};
       opt.chi2step(size, freq, samplerate, k_ratio, stride, criterium, "x");
       if(i%100==0){
         std::cout << "i: " <<  i << ", energy: " << opt.getResidualEnergy()
