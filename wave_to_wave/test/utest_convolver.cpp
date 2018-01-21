@@ -1,17 +1,7 @@
 #include "catch.hpp"
 
-// STL INCLUDES
-#include<string>
-#include<vector>
-#include<list>
-#include<complex>
-#include <cstdlib>
-// SYSTEM-INSTALLED LIBRARIES
-#include <fftw3.h>
-// LOCAL INCLUDES
-#include "../include/helpers.hpp"
-#include "../include/signal.hpp"
-#include "../include/convolver.hpp"
+// LOCAL INCLUDE
+#include "../include/w2w.hpp"
 
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,18 +1,7 @@
 #include "catch.hpp"
 
-// STL INCLUDES
-#include<string>
-#include<vector>
-#include<list>
-#include<complex>
-#include<numeric>
-#include<algorithm>
-// LIB INCLUDES
-#include<sndfile.h>
-// LOCAL INCLUDES
-#include "../include/helpers.hpp"
-#include "../include/signal.hpp"
-
+// LOCAL INCLUDE
+#include "../include/w2w.hpp"
 
 const bool kPlot = false;
 
@@ -41,6 +30,32 @@ TEST_CASE("Testing the AudioSignal default constructor", "[AudioSignal]"){
   AudioSignal<int> as;
   REQUIRE(as.getSize() == 0);
   REQUIRE(as.getData() == nullptr);
+}
+
+TEST_CASE("Testing the stride-down function for all classes", "[AudioSignal]"){
+  const size_t kSigSizes = 100;
+  AudioSignal<int> as([](long int x){return 3*x;}, kSigSizes);
+  FloatSignal fs([](long int x){return 7*x;}, kSigSizes);
+  ComplexSignal cs([](long int x){return std::complex<float>(11*x,13*x);},
+                   kSigSizes);
+  // expect error for stride < 1:
+  REQUIRE_THROWS_AS(as.makeStrided(0), std::invalid_argument);
+  REQUIRE_THROWS_AS(fs.makeStrided(0), std::invalid_argument);
+  REQUIRE_THROWS_AS(cs.makeStrided(0), std::invalid_argument);
+  // check values are correct for some strides
+  for(size_t stride=1; stride<5; ++stride){
+    AudioSignal<int>* as_s = as.makeStrided(stride);
+    FloatSignal*      fs_s = (FloatSignal*)fs.makeStrided(stride);
+    ComplexSignal*    cs_s = (ComplexSignal*)cs.makeStrided(stride);
+    for(size_t i=0, j=0; i<kSigSizes; i+=stride, ++j){
+      REQUIRE(as_s->operator[](j) == 3*i);
+      REQUIRE(fs_s->operator[](j) == 7*i);
+      REQUIRE(cs_s->operator[](j) == std::complex<float>(11*i,13*i));
+    }
+    delete as_s;
+    delete fs_s;
+    delete cs_s;
+  }
 }
 
 TEST_CASE("Testing the FloatSignal class", "[AudioSignal, FloatSignal]"){

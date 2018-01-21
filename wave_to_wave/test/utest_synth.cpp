@@ -2,12 +2,8 @@
 
 // STL INCLUDES
 
-// LOCAL INCLUDES
-#include "../include/signal.hpp"
-#include "../include/synth.hpp"
-#include "../include/convolver.hpp"
-
-
+// LOCAL INCLUDE
+#include "../include/w2w.hpp"
 
 
 ////////////////////////////////////////////////////////////////////////////////

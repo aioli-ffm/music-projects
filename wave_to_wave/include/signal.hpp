@@ -89,6 +89,24 @@ public:
   ~AudioSignal(){
     if(data_!=nullptr){free(data_);}
   }
+
+  // FACTORY: STRIDE DOWN SIGNAL:
+  // returns a copy of the signal holding only indexes for i%stride==0
+  AudioSignal<T>* makeStrided(size_t stride){
+    if(stride<1){
+      throw std::invalid_argument("makeStrided: stride has to be >=1 and was "+
+                                  std::to_string(stride));
+    }
+    const double kStrideInv = 1.0/stride;
+    AudioSignal<T>* strided = new AudioSignal<T>([=](long int x){return data_[0];},
+                                                 std::ceil(kStrideInv*size_));
+    T* data = strided->getData();
+    for(size_t i=0, j=0; i<size_; i+=stride, ++j){
+      data[j] = data_[i];
+    }
+    return strided;
+  }
+
   // GETTERS/SETTERS/PRETTYPRINT
   size_t &getSize(){return size_;}
   const size_t &getSize() const{return size_;}

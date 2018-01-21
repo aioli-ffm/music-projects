@@ -29,8 +29,9 @@
 // LIB INCLUDES
 #include<csound/csound.hpp>
 // LOCAL INCLUDES
-#include "../include/helpers.hpp"
-#include "../include/signal.hpp"
+// #include "../include/helpers.hpp"
+// #include "../include/signal.hpp"
+#include "w2w.hpp"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

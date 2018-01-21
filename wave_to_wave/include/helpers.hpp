@@ -8,13 +8,74 @@
 #include <math.h>
 #include <limits>
 #include <algorithm>
+#include <random>
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MATH
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 static const double DOUBLE_EPSILON = std::numeric_limits<double>::epsilon();
+
+
+// This class is a simple wrapper to the random engine of the C++ STL
+class RandGen{
+private:
+  std::random_device device_;  // only used once to initialise (seed) engine
+  std::mt19937 generator_; // random-number engine used (Mersenne-Twister in this case)
+public:
+  explicit RandGen() : generator_(device_()){}
+  // T can be any int-like type
+  template<typename T>
+  T unifInt(T low_included, T high_included){
+    std::uniform_int_distribution<T> dist(low_included, high_included);
+    return dist(generator_);
+  }
+  // T can be any float-like type
+  template<typename T>
+  T unifReal(T low_included, T high_included){
+    std::uniform_real_distribution<T> dist(low_included, high_included);
+    return dist(generator_);
+  }
+
+  // T can be any int-like type. Being A,B~unif(0,1), and C=max(A,B), The PDF of C is f(x)=2x,
+  // that is, the histogram of N elements will approx a ramp from f(min)=0 to f(max)=2N/(max-min)
+  // If rev=true, C=min(A,B), which will reverse the histogram: f(min)=2N/(max-min), f(max)=0
+  template<typename T>
+  T rampInt(T low_included, T high_included, bool rev=false){
+    std::uniform_int_distribution<T> dist(low_included, high_included);
+    T a = dist(generator_);
+    T b = dist(generator_);
+    return (rev)? std::min(a,b) : std::max(a,b);
+  }
+
+  // T can be any float-like type. See rampInt explanation
+  template<typename T>
+  T rampReal(T low_included, T high_included, bool rev=false){
+    std::uniform_real_distribution<T> dist(low_included, high_included);
+    T a = dist(generator_);
+    T b = dist(generator_);
+    return (rev)? std::min(a,b) : std::max(a,b);
+  }
+
+  // T can be any float-like type (int-like type not directly supported, cast down)
+  template<typename T>
+  T exp(T lambda){
+    std::exponential_distribution<T> dist(lambda);
+    return dist(generator_);
+  }
+  // T can be any float-like type (int-like type not directly supported, cast down)
+  template<typename T>
+  T normal(T mean, T stddev){
+    std::normal_distribution<T> dist(mean, stddev);
+    return dist(generator_);
+  }
+};
+
+template<typename Iter>
+static double Energy(Iter beg, Iter end){
+  return std::inner_product(beg, end, beg, 0.0);
+}
 
 template<typename T>
 static bool abs_compare(T a, T b){return (std::abs(a) < std::abs(b));}

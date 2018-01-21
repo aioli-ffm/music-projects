@@ -1,67 +1,46 @@
 #include "catch.hpp"
 
-// STL INCLUDES
-#include<string>
-#include<vector>
-#include<list>
-#include<complex>
-#include<algorithm>
-// #include <random>
-#include <thread>
-// SYSTEM-INSTALLED LIBRARIES
-#include <fftw3.h>
-// LOCAL INCLUDES
-#include "../include/helpers.hpp"
-#include "../include/signal.hpp"
-#include "../include/optimizer.hpp"
+// LOCAL INCLUDE
+#include "../include/w2w.hpp"
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// TESTING THE CHI2OPTIMIZER CLASS
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("test Chi2Optimizer", "[Chi2Optimizer]"){
+  RandGen rand;
+  // test that with bigger patch crashes.
+  SECTION("optimize regular audio file"){
+    FloatSignal pop("pop.wav");
+    Chi2Optimizer opt(pop);
+    for(size_t i=0; i<1000; ++i){
+      size_t size = rand.rampInt(40, 10000); // unifReal, normal
+      double k_ratio = rand.rampReal(0.0, 1.0);
+      size_t samplerate = 22050;
+      double freq = (40.0* samplerate)/ size;
+      size_t stride = 1;
+      auto criterium = [=](FloatSignal &fs){return
+                                            PopulateMaxCriterium(fs,size,0.1);};
+                                            // SingleMaxCriterium(fs);};
+      opt.chi2step(size, freq, samplerate, k_ratio, stride, criterium, "x");
+      if(i%100==0){
+        std::cout << "i: " <<  i << ", energy: " << opt.getResidualEnergy()
+                  << std::endl;
+      }
+    }
+    opt.getReconstruction().toWav("pop_chi2.wav", 22050);
+  }
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
 /// TESTING THE WAVTOWAVOPTIMIZER CLASS
 ////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::pair<long int, float> > SingleMaxCriterium(FloatSignal &fs,
-                                                              size_t _){
-  std::vector<std::pair<long int, float> > result;
-  float* abs_max = std::max_element(fs.begin(), fs.end(), abs_compare<float>);
-  result.push_back(std::pair<long int,float>(abs_max-fs.begin(), *abs_max));
-  return result;
-};
-
-
-
-
-std::vector<std::pair<long int, float> > PopulateCriterium(FloatSignal &fs,
-                                                           size_t patch_sz,
-                                                           float eps){
-  std::vector<std::pair<long int, float> > result = SingleMaxCriterium(fs, 0);
-  float* fs_begin = fs.begin();
-  float* fs_max = fs_begin+result.at(0).first;
-  // std::cout << "maximum at: " << result.at(0).first << std::endl;
-  float* end = fs.end();
-  for(float* it=fs_max+patch_sz; it<end; it+=patch_sz){
-    it = std::max_element(it, std::min(end, it+patch_sz), abs_compare<float>);
-    if(std::abs(*it)>eps){
-      result.push_back(std::pair<long int, float>(it-fs_begin, *it));
-    }
-  }
-  const size_t kTwicePatchSize = (2*patch_sz)-1;
-  for(float* it=fs_max-(patch_sz-1); it>fs_begin; it-=kTwicePatchSize){
-    it = std::max_element(std::max(it-(patch_sz-1),fs_begin),it,abs_compare<float>);
-    if(std::abs(*it)>eps){
-      result.push_back(std::pair<long int, float>(it-fs_begin, *it));
-    }
-  }
-  // std::cout << "vector:"<< std::endl;
-  // for(const auto& x : result){
-  //   std::cout << x.first << "   " << x.second << std::endl;
-  // }
-  return result;
-};
-
 
 // //
-// std::vector<std::pair<long int, float> > PopulateCriterium(FloatSignal &fs,
+// std::vector<std::pair<long int, float> > PopulateMaxCriterium(FloatSignal &fs,
 //                                                            size_t patch_sz,
 //                                                            float eps=0.001){
 //   std::vector<std::pair<long int, float> > result;
@@ -82,7 +61,7 @@ std::vector<std::pair<long int, float> > PopulateCriterium(FloatSignal &fs,
 //   }
 // };
 
-// TEST_CASE("test optimizer with singlemax criterium", "[optimizer]"){
+// TEST_CASE("test optimization with singlemax criterium", "[optimizer]"){
 
 //   SECTION("test against a simple unit delta with different sizes"){
 //     for(size_t N=1000; N<10000; N+=1000){
@@ -96,7 +75,7 @@ std::vector<std::pair<long int, float> > PopulateCriterium(FloatSignal &fs,
 //         // After exactly N iterations, the delta should optimize the given
 //         // signal with an per-sample error below 0.01%
 //         for(size_t i=0; i<N; ++i){
-//           o.step(patch, kPatchEnergy, [=](FloatSignal &fs){
+//           o.step(patch, kPatchEnergy, 1, [=](FloatSignal &fs){
 //               return SingleMaxCriterium(fs, M);}, "test");
 //         }
 //         REQUIRE(o.getResidualEnergy()/N < 0.0001);
@@ -116,7 +95,7 @@ std::vector<std::pair<long int, float> > PopulateCriterium(FloatSignal &fs,
 //         // After exactly N/2 iterations, the delta should optimize the given
 //         // signal with an per-sample error below 0.01%
 //         for(size_t i=0; i<N/2; ++i){
-//           o.step(patch, kPatchEnergy, [=](FloatSignal &fs){
+//           o.step(patch, kPatchEnergy, 1, [=](FloatSignal &fs){
 //               return SingleMaxCriterium(fs, M);}, "myPatch 1 2 3");
 //         }
 //         REQUIRE(o.getResidualEnergy()/N < 0.0001);
@@ -138,7 +117,7 @@ std::vector<std::pair<long int, float> > PopulateCriterium(FloatSignal &fs,
 //       // After exactly N/2 iterations, the delayed delta should optimize the
 //       // given signal with an per-sample error below 0.01%
 //       for(size_t i=0; i<N/2; ++i){
-//         o.step(patch, kPatchEnergy, [=](FloatSignal &fs){
+//         o.step(patch, kPatchEnergy, 1, [=](FloatSignal &fs){
 //             return SingleMaxCriterium(fs, M);}, "myPatch 1 2 3");
 //       }
 //       REQUIRE(o.getResidualEnergy()/N < 0.0001);
@@ -153,7 +132,7 @@ std::vector<std::pair<long int, float> > PopulateCriterium(FloatSignal &fs,
 
 
 
-TEST_CASE("test optimizer with populate+absmax criterium", "[optimizer]"){
+TEST_CASE("test optimization with populate+absmax criterium", "[optimizer]"){
 
   SECTION("test against a simple unit delta with different sizes"){
     size_t N=1000;
@@ -172,8 +151,8 @@ TEST_CASE("test optimizer with populate+absmax criterium", "[optimizer]"){
         // signal with a per-sample error below 0.01%
         size_t i = 0;
         while(o.getResidualEnergy()/N >0.0001){
-          o.step(patch, kPatchEnergy, [=](FloatSignal &fs){
-              return PopulateCriterium(fs, M, kEpsilon);}, "test");
+          o.step(patch, kPatchEnergy, 1, [=](FloatSignal &fs){
+              return PopulateMaxCriterium(fs, M, kEpsilon);}, "test");
           i++;
         }
         REQUIRE(o.getResidualEnergy()/N <= 0.0001);
@@ -199,8 +178,8 @@ TEST_CASE("test optimizer with populate+absmax criterium", "[optimizer]"){
       // signal with an per-sample error below 0.01%
       size_t i = 0;
       while(o.getResidualEnergy()/N >0.0001){
-        o.step(patch, kPatchEnergy, [=](FloatSignal &fs){
-            return PopulateCriterium(fs, M, kEpsilon);}, "myPatch 1 2 3");
+        o.step(patch, kPatchEnergy, 1, [=](FloatSignal &fs){
+            return PopulateMaxCriterium(fs, M, kEpsilon);}, "myPatch 1 2 3");
         i++;
         // if(i%10==0){
         //   std::cout << "   i=" << i << std::endl;
@@ -214,7 +193,4 @@ TEST_CASE("test optimizer with populate+absmax criterium", "[optimizer]"){
         o.getSeqLength()<<" elements" << std::endl;
     }
   }
-
-
-
 }

@@ -17,12 +17,6 @@
 #ifndef CONVOLVER_H
 #define CONVOLVER_H
 
-// OPEN MP:
-// comment this line to deactivate OpenMP for loop parallelizations, or if you want to debug
-// memory management (valgrind reports OMP normal activity as error).
-// the number is the minimum size that a 'for' loop needs to get sent to OMP (1=>always sent)
-#define WITH_OPENMP_ABOVE 1
-
 // STL INCLUDES
 #include <string.h>
 #include <math.h>
@@ -38,9 +32,8 @@
 #include <memory>
 // SYSTEM-INSTALLED LIBRARIES
 #include <fftw3.h>
-// LOCAL INCLUDES
-#include "helpers.hpp"
-#include "signal.hpp"
+// LOCAL GLOBAL INCLUDE
+#include "w2w.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

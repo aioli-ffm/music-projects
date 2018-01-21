@@ -1,20 +1,7 @@
 #include "catch.hpp"
 
-// STL INCLUDES
-#include<iostream>
-#include<string>
-#include<vector>
-#include<list>
-#include<complex>
-#include<numeric>
-#include<algorithm>
-#include<cmath>
-// LIB INCLUDES
-#include<sndfile.h>
-// LOCAL INCLUDES
-#include "../include/helpers.hpp"
-#include "../include/signal.hpp"
-
+// LOCAL INCLUDE
+#include "../include/w2w.hpp"
 
 
 
@@ -31,7 +18,6 @@ static double Chi2Test(double x, double df){
   double x_half = 0.5*x;
   return 0.5 * pow(x_half, df_half-1) / exp(x_half) / std::tgamma(df_half);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// TESTING THE IMPLEMENTED MATH
@@ -164,3 +150,78 @@ TEST_CASE("IterableToString accepts collections and iterators", "[typecheck]"){
   //     std::cout << "Chi int" << i << std::endl;
   //   }
   // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// TEST_CASE("Test the RandGen methods", "[RandGen]"){
+//   // For this tests, the chi2 method is used: first, sample from the
+//   // distributions and fill the histograms a and b (just different datatypes).
+//   // Then, calculate the chi2 score by the sum of (observed-expected)^2/expected
+//   // for each bin. The likelihood of the observed distribution NOT being the
+//   // expected is the integral from zero to the chi2 score on the chi2 curve
+//   // for degrees_of_freedom = num_of_bins-1.
+//   // **NOTE: the expected chi2score for a unif with B buckets is (B-1).
+//   //   And the expected variance is 2(B-1). Therefore it is unfeasible to
+//   // CONFIRM a randgen just by this means, since the p-value will fluctuate
+//   // largely around an already ambiguous p-value.
+//   RandGen rand;
+//   const size_t kNumBuckets = 50;
+//   const size_t kDegreesFreedom = kNumBuckets-1;
+//   const size_t kNumSamples = kNumBuckets*1000;
+
+//   FloatSignal histogram_a(kNumBuckets);
+//   FloatSignal histogram_b(kNumBuckets);
+//   SECTION("Test unifInt for different types"){
+//     // fill the histograms a and b
+//     for(size_t x=0; x<kNumSamples; ++x){
+//       int r1 = rand.unifInt(0, (int)kNumBuckets-1);
+//       size_t r2 = rand.unifInt((size_t)0, kNumBuckets-1);
+//       histogram_a[r1] += 1;
+//       histogram_b[r2] += 1;
+//     }
+//     // calculate the chi2 score for every histogram
+//     const double kExpectedSamplesPerBucket = ((double)kNumSamples)/kNumBuckets;
+//     histogram_a -= kExpectedSamplesPerBucket;
+//     histogram_b -= kExpectedSamplesPerBucket;
+//     double chi2value_a = Energy(histogram_a.begin(), histogram_a.end()) /
+//       kExpectedSamplesPerBucket;
+//     double chi2value_b = Energy(histogram_b.begin(), histogram_b.end()) /
+//       kExpectedSamplesPerBucket;
+//     // calculate the probability that the observed dist matched the expected one
+//     double chi2integral_a = 0;
+//     double chi2integral_b = 0;
+//     for(double x=0; x<chi2value_a; x+=0.001){
+//       chi2integral_a += Chi2(x, kDegreesFreedom);
+//     }
+//     for(double x=0; x<chi2value_b; x+=0.001){
+//       chi2integral_b += Chi2(x, kDegreesFreedom);
+//     }
+//     chi2integral_a /= 1000.0;
+//     chi2integral_b /= 1000.0;
+//     // require the probability to be ??% (this is the problem, note above)
+//     REQUIRE(1.0-chi2integral_a > 0.90);
+//     REQUIRE(1.0-chi2integral_b > 0.90);
+//   }
+// }

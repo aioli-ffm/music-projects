@@ -23,8 +23,8 @@
 // #include "third_party/matplotlibcpp.h"
 #include <cxxopts.hpp>
 // LOCAL INCLUDES
-#include "include/signal.hpp"
-#include "include/convolver.hpp"
+#include "include/w2w.hpp"
+
 
 int main(int argc,  char** argv){
 
@@ -68,36 +68,17 @@ int main(int argc,  char** argv){
 
 // TODO:
 
-// currently: populate max doesn't work with redundant signals: it converges much faster to 6 digits
-// but then slows down heavily. Trying to find the cause by printing the resiudal (optimizer files)
+// Implement "strided" downsampling.
 
-// populate criterium seems to work OK. try to parallelize it, and put both criteria into another file.
-// add a "counter" to the optimizer, needed to keep track of the total number of elts.
+// expand the instrument... (takes long)
 
-// try to achieve good reconstructions with the wavelets. Do some massive, real-audio tests
+// provide an interface to allow static typecheching of the newly created criteria
 
-// optimization works. Finish implementation of generic optimizer (comment&tidy up), and inherit
-// the class to bind it with the chi2synth. Keep in mind that the env. of the synth is known
-// beforehand, so its energy shall not be calculated! Also, tweak the synth to output an exp if
-// ratio=0 and a truncated gaussian if ratio=1, those should be faster to calculate than chi2.
-
-// once the subclass is finished, empirical test with real audio files. Consider where to implement
-// "scatter" downsampling. Ideally, implement a test that uses pure wavelets for perfect
-// reconstruction of some arbitrary signals.
-
-// After that,
-
+// the chi2 server should include a function that approximates the energy of the signal without having to compute it
+// if the chi uses pure freqs, the opt.step could also be parallelized for different chi freqs.
 
 // http://csoundjournal.com/issue17/gogins_composing_in_cpp.html
 // sudo apt install libcsnd-dev libcsound64-dev
 // explanation CSOUND API: http://write.flossmanuals.net/csound/a-the-csound-api/
 // CSOUND 6 API: http://csound.com/docs/api/modules.html
 // explanation csound plugins: http://write.flossmanuals.net/csound/extending-csound/
-
-// put plotting deps in free funcs, not in signals: plot2D(x.beg(), y.end(), x.beg()) and plot3d...
-// tidy up fft plan class tree (seems verbose).
-// once design and implementation is "stable", utest convolver file (clean MAIN)
-// put the parse into a separate file? clear parser questions.
-// check valgrind... check imports
-// write optimizer. support a lazy dict of {1024: FloatSignal(orig), 2046: orig}
-//                  copies of the original, to be compatible with every patch.

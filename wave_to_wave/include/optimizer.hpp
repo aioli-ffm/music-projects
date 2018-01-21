@@ -21,39 +21,84 @@
 // STL INCLUDES
 #include <map>
 #include <string>
-// LOCAL INCLUDES
-#include "helpers.hpp"
-#include "signal.hpp"
-#include "convolver.hpp"
-#include "synth.hpp"
+// LOCAL INCLUDE
+#include "w2w.hpp"
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+/// CRITERIA
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// FloatSignal* sig = new FloatSignal(padded_patch_size_);
-// std::copy(it, std::min(end_it, it+padded_size_half_), sig->begin()+padded_size_half_);
-// signal_vec_.push_back(new FftTransformer(sig, new ComplexSignal(padded_patch_size_complex_)));
+// Given a signal, expected to be the cross-correlation between two other signals, returns a
+// vector<position, value> of one single element with the values for the absolute maximum
+std::vector<std::pair<long int, float> > SingleMaxCriterium(FloatSignal &fs){
+  std::vector<std::pair<long int, float> > result;
+  float* abs_max = std::max_element(fs.begin(), fs.end(), abs_compare<float>);
+  result.push_back(std::pair<long int,float>(abs_max-fs.begin(), *abs_max));
+  return result;
+};
 
-// This class is a specialized and optimized version of the OverlapSaveConvolver, and is expected
-// to give support to the WavToWavOptimizer with the following operations:
-// 1. constructor(FloatSignal &sig, ComplexSignal &patch). Basically the same as the convolver, but
-// automatically performs the forward FFTs after.
-// 2.
+// Given a signal, expected to be the cross-correlation between a signal (longer) and a patch
+// (shorter), returns a vector<position, value> that holds the absolute maximum, and all the
+// local absolute maxima that finds before and after it,making sure that the distance between
+// two elements of the vector is at least patch_sz, to a void interferences.
+// The name reflects the intention of finding many non-colliding good values for a single
+// correlation, which can greatly speed up the optimization process.
+std::vector<std::pair<long int, float> > PopulateMaxCriterium(FloatSignal &fs,
+                                                           size_t patch_sz,
+                                                           float eps){
+  std::vector<std::pair<long int, float> > result = SingleMaxCriterium(fs);
+  float* fs_begin = fs.begin();
+  float* fs_max = fs_begin+result.at(0).first;
+  // std::cout << "maximum at: " << result.at(0).first << std::endl;
+  float* end = fs.end();
+  for(float* it=fs_max+patch_sz; it<end; it+=patch_sz){
+    it = std::max_element(it, std::min(end, it+patch_sz), abs_compare<float>);
+    if(std::abs(*it)>eps){
+      result.push_back(std::pair<long int, float>(it-fs_begin, *it));
+    }
+  }
+  const size_t kTwicePatchSize = (2*patch_sz)-1;
+  for(float* it=fs_max-(patch_sz-1); it>fs_begin; it-=kTwicePatchSize){
+    it = std::max_element(std::max(it-(patch_sz-1),fs_begin),it,abs_compare<float>);
+    if(std::abs(*it)>eps){
+      result.push_back(std::pair<long int, float>(it-fs_begin, *it));
+    }
+  }
+  // std::cout << "vector:"<< std::endl;
+  // for(const auto& x : result){
+  //   std::cout << x.first << "   " << x.second << std::endl;
+  // }
+  return result;
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// OPTIMIZERS
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// This class is the basic implementation of the wav2wav algorithm. Given a signal to be optimized,
+// it provides the "step" method, which, given a smaller signal, can be performed several times
+// to build a reconstruction.
+// It also provides getters for the reconstruction's current wave, sequence and energy, and methods
+// for exporting the wave and the sequence.
 class WavToWavOptimizer{
 private:
-  // size_t last_pipeline_ = 0;
-  const size_t kMinChunkSize_;
-  FloatSignal& original_;
-  size_t original_size_;
-  FftTransformer*  residual_;
-  // std::stringstream sequence_;
-  std::vector<std::string> sequence_;
-  std::map<size_t, OverlapSaveConvolver*> pipelines_;
-  //
-  // FftTransformer optimized_;
+  const std::string seq_separator_;
+  const size_t kMinChunkSize_; // given at construction, unchanged
+  FloatSignal& original_;      // given at construction, unchanged
+  size_t original_size_;       // given at construction, unchanged
+  FftTransformer*  residual_;  // copy of the original at construction, altered by step method
+  std::vector<std::string> sequence_; // empty at construction, filled by step method
+  std::map<size_t, OverlapSaveConvolver*> pipelines_; // machinery for performing cross-correlation
 public:
-  explicit WavToWavOptimizer(FloatSignal &original, const size_t min_chunk_size=2048)
-    : kMinChunkSize_(min_chunk_size),
+  // CONSTRUCTOR AND DESTRUCTOR
+  explicit WavToWavOptimizer(FloatSignal &original, const size_t min_chunk_size=2048,
+                             const std::string seq_separator="||")
+    : seq_separator_(seq_separator),
+      kMinChunkSize_(min_chunk_size),
       original_(original),
       original_size_(original.getSize()),
       residual_(new FftTransformer(new FloatSignal(original.begin(), original_size_),
@@ -68,11 +113,65 @@ public:
     delete residual_->c;
     delete residual_;
   }
+  // GETTERS
+  std::string getSeqSeparator(){return seq_separator_;}
+  FftTransformer* getResidual(){return residual_;}
+  size_t getSeqLength(){return sequence_.size();}
+  float getResidualEnergy(){
+    FloatSignal* r = residual_->r;
+    return std::inner_product(r->begin(), r->end(), r->begin(), 0.0f);
+  }
+  // OPTIMIZATION RESULTS
 
+    // Since the residual=original-reconstruction, it holds: reconstruction = original-residual.
+  FloatSignal getReconstruction(){
+    FloatSignal reconstruction(original_.begin(), original_size_);
+    reconstruction -= *residual_->r;
+    return reconstruction;
+  }
+
+  // Saves the current optimization sequence as an ASCII file with one
+  void exportTxtSequence(const std::string path_out){
+    std::ofstream out(path_out);
+    if (out.is_open()){
+      for(const std::string& s : sequence_){out << s << std::endl;}
+      out.close();
+    }
+    else{
+      throw std::invalid_argument("exportTxtSequence: unable to open output stream "+path_out);
+    }
+  }
+  // OPTIMIZATION STEP:
+  // Given:
+  //  * a patch signal (expected to be shorter than the one given at construction) and its energy
+  //  * a criterium function of signature: signal->vec(long int, float), that will receive the
+  //    NON-NORMALIZED cross-correlation between the original and the patch, and is expected to
+  //    return a vector of (position, intensity) tuples taken from that correlation
+  //  * a string to be appended to the "position||intensity||" line that will be generated for each
+  //    output of the criterium
+  // This function performs the cross-correlation between the original given at construction and
+  // the given patch, applies the given optimization criterium to it and, for every output of the
+  // criterium, subtracts the patch from the residual at the given position with the given intensity
+  // and adds the corresponding "position||intensity||extra_info" element to the opt. sequence
+  // vector.
+  // After that, the function returns the output vector of the criterium (can be ignored in most
+  // cases).
   std::vector<std::pair<long int, float> > step(FloatSignal& patch, const float patch_energy,
+                                                const size_t stride,
                                                 std::function<std::vector<std::pair<long int, float>
-                                                >(FloatSignal&)> opt_criterium,
-                                                const std::string seq_notes){
+                                                             >(FloatSignal&)> opt_criterium,
+                                                const std::string extra_info){
+    // 1. make strided patch and residual: start at 0 every k
+    // 2. feed them as before, and optimize
+    // 3. multiply the positions by k at reconstruction
+    // const double kStrideInv = 1.0/stride;
+    // FloatSignal strided_patch([=](long int x){re} std::ceil(kStrideInv*patch.getSize()))
+
+    FloatSignal* s_patch = (FloatSignal*)patch.makeStrided(stride);
+    FloatSignal* s_residual = (FloatSignal*)residual_->r->makeStrided(stride);
+    delete s_patch;
+    delete s_residual;
+
     // adjust and update metadata before loading the pipeline
     const size_t kPatchSize = patch.getSize();
     const size_t kPaddedSize = std::max(kMinChunkSize_, 2*Pow2Ceil(kPatchSize));
@@ -101,48 +200,58 @@ public:
     convolver->extractConvolvedTo(result);
     // apply criterium to extract a list of <POSITION, XCORR_VALUE> changes
     std::vector<std::pair<long int, float> > changes = opt_criterium(result);
-    // subtract the changes returned by the criterium to the residual signal
-    for (const auto& elt : changes){
+    // prepare parallel optimization of all elements in changes
+    const size_t changes_size = changes.size();
+    const size_t seq_size = sequence_.size();
+    sequence_.reserve(changes_size);
+    // // subtract the changes returned by the criterium to the residual signal
+    #ifdef WITH_OPENMP_ABOVE
+    #pragma omp parallel for schedule(static, WITH_OPENMP_ABOVE)
+    #endif
+    for (size_t i=0; i<changes_size; ++i){
+      auto elt = changes[i];
       long int position = elt.first-kPatchSize+1;
       float factor = elt.second/kNormFactor;
       residual_->r->subtractMultipliedSignal(patch, factor, position);
-      sequence_.push_back(std::to_string(position)+" "+std::to_string(factor)+" "+seq_notes);
+      #pragma omp critical
+      sequence_.push_back(std::to_string(position)+seq_separator_+std::to_string(factor)+
+                          seq_separator_+extra_info);
     }
     return changes;
   }
-
-  FftTransformer* getResidual(){return residual_;}
-
-  size_t getSeqLength(){
-    return sequence_.size();
-  }
-
-  float getResidualEnergy(){
-    FloatSignal* r = residual_->r;
-    return std::inner_product(r->begin(), r->end(), r->begin(), 0.0f);
-  }
-  //
-  void exportReconstruction(const std::string wav_export_path){
-    FloatSignal out(original_.begin(), original_size_);
-    out -= *residual_->r;
-    out.toWav(wav_export_path, 22050);
-  }
-  //
-  void exportTxtSequence(const std::string path_out){
-    std::ofstream out(path_out);
-    if (out.is_open()){
-      for(const std::string& s : sequence_){
-        out << s << std::endl;
-      }
-      // out << sequence_.rdbuf();
-      out.close();
-    }
-    else{
-      throw std::invalid_argument("exportTxtSequence: unable to open output stream "+path_out);
-    }
-  }
-
 };
+
+
+
+
+// This class specializes the WavToWavOptimizer for the specific case in which the patches used
+// to perform the "step" method are always outputs of the Chi2Synth.
+class Chi2Optimizer : public WavToWavOptimizer {
+private:
+  Chi2Server chi2server_;
+public:
+  explicit Chi2Optimizer(FloatSignal &original, const size_t min_chunk_size=2048,
+                          const std::string seq_separator="||")
+    : WavToWavOptimizer(original, min_chunk_size, seq_separator){}
+
+  // This method wraps the "step" method: instead of receiving a FloatSignal as a patch, generates
+  // one with the "Chi2Synth" given its size in samples, freq in Hz and samplerate (samples/second).
+  // The env_ratio is expected to be between 0 (exponential) and 1 (quasi-gaussian).
+  std::vector<std::pair<long int, float> > chi2step(const size_t size, const double freq,
+                                                    const size_t samplerate, const double env_ratio,
+                                                    const size_t stride,
+                                                    std::function<std::vector<std::pair<long int,
+                                                       float> >(FloatSignal&)> opt_criterium,
+                                                    const std::string extra_info){
+    Chi2Synth patch(chi2server_, size, freq, samplerate, env_ratio, 1.5, 100);
+    float patch_energy = Energy(patch.begin(), patch.end());
+    return step(patch, patch_energy, stride, opt_criterium, extra_info);
+
+  }
+};
+
+
+
 
 
 #endif
