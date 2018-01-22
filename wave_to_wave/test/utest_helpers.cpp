@@ -20,6 +20,24 @@ static double Chi2Test(double x, double df){
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// STRING PROCESSING
+////////////////////////////////////////////////////////////////////////////////
+TEST_CASE("Testing Split function", "[helpers, split]"){
+  std::string s1 = "a|b c||d  e|||f   g||||h    i";
+  std::vector<std::string> v1 = Split(s1, "||");
+  std::vector<std::string> v2 = Split(s1, "  ");
+  std::vector<std::string> v1_test {"a|b c", "d  e", "|f   g", "h    i"};
+  std::vector<std::string> v2_test {"a|b c||d", "e|||f", " g||||h", "i"};
+  REQUIRE(v1.size() == 4);
+  REQUIRE(v2.size() == 4);
+  for(size_t i=0; i<4; ++i){
+    REQUIRE(v1[i] == v1_test[i]);
+    REQUIRE(v2[i] == v2_test[i]);
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 /// TESTING THE IMPLEMENTED MATH
 ////////////////////////////////////////////////////////////////////////////////
 

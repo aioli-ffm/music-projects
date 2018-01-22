@@ -20,59 +20,36 @@
 #include <string>
 #include <iostream>
 // LOCAL THIRD-PARTY
-// #include "third_party/matplotlibcpp.h"
-#include <cxxopts.hpp>
+
 // LOCAL INCLUDES
 #include "include/w2w.hpp"
 
 
-int main(int argc,  char** argv){
-
-  // DEFINE AND PARSE INPUT ARGUMENTS
-  cxxopts::Options input_parser("WAVE TO WAVE", "Reconstructs a wave by combining others");
-  //
-  input_parser.add_options()
-    ("z,debug-parser", "If true, shows all the flag values",
-     cxxopts::value<bool>()->default_value("false"))
-    ("h,help", "Show help to use the WAVE TO WAVE application",
-     cxxopts::value<bool>()->default_value("false"))
-    ("x,create-wisdom", "Create wisdom file to make FFTW run faster (do just once) and export to this path.",
-     cxxopts::value<std::string>()->default_value(""))
-    ("y,import-wisdom", "Path to a valid FFTW wisdom file to be loaded",
-     cxxopts::value<std::string>()->default_value(""))
-    ("i,num-iterations", "Number of iterations to be performed by the optimizer",
-     cxxopts::value<size_t>()->default_value("10"));
-  //
-  cxxopts::ParseResult parsed_args = input_parser.parse(argc, argv);
-  const bool kDebugParser = parsed_args["z"].as<bool>();
-  const bool kHelp = parsed_args["h"].as<bool>();
-  const std::string kCreateWisdom = parsed_args["x"].as<std::string>();
-  const std::string kImportWisdom = parsed_args["y"].as<std::string>();
-  const size_t kIterations = parsed_args["i"].as<size_t>();
-  //
-  if(kHelp){std::cout << "Here could be some helpful documentation." << std::endl;}
-  if(kDebugParser){
-    std::cout << "Input parser arguments:" << std::endl;
-    std::cout << "z,debug-parser --> " << kDebugParser << std::endl;
-    std::cout << "x,create-wisdom --> " << kCreateWisdom << std::endl;
-    std::cout << "y,import-wisdom --> " << kImportWisdom << std::endl;
-    std::cout << "i,num-iterations --> " << kIterations << std::endl;
-  }
-  //
-  if(!kCreateWisdom.empty()){MakeAndExportFftwWisdom(kCreateWisdom, 0, 29);}
 
 
+int main (int argc, char **argv){
 
+  std::cout << "he wo"<< argc << argv[0] << std::endl;
   return 0;
 }
 
+
 // TODO:
 
-// apply ML on the sequence level
+// sequence constructor and asString methods seem to work. Utest them. Finish the addToSignal method and integrate it into the optimizer (and utest it): it should: 1) host the signal object and use its functionality. 2) feature a new constructor, that does the same as the regular one, but also subtracts the seq from the residual.
 
-// expand the instrument... (takes long)
+// With that it should be possible to serialize the sequence better: easily resume optimizations, split them across sessions, devices...
 
-// provide an interface to allow static typecheching of the newly created criteria
+// *  provide an interface to allow static typecheching of the newly created criteria
+// * finish the input parser for the flags.
+// * comment, utest, valgrind, license, tidy up.
+
+// that would be the end of the core API: helpers, signals, convolver, optimizer, sequencer, inputparser.
+// The "instruments" and "meta" APIs would build on top of it, and are the actual artistic work
+
+
+// OPTIMIZATIONS:
+// given a stride, the stride_down function should be ~exp(1/stride), so that the level of compression and speedup remains but the artifacts (hopefully) go away. compute it once for the residual, and pick the beginning for the patch (to avoid desynch).
 
 // the chi2 server should include a function that approximates the energy of the signal without having to compute it
 // if the chi uses pure freqs, the opt.step could also be parallelized for different chi freqs.

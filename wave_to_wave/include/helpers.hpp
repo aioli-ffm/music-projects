@@ -1,3 +1,19 @@
+// Copyright (C) 2017 Andres Fernandez (https://github.com/andres-fr)
+
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
 #ifndef HELPERS_H
 #define HELPERS_H
 
@@ -290,6 +306,25 @@ void CheckWithinRange(const size_t idx, const size_t min_allowed, const size_t m
 }
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// STRING PROCESSING
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Given a text and a separator strings, runs over the text removing the separators and adding the
+// resulting chunks into a vector, which is returned. Empty tokens are ignored
+// Split("a|b c||d  e|||f   g||||h    i", "||") returns ["a|b c", "d  e", "|f   g", "h    i"]
+std::vector<std::string> Split(const std::string &text, const std::string sep){
+  const size_t kSepSize = sep.size();
+  std::vector<std::string> tokens;
+  std::size_t start = 0, end = 0;
+  while ((end = text.find(sep, start)) != std::string::npos) {
+    if (end != start){tokens.push_back(text.substr(start, end - start));}
+    start = end + kSepSize;
+  }
+  if (end != start) {tokens.push_back(text.substr(start));}
+  return tokens;
+}
 
 
 

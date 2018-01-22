@@ -16,7 +16,7 @@ TEST_CASE("Testing plot", "[AudioSignal]"){
   FloatSignal fss(sin_gen2, 44100);
   ComplexSignal css(spiral_gen, 44100);
 
-  FloatSignal pop("pop.wav");
+  FloatSignal pop("pop_test.wav");
   FloatSignal pop_short(pop.getData(), 22050);
   if(kPlot){
     fss.plot("a plot of 2.34*sin(x) between 0s and 1s", 44100);

@@ -202,7 +202,7 @@ public:
   }
 
   // GETTERS
-  const size_t getPaddedSize() const {return padded_patch_size_;}
+  size_t getPaddedSize() const {return padded_patch_size_;}
   const FftTransformer* getPatch() const {return patch_;}
   const std::vector<FftTransformer*>& getSignalVec() const {return signal_vec_;}
 

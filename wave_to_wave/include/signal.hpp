@@ -21,8 +21,10 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <functional>
 #include <complex>
 #include <cstdlib>
+//THIRD-PARTY INCLUDES
 #include<sndfile.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +49,7 @@ protected:
   // "other" with respect to "this" (t=13 means that other[0] will be applied to this[13]),
   // this function adjust the endpoints to match the desired t, and returns the optimal loop size.
   // Example: see addSignal and mulSignal.
-  const size_t _prepareSignalOpInPlace(T* &begin_this, T* &begin_other,
+  size_t _prepareSignalOpInPlace(T* &begin_this, T* &begin_other,
                                        const T* end_other, const int t) const {
     // if t>0, advance this.begin(). If t<0, advance other.begin()
     if(t>0){
@@ -98,8 +100,7 @@ public:
                                   std::to_string(stride));
     }
     const double kStrideInv = 1.0/stride;
-    AudioSignal<T>* strided = new AudioSignal<T>([=](long int x){return data_[0];},
-                                                 std::ceil(kStrideInv*size_));
+    AudioSignal<T>* strided = new AudioSignal<T>(std::ceil(kStrideInv*size_));
     T* data = strided->getData();
     for(size_t i=0, j=0; i<size_; i+=stride, ++j){
       data[j] = data_[i];

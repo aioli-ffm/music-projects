@@ -30,5 +30,6 @@
 #include "convolver.hpp"
 #include "synth.hpp"
 #include "optimizer.hpp"
+#include "sequence.hpp"
 
 #endif
