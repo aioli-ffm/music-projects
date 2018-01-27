@@ -20,6 +20,9 @@
 // STL INCLUDES
 #include <sstream>
 #include <string>
+#include <vector>
+#include <map>
+#include <deque>
 #include <stdexcept>
 #include <math.h>
 #include <limits>
@@ -206,27 +209,36 @@ static double Chi2(double x, double df){
 // Given a container or its beginning and end iterables, converts the container to a string
 // of the form {a, b, c} (like a basic version of Python's __str__).
 template<typename T>
-std::string IterableToString(T it, T end){
+std::string IterableToString(T it, T end,
+                             const std::string before="{",
+                             const std::string after="}",
+                             const std::string separator=", "){
   std::stringstream ss;
-  ss << "{";
+  ss << before;
   bool first = true;
   for (; it!=end; ++it){
     if (first){
       ss << *it;
       first = false;
     } else {
-      ss << ", " << *it;
+      ss << separator << *it;
     }
-  } ss << "}";
+  } ss << after;
   return ss.str();
 }
 template <class C> // Overload to directly accept any Collection like vector<int>
-std::string IterableToString(const C &c){
-  return IterableToString(c.begin(), c.end());
+std::string IterableToString(const C &c,
+                             const std::string before="{",
+                             const std::string after="}",
+                             const std::string separator=", "){
+  return IterableToString(c.begin(), c.end(), before, after, separator);
 }
 template <class T> // Overload to directly accept initializer_lists
-std::string IterableToString(const std::initializer_list<T> c){
-  return IterableToString(c.begin(), c.end());
+std::string IterableToString(const std::initializer_list<T> c,
+                             const std::string before="{",
+                             const std::string after="}",
+                             const std::string separator=", "){
+  return IterableToString(c.begin(), c.end(), before, after, separator);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@ TEST_CASE("test Chi2Optimizer", "[Chi2Optimizer]"){
     FloatSignal pop(kWavPath);
     Chi2Optimizer opt(pop);
     const size_t kSamplerate = 22050;
-    const size_t kStride = 1;
+    const size_t kStride = 10;
     for(size_t i=0; i<500; ++i){
       size_t size = rand.rampInt((size_t)100, kSamplerate, true); // unifReal, normal
       double k_ratio = rand.rampReal(0.0, 1.0);

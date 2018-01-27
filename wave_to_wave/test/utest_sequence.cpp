@@ -10,9 +10,9 @@
 
 TEST_CASE("testing the Sequence class", "[Sequence]"){
   SECTION("test empty constructor"){
-    Sequence seq;
-    Sequence seq2("test_sequence.txt");
-    std::cout << seq.asString() << std::endl;
+    Sequence seq("test_sequence.txt");
+    std::cout << seq.asString({{1,"hello"}, {3,"bye"}}) << std::endl;
+    std::cout << std::stof("123.456aaaa") << std::endl;
   }
   SECTION("test"){
     REQUIRE(1==1);
@@ -20,3 +20,5 @@ TEST_CASE("testing the Sequence class", "[Sequence]"){
   }
     
 }
+
+

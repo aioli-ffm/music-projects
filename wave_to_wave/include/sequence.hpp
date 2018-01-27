@@ -29,6 +29,11 @@
 #include "w2w.hpp"
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class Sequence {
 private:
   std::string separator_ = " ";
@@ -75,17 +80,21 @@ public:
           it += kSepSize;
           token_beg = it;
         }
-      } // finish loop for characters in line
+      } // finish loop for characters in line adding the last token found
+      line_tokens.push_back(std::string(token_beg, end));
       // try to add the elements to the data_ vector without exceptions
       // If anything goes wrong, warn and ignore line
       try {
-        const long int kDelay = std::stol(line_tokens.front());
+        size_t idx = -1; // used by string->number conversors to tell where they stopped parsing
+        const long int kDelay = std::stol(line_tokens.front(), &idx);
+        CheckAllEqual({idx, line_tokens.front().size()}, "malformed delay!");
         line_tokens.pop_front();
-        const float kNorm = std::stof(line_tokens.front());
+        const float kNorm = std::stof(line_tokens.front(), &idx);
+        CheckAllEqual({idx, line_tokens.front().size()}, "malformed norm factor!");
         line_tokens.pop_front();
         data_.push_back(std::make_tuple(kDelay, kNorm, line_tokens));
       } catch (...) {
-        std::cout << "[Sequence]Ignored malformed line ==>" << line << std::endl;
+        std::cout << "[Sequence]Ignored malformed line: " << line << std::endl;
       }
     end_of_char_loop:;
     } // finish loop for lines in file
@@ -96,17 +105,36 @@ public:
     return data_;
   }
 
-  std::string asString(){
+
+  // comments NOT passed by reference (because it is destructed)
+  // Given following contents: (123 0.123 1 2 3 4), (456 0.456 a b c d), (789 0.789 1a 2b 3c 4d)
+  // calling asString({{1,"hello"}, {3,"bye"}}) with separator=" " and comment_marker="#"
+  // will produce the following string:
+  //   # hello
+  //   123 0.123 1 2 3 4
+  //   456 0.456 a b c d
+  //   # bye
+  //   789 0.789 1a 2b 3c 4d
+  std::string asString(std::deque<std::pair<size_t, std::string> > comments){
+    std::sort(begin(comments), end(comments), // sort by size_t
+              [](auto const &t1, auto const &t2) {return std::get<0>(t1) < std::get<0>(t2);});
     std::stringstream result;
+    size_t i=1;
     for(auto const& line : data_){
+      if(std::get<0>(comments[0])==i){
+        result << comment_marker_ << " " << std::get<1>(comments[0]) << std::endl;
+        comments.pop_front();
+      }
       result << std::get<0>(line) << separator_ << std::get<1>(line);
       for(auto const& elt : std::get<2>(line)){
         result << separator_ << elt;
       }
       result << std::endl;
+      i++;
     }
     return result.str();
   }
+  std::string asString(){return asString({});} // overload for empty input
 
 
   // to signal
