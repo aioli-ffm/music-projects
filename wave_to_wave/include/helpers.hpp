@@ -340,4 +340,39 @@ std::vector<std::string> Split(const std::string &text, const std::string sep){
 
 
 
+
+// given a string in the form <token1><separator><token2> ... <comment_marker><comments>...
+// returns an iterator of strings with the found tokens
+std::deque<std::string> ParseLine(std::string line,
+                                  std::string separator=" ",
+                                  std::string comment_marker="#"){
+  // variables needed
+  std::string::iterator it = line.begin();
+  std::string::iterator end = line.end();
+  const size_t kSepSize = separator.size();
+  const size_t kCommentSize = comment_marker.size();
+  // first remove the comments by (verbose but fast) pattern matching
+  std::string::iterator comm_it = it+line.find_first_of(comment_marker[0]);
+  if(end-comm_it>=kCommentSize &&
+     std::equal(comm_it, comm_it+kCommentSize, comment_marker.begin(), comment_marker.end())){
+    end = comm_it;
+  }
+  // Then find and remove separators. The rest are the tokens
+  std::deque<std::string> line_tokens;
+  std::string::iterator token_beg = it;
+  for(std::string::iterator sep_beg=separator.begin(), sep_end=separator.end(); it<end; ++it){
+    if(*it == separator[0] &&
+       end-it >= kSepSize  &&
+       std::equal(it, it+kSepSize, sep_beg, sep_end)){
+      line_tokens.push_back(std::string(token_beg, it));
+      it += kSepSize;
+      token_beg = it;
+    }
+  } // finish loop for characters in line adding the last token found
+  if(token_beg<end){line_tokens.push_back(std::string(token_beg, end));}
+  return line_tokens;
+}
+
+
+
 #endif
