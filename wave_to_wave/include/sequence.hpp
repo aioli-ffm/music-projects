@@ -58,20 +58,21 @@ public:
       const size_t kLineSize = line.size();
       if(kLineSize<1){continue;}
       std::string::iterator token_beg = line.begin();
-      std::string::iterator it = line.begin();
       std::string::iterator end = line.end();
-      std::string::iterator comm_beg = comment_marker_.begin();
-      std::string::iterator comm_end = comment_marker_.end();
-      std::string::iterator sep_beg = separator_.begin();
-      std::string::iterator sep_end = separator_.end();
-      // loop runs for every character in the line
-      for(; it<end; ++it){
-        // search for comment marker: if found, finish processing the line
+      // first remove the comments by pattern matching
+      for(std::string::iterator it = line.begin(),
+            comm_beg = comment_marker_.begin(),
+            comm_end = comment_marker_.end(); it<end; ++it){
         if(*it == comment_marker_[0] &&
            end-it >= kCommentSize   &&
            std::equal(it, it+kCommentSize, comm_beg, comm_end)){
-          goto end_of_char_loop; // dijkstra? who?
+          end = it;
         }
+      }
+      // Then find and remove separators. The rest are the line tokens
+      for(std::string::iterator it = line.begin(),
+            sep_beg = separator_.begin(),
+            sep_end = separator_.end(); it<end; ++it){
         // search for separator marker, and add new token if found
         if(*it == separator_[0] &&
            end-it >= kSepSize  &&
@@ -81,22 +82,23 @@ public:
           token_beg = it;
         }
       } // finish loop for characters in line adding the last token found
-      line_tokens.push_back(std::string(token_beg, end));
+      if(token_beg<end){line_tokens.push_back(std::string(token_beg, end));}
       // try to add the elements to the data_ vector without exceptions
       // If anything goes wrong, warn and ignore line
-      try {
-        size_t idx = -1; // used by string->number conversors to tell where they stopped parsing
-        const long int kDelay = std::stol(line_tokens.front(), &idx);
-        CheckAllEqual({idx, line_tokens.front().size()}, "malformed delay!");
-        line_tokens.pop_front();
-        const float kNorm = std::stof(line_tokens.front(), &idx);
-        CheckAllEqual({idx, line_tokens.front().size()}, "malformed norm factor!");
-        line_tokens.pop_front();
-        data_.push_back(std::make_tuple(kDelay, kNorm, line_tokens));
-      } catch (...) {
-        std::cout << "[Sequence]Ignored malformed line: " << line << std::endl;
+      if(line_tokens.size()>0){
+        try {
+          size_t idx = -1; // used by string->number conversors to tell where they stopped parsing
+          const long int kDelay = std::stol(line_tokens.front(), &idx);
+          CheckAllEqual({idx, line_tokens.front().size()}, "malformed delay!");
+          line_tokens.pop_front();
+          const float kNorm = std::stof(line_tokens.front(), &idx);
+          CheckAllEqual({idx, line_tokens.front().size()}, "malformed norm factor!");
+          line_tokens.pop_front();
+          data_.push_back(std::make_tuple(kDelay, kNorm, line_tokens));
+        } catch (...) {
+          std::cout << "[Sequence]Ignored malformed line: " << line << std::endl;
+        }
       }
-    end_of_char_loop:;
     } // finish loop for lines in file
     in.close(); // end of constructor
   }
@@ -107,14 +109,14 @@ public:
 
 
   // comments NOT passed by reference (because it is destructed)
-  // Given following contents: (123 0.123 1 2 3 4), (456 0.456 a b c d), (789 0.789 1a 2b 3c 4d)
-  // calling asString({{1,"hello"}, {3,"bye"}}) with separator=" " and comment_marker="#"
-  // will produce the following string:
+  // Given following seq: (123,0.123,{"1","2","3"}),(456,0.456,{"a"}),(789,0.789,{"asdf","fdsa"})
+  // with separator=" " and comment_marker="#", calling seq.asString({{1,"hello"}, {3,"bye"}}) will
+  // produce the following string:
   //   # hello
-  //   123 0.123 1 2 3 4
-  //   456 0.456 a b c d
+  //   123 0.123 1 2
+  //   456 0.456 a
   //   # bye
-  //   789 0.789 1a 2b 3c 4d
+  //   789 0.789 asdf fdsa
   std::string asString(std::deque<std::pair<size_t, std::string> > comments){
     std::sort(begin(comments), end(comments), // sort by size_t
               [](auto const &t1, auto const &t2) {return std::get<0>(t1) < std::get<0>(t2);});
