@@ -28,6 +28,8 @@
 #include <limits>
 #include <algorithm>
 #include <random>
+#include <chrono> // `std::chrono::` functions and classes, e.g. std::chrono::milliseconds
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,124 +203,6 @@ static double Chi2(double x, double df){
 // }
 
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// TYPECHECK/ANTIBUGGING
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Given a container or its beginning and end iterables, converts the container to a string
-// of the form {a, b, c} (like a basic version of Python's __str__).
-template<typename T>
-std::string IterableToString(T it, T end,
-                             const std::string before="{",
-                             const std::string after="}",
-                             const std::string separator=", "){
-  std::stringstream ss;
-  ss << before;
-  bool first = true;
-  for (; it!=end; ++it){
-    if (first){
-      ss << *it;
-      first = false;
-    } else {
-      ss << separator << *it;
-    }
-  } ss << after;
-  return ss.str();
-}
-template <class C> // Overload to directly accept any Collection like vector<int>
-std::string IterableToString(const C &c,
-                             const std::string before="{",
-                             const std::string after="}",
-                             const std::string separator=", "){
-  return IterableToString(c.begin(), c.end(), before, after, separator);
-}
-template <class T> // Overload to directly accept initializer_lists
-std::string IterableToString(const std::initializer_list<T> c,
-                             const std::string before="{",
-                             const std::string after="}",
-                             const std::string separator=", "){
-  return IterableToString(c.begin(), c.end(), before, after, separator);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Raises an exception if complex_size!=(real_size/2+1), being "/" an integer division.
-void CheckRealComplexRatio(const size_t real_size, const size_t complex_size,
-                           const std::string func_name){
-  if(complex_size!=(real_size/2+1)){
-    throw std::runtime_error(std::string("[ERROR] ") + func_name +
-                             ": size of ComplexSignal must equal size(FloatSignal)/2+1. " +
-                             " Sizes were (float, complex): " +
-                             IterableToString({real_size, complex_size}));
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// Given a container or its beginning and end iterables, checks wether all values contained in the
-// iterable are equal and raises an exception if not. Usage example:
-// CheckAllEqual({a.size_, b.size_, result.size_},
-//                 "SpectralCorrelation: all sizes must be equal and are");
-template<class I>
-void CheckAllEqual(const I beg, const I end, const std::string &message){
-  I it = beg;
-  bool all_eq = true;
-  auto last = (it==end)? end : std::prev(end);
-  for(;it!=last; ++it){
-    all_eq &= (*(it)==*(std::next(it)));
-    if (!all_eq) {
-      throw std::runtime_error(std::string("[ERROR] ") + message+" "+IterableToString(beg, end));
-    }
-  }
-}
-template <class C> // Overload to directly accept any Collection like vector<int>
-void CheckAllEqual(const C &c, const std::string message){
-  CheckAllEqual(c.begin(), c.end(), message);
-}
-template <class T> // Overload to directly accept initializer_lists
-void CheckAllEqual(const std::initializer_list<T> c, const std::string message){
-  CheckAllEqual(c.begin(), c.end(), message);
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Raises an exception if complex_size!=(real_size/2+1), being "/" an integer division.
-void CheckRealComplexRatio(const size_t real_size, const size_t complex_size,
-                           const std::string func_name="CheckRealComplexRatio");
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Abstract function that performs a comparation between any 2 elements, and if the comparation
-// returns a truthy value raises an exception with the given message.
-template <class T, class Functor>
-void CheckTwoElements(const T a, const T b, const Functor &binary_predicate,
-                        const std::string message){
-  if(binary_predicate(a,b)){
-    throw std::runtime_error(std::string("[ERROR] ") + message + " " + IterableToString({a, b}));
-  }
-}
-
-
-// Raises an exception with the given message if a>b.
-void CheckLessEqual(const size_t a, const size_t b, const std::string message){
-  CheckTwoElements(a, b, [](const size_t a, const size_t b){return a>b;},  message);
-}
-
-
-void CheckWithinRange(const size_t idx, const size_t min_allowed, const size_t max_allowed,
-                      const std::string func_name){
-  CheckTwoElements(idx, min_allowed, [](const size_t a, const size_t b){return a<b;},
-                   func_name+" index cannot be smaller than minimum allowed!");
-  CheckTwoElements(idx, max_allowed, [](const size_t a, const size_t b){return a>b;},
-                   func_name+" index cannot be bigger than maximum allowed!");
-}
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// STRING PROCESSING
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,6 +256,160 @@ std::deque<std::string> ParseLine(std::string line,
   if(token_beg<end){line_tokens.push_back(std::string(token_beg, end));}
   return line_tokens;
 }
+
+// Given a container or its beginning and end iterables, converts the container to a string
+// of the form {a, b, c} (like a basic version of Python's __str__).
+template<typename T>
+std::string IterableToString(T it, T end,
+                             const std::string before="{",
+                             const std::string after="}",
+                             const std::string separator=", "){
+  std::stringstream ss;
+  ss << before;
+  bool first = true;
+  for (; it!=end; ++it){
+    if (first){
+      ss << *it;
+      first = false;
+    } else {
+      ss << separator << *it;
+    }
+  } ss << after;
+  return ss.str();
+}
+template <class C> // Overload to directly accept any Collection like vector<int>
+std::string IterableToString(const C &c,
+                             const std::string before="{",
+                             const std::string after="}",
+                             const std::string separator=", "){
+  return IterableToString(c.begin(), c.end(), before, after, separator);
+}
+template <class T> // Overload to directly accept initializer_lists
+std::string IterableToString(const std::initializer_list<T> c,
+                             const std::string before="{",
+                             const std::string after="}",
+                             const std::string separator=", "){
+  return IterableToString(c.begin(), c.end(), before, after, separator);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// TYPECHECK/ANTIBUGGING
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Given a container or its beginning and end iterables, checks wether all values contained in the
+// iterable are equal and raises an exception if not. Usage example:
+// CheckAllEqual({a.size_, b.size_, result.size_},
+//                 "SpectralCorrelation: all sizes must be equal and are");
+template<class I>
+void CheckAllEqual(const I beg, const I end, const std::string &message){
+  I it = beg;
+  bool all_eq = true;
+  auto last = (it==end)? end : std::prev(end);
+  for(;it!=last; ++it){
+    all_eq &= (*(it)==*(std::next(it)));
+    if (!all_eq) {
+      throw std::runtime_error(std::string("[ERROR] ") + message+" "+IterableToString(beg, end));
+    }
+  }
+}
+template <class C> // Overload to directly accept any Collection like vector<int>
+void CheckAllEqual(const C &c, const std::string message){
+  CheckAllEqual(c.begin(), c.end(), message);
+}
+template <class T> // Overload to directly accept initializer_lists
+void CheckAllEqual(const std::initializer_list<T> c, const std::string message){
+  CheckAllEqual(c.begin(), c.end(), message);
+}
+
+template<class I>
+bool CompareIterables(const I beg1, const I end1, const I beg2, const I end2){
+  // if sizes are not the same, return false
+  if(std::distance(beg1,end1) != std::distance(beg1,end1)){
+    return false;
+  }
+  // if any of the contents are not the same, return false
+  for(I it1=beg1, it2=beg2; it1!=end1; ++it1, ++it2){
+    if (*it1 != *it2) {
+      return false;
+    }
+  } // otherwise return true
+  return true;
+}
+template <class C> // Overload to directly accept any Collection like vector<int>
+bool CompareIterables(const C &c1, const C &c2){
+  return CompareIterables(c1.begin(), c1.end(), c2.begin(), c2.end());
+}
+template <class T> // Overload to directly accept initializer_lists
+bool CompareIterables(const std::initializer_list<T> &c1, const std::initializer_list<T> &c2){
+  return CompareIterables(c1.begin(), c1.end(), c2.begin(), c2.end());
+}
+
+
+// Raises an exception if complex_size!=(real_size/2+1), being "/" an integer division.
+void CheckRealComplexRatio(const size_t real_size, const size_t complex_size,
+                           const std::string func_name){
+  if(complex_size!=(real_size/2+1)){
+    throw std::runtime_error(std::string("[ERROR] ") + func_name +
+                             ": size of ComplexSignal must equal size(FloatSignal)/2+1. " +
+                             " Sizes were (float, complex): " +
+                             IterableToString({real_size, complex_size}));
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Abstract function that performs a comparation between any 2 elements, and if the comparation
+// returns a truthy value raises an exception with the given message.
+template <class T, class Functor>
+void CheckTwoElements(const T a, const T b, const Functor &binary_predicate,
+                        const std::string message){
+  if(binary_predicate(a,b)){
+    throw std::runtime_error(std::string("[ERROR] ") + message + " " + IterableToString({a, b}));
+  }
+}
+
+
+// Raises an exception with the given message if a>b.
+void CheckLessEqual(const size_t a, const size_t b, const std::string message){
+  CheckTwoElements(a, b, [](const size_t a, const size_t b){return a>b;},  message);
+}
+
+
+void CheckWithinRange(const size_t idx, const size_t min_allowed, const size_t max_allowed,
+                      const std::string func_name){
+  CheckTwoElements(idx, min_allowed, [](const size_t a, const size_t b){return a<b;},
+                   func_name+" index cannot be smaller than minimum allowed!");
+  CheckTwoElements(idx, max_allowed, [](const size_t a, const size_t b){return a>b;},
+                   func_name+" index cannot be bigger than maximum allowed!");
+}
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// MISC
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Timer{
+private:
+  std::chrono::high_resolution_clock::time_point timestamp_;
+  public:
+  explicit Timer(){reset();}
+  void reset(){timestamp_ = std::chrono::high_resolution_clock::now();}
+  double elapsed_ms(){
+    std::chrono::high_resolution_clock::time_point x = std::chrono::high_resolution_clock::now();
+    return((double)std::chrono::duration_cast<std::chrono::nanoseconds>(x-timestamp_).count())*1e-6;
+  }
+};
 
 
 

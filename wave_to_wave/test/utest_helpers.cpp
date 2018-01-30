@@ -3,6 +3,9 @@
 // LOCAL INCLUDE
 #include "../include/w2w.hpp"
 
+// for testing timer
+#include <thread>
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,21 +23,52 @@ static double Chi2Test(double x, double df){
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// MISC
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("Testing timer class", "[helpers, timer]"){
+  Timer t;
+  const size_t kSleepMiliseconds = 20;
+  std::this_thread::sleep_for(std::chrono::milliseconds(kSleepMiliseconds));
+  double elapsed_ms = t.elapsed_ms();
+  // require relative error to be below 1%
+  double abs_error = std::abs(elapsed_ms - kSleepMiliseconds);
+  double rel_error = abs_error /kSleepMiliseconds;
+  REQUIRE(rel_error <= 0.01);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 /// STRING PROCESSING
 ////////////////////////////////////////////////////////////////////////////////
+
 TEST_CASE("Testing Split function", "[helpers, split]"){
   std::string s1 = "a|b c||d  e|||f   g||||h    i";
-  std::vector<std::string> v1 = Split(s1, "||");
-  std::vector<std::string> v2 = Split(s1, "  ");
-  std::vector<std::string> v1_test {"a|b c", "d  e", "|f   g", "h    i"};
-  std::vector<std::string> v2_test {"a|b c||d", "e|||f", " g||||h", "i"};
-  REQUIRE(v1.size() == 4);
-  REQUIRE(v2.size() == 4);
-  for(size_t i=0; i<4; ++i){
-    REQUIRE(v1[i] == v1_test[i]);
-    REQUIRE(v2[i] == v2_test[i]);
-  }
+  CHECK(CompareIterables(Split(s1, "||"),
+                         {"a|b c", "d  e", "|f   g", "h    i"}));
+  CHECK(CompareIterables(Split(s1, "  "),
+                         {"a|b c||d", "e|||f", " g||||h", "i"}));
 }
+
+TEST_CASE("Testing ParseLine", "[helpers, parseline]"){
+  std::string s1 = "#some comment";
+  std::string s2 = "some text # and some comment";
+  std::string s3 = "a,b,c,d,e//comment";
+  CHECK(CompareIterables(ParseLine(s1, " ", "#"), {}));
+  CHECK(CompareIterables(ParseLine(s2, " ", "#"), {"some", "text"}));
+  CHECK(CompareIterables(ParseLine(s3, ",", "//"), {"a","b","c","d","e"}));
+}
+
+
+TEST_CASE("Testing IterableToString", "[helpers, iterabletostring]"){
+  std::vector<size_t> c1{1,2,3,4,5};
+  std::list<std::string> c2{"hello",  "world"};
+  std::deque<double> c3{1.2, 3.4, 5.6, 7.8};
+  CHECK(IterableToString(c1, "<", ">", ", ") == "<1, 2, 3, 4, 5>");
+  CHECK(IterableToString(c2, "[", "]", ",") == "[hello,world]");
+  CHECK(IterableToString(c3, "{", "}", " || ") == "{1.2 || 3.4 || 5.6 || 7.8}");
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,34 +148,6 @@ TEST_CASE("Chi2(double, double)", "[helpers]"){
 
 
 
-TEST_CASE("IterableToString accepts collections and iterators", "[typecheck]"){
-
-  // vector<std::string> c1({"foo", "bar"});
-// vector<size_t> c2({1});
-// list<double> c3({1,2,3,4,5});
-// vector<bool> c4({false, true, false});
-// list<int> c5;
-// cout << IterableToString({1.23, 4.56, -789.0}) << endl;
-// cout << IterableToString(c1) << endl;
-// cout << IterableToString({"hello", "hello"}) << endl;
-// cout << IterableToString(c2) << endl;
-// cout << IterableToString(c3) << endl;
-// cout << IterableToString(c4) << endl;
-// cout << IterableToString(c5.begin(), c5.end()) << endl;
-
-  std::vector<size_t> v{1,2,3,4,5};
-  std::list<std::string> l{"hello",  "world"};
-
-  REQUIRE(v[1]*10 == 20);
-
-  SECTION( "basic test" ) {
-    v.push_back(6);
-    const std::string kVstr = "{1, 2, 3, 4, 5, 6}";
-    REQUIRE( IterableToString(v) == kVstr);
-    REQUIRE( IterableToString(v.begin(), v.end()) == kVstr);
-
-  }
-}
 
 
 

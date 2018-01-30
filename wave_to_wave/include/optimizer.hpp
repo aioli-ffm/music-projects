@@ -42,7 +42,7 @@ std::vector<std::pair<long int, float> > SingleMaxCriterium(FloatSignal &fs){
 // Given a signal, expected to be the cross-correlation between a signal (longer) and a patch
 // (shorter), returns a vector<position, value> that holds the absolute maximum, and all the
 // local absolute maxima that finds before and after it,making sure that the distance between
-// two elements of the vector is at least patch_sz, to a void interferences.
+// two elements of the vector is at least patch_sz, to avoid interferences.
 // The name reflects the intention of finding many non-colliding good values for a single
 // correlation, which can greatly speed up the optimization process.
 std::vector<std::pair<long int, float> > PopulateMaxCriterium(FloatSignal &fs,

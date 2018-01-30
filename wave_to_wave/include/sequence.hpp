@@ -85,9 +85,10 @@ public:
 
   // comments NOT passed by reference (because it is destructed)
   // Given following seq: (123,0.123,{"1","2","3"}),(456,0.456,{"a"}),(789,0.789,{"asdf","fdsa"})
-  // with separator=" " and comment_marker="#", calling seq.asString({{1,"hello"}, {3,"bye"}}) will
-  // produce the following string:
+  // with separator=" " and comment_marker="#",calling seq.asString({{1,"hello\nworld"}, {3,"bye"}})
+  // will produce the following string:
   //   # hello
+  //   # world
   //   123 0.123 1 2
   //   456 0.456 a
   //   # bye
@@ -99,7 +100,11 @@ public:
     size_t i=1;
     for(auto const& line : data_){
       if(std::get<0>(comments[0])==i){
-        result << comment_marker_ << " " << std::get<1>(comments[0]) << std::endl;
+        std::string comm = std::get<1>(comments[0]);
+        std::stringstream comm_stream(comm);
+        while(std::getline(comm_stream, comm)){ // write found lines into comm (destructive)
+          result << comment_marker_ << " " << comm << std::endl;
+        }
         comments.pop_front();
       }
       result << std::get<0>(line) << separator_ << std::get<1>(line);

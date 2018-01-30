@@ -123,7 +123,8 @@ public:
     // its values have to be interpolated in the following loop:
     for(size_t i=0; i<size; ++i, chi_idx+=chi_idx_delta, x+=sin_delta){
       chidxint = chi_idx;
-      data_[i] = sin(x*sin_ratio_) * LinInterp(chi_data[chidxint],chi_data[chidxint+1], modf(chi_idx,&_));
+      data_[i] = sin(x*sin_ratio_) * LinInterp(chi_data[chidxint],chi_data[chidxint+1],
+                                               modf(chi_idx,&_));
     }
   }
 
@@ -143,21 +144,6 @@ public:
 
 
 
-void Test(const std::string outpath="/tmp/test.wav"){
-  size_t samplerate = 44100;
-  size_t secs =20;
-  Chi2Server serv;
-  FloatSignal seq(samplerate*secs);
-  size_t num_notes = 10;
-  for(double i=0, k=0; i<num_notes; ++i, k+=1.0/(num_notes-1)){
-    Chi2Synth blob(serv, seq.getSize()/num_notes, 880.0, samplerate, k);
-    seq.addSignal(blob, i*blob.getSize());
-  }
-  seq.plot("Linear evolution of sin(x)*Chi2(x, k) for k=2, ..., k=7", samplerate, 1, 0.4);
-  seq.toWav(outpath, samplerate);
-}
-
-
 // int main(int argc, char **argv)
 // {
 //   Csound *cs = new Csound();
@@ -168,24 +154,6 @@ void Test(const std::string outpath="/tmp/test.wav"){
 //   delete cs;
 //   return (result >= 0 ? 0 : result);
 // }
-
-
-
-
-// // envelope management: we dont need thousands... come up with a fast way to deal with this:
-// // probably generate 15 curves with 1000 points each and then select the curve by truncating
-// // and the index also by
-// template<class Iter>
-// class Chi2Env {
-// private:
-//   std::vector<FloatSignal> envs;
-// public:
-//   Chi2Env(Iter k_beg, Iter k_end, const size_t num_points){
-//     for(; k_beg!=k_end; ++k_beg){
-//       // generate a sig with num_points and proper k, should be faded in out and balanced
-//     }
-//   }
-// };
 
 
 #endif
