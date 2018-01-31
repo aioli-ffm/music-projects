@@ -444,9 +444,7 @@ def main():
                  L2_REG, OPTIMIZER_FN,
                  TRAIN_FREQ, CV_FREQ,
                  save_path=SAVE_PATH)
-    ### LOAD AND USE TRAINED MODEL
-    test_pretrained_model(TRAIN_SUBSET, SAVE_PATH,
-                          CHUNK_SIZE, 1,50000)
+
 
 
 main()
