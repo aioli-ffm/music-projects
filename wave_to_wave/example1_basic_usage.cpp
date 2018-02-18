@@ -43,6 +43,13 @@ int main (int argc, char **argv){
 
 // for the optimization, seq dispatching, synth creation etc the app paradigm seems to be the
 // best fit: allows static and dynamic info, little user overhead and easy debug (no macros). Do prototype
+// not really! bc the loading of the synths has to be dynamic... synths have to be loaded statically!
+
+
+// best approach: really having an app wouldnt hurt.
+// the lib has an enum statically generated with all the synths. When the app starts, it loads the enum into a map.
+// any synth that is defined on the top of it (implementing some interface), gets added dynamically into the app
+
 
 // If the app is OK: 1) convert seq into audio. 2) integrate seq with optimizer (new constructor?). 3) do a basic_usage example to get an idea of the API usability.
 
